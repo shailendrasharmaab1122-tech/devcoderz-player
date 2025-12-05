@@ -1,145 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Devansh X Anuj Player</title>
-  <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet" />
-  <style>
-    body { background:#000; margin:0; padding:0; }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devansh X Anuj Player</title>
 
-    /* Top Big Text */
-    .top-brand-text {
-      position: absolute;
-      top: 10px;
-      width: 100%;
-      text-align: center;
-      font-size: 32px;
-      font-weight: 800;
-      color: #00eaff;
-      text-shadow: 0 0 10px #00eaff;
-      z-index: 9999;
-      font-family: Arial, sans-serif;
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, #0d1224, #000814 80%);
+        font-family: "Poppins", sans-serif;
+        color: white;
     }
 
-    /* Player Container */
-    #playerContainer {
-      position: relative;
-      width: 100%;
-      height: 100vh;
+    .frame {
+        width: 92%;
+        max-width: 850px;
+        padding: 18px;
+        border-radius: 22px;
+
+        /* Glass + Glow */
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+
+        box-shadow: 0 0 30px rgba(0, 162, 255, 0.4),
+                    0 0 60px rgba(135, 0, 255, 0.25);
+
+        animation: fadeIn 0.8s ease-out;
     }
 
-    /* Quality Button */
-    .vjs-menu-button-popup .vjs-menu {
-      max-height: 200px;
+    @keyframes fadeIn {
+        from { transform: scale(0.96); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
     }
 
-    /* Custom Speed Box */
-    .speed-box {
-      position: absolute;
-      right: 20px;
-      bottom: 120px;
-      background: rgba(0,0,0,0.7);
-      padding: 12px;
-      border-radius: 10px;
-      color: white;
-      z-index: 9999;
-      font-size: 16px;
+    .title {
+        text-align: center;
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 12px;
+
+        background: linear-gradient(90deg, #38bdf8, #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+
+        text-shadow: 0 0 10px rgba(82, 189, 255, 0.4);
     }
-  </style>
+
+    video {
+        width: 100%;
+        border-radius: 16px;
+        background: black;
+        box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    }
+
+    .controls {
+        margin-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    select, button {
+        padding: 7px 12px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+
+        transition: 0.2s;
+    }
+
+    select:hover, button:hover {
+        background: rgba(255, 255, 255, 0.20);
+        transform: scale(1.05);
+    }
+
+    .right-controls {
+        display: flex;
+        gap: 12px;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 </head>
 <body>
 
-<div id="playerContainer">
+<div class="frame">
 
-  <div class="top-brand-text">Devansh X Anuj</div>
+    <div class="title">Devansh X Anuj Player</div>
 
-  <video
-    id="videoPlayer"
-    class="video-js vjs-default-skin vjs-big-play-centered"
-    controls
-    preload="auto"
-    width="100%"
-    height="100%"
-    playsinline
-    webkit-playsinline
-  ></video>
+    <video id="video" controls></video>
 
-  <!-- Speed Control Box -->
-  <div class="speed-box">
-    <select id="speedControl">
-      <option value="1">1x</option>
-      <option value="1.25">1.25x</option>
-      <option value="1.5">1.5x</option>
-      <option value="2">2x</option>
-      <option value="2.5">2.5x</option>
-      <option value="3">3x</option>
-      <option value="3.5">3.5x</option>
-      <option value="4">4x</option>
-    </select>
-  </div>
+    <div class="controls">
+        <select id="quality"></select>
 
+        <div class="right-controls">
+            <select id="speed">
+                <option value="1">1x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2">2x</option>
+                <option value="2.5">2.5x</option>
+                <option value="3">3x</option>
+                <option value="4">4x</option>
+            </select>
+
+            <button onclick="video.requestFullscreen()">Fullscreen</button>
+        </div>
+    </div>
 </div>
 
-<script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.7/hls.min.js"></script>
-
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const videoURL = urlParams.get("Url") || urlParams.get("url") || urlParams.get("x");
+    const video = document.getElementById("video");
+    const qualitySelect = document.getElementById("quality");
+    const speed = document.getElementById("speed");
 
-  const video = document.getElementById("videoPlayer");
+    const url = new URLSearchParams(location.search).get("url");
 
-  if (Hls.isSupported()) {
-    const hls = new Hls({
-      maxMaxBufferLength: 60,
-    });
-    hls.loadSource(videoURL);
-    hls.attachMedia(video);
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-      console.log("Quality Levels:", hls.levels);
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+            data.levels.forEach((level, i) => {
+                let q = document.createElement("option");
+                q.value = i;
+                q.text = level.height + "p";
+                qualitySelect.appendChild(q);
+            });
 
-      // QUALITY MENU
-      let qualityMenu = document.createElement("select");
-      qualityMenu.style.position = "absolute";
-      qualityMenu.style.left = "20px";
-      qualityMenu.style.bottom = "120px";
-      qualityMenu.style.zIndex = 9999;
-      qualityMenu.style.padding = "8px";
-      qualityMenu.style.background = "rgba(0,0,0,0.7)";
-      qualityMenu.style.color = "white";
-      qualityMenu.style.borderRadius = "10px";
+            qualitySelect.onchange = () => {
+                hls.currentLevel = qualitySelect.value;
+            };
+        });
+    }
 
-      let autoOption = document.createElement("option");
-      autoOption.value = -1;
-      autoOption.text = "Auto";
-      qualityMenu.appendChild(autoOption);
-
-      hls.levels.forEach((level, i) => {
-        let opt = document.createElement("option");
-        opt.value = i;
-        opt.text = (level.height || "") + "p";
-        qualityMenu.appendChild(opt);
-      });
-
-      qualityMenu.addEventListener("change", function () {
-        let val = parseInt(this.value);
-        hls.currentLevel = val;
-      });
-
-      document.body.appendChild(qualityMenu);
-    });
-  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = videoURL;
-  }
-
-  // SPEED CONTROL
-  const speedControl = document.getElementById("speedControl");
-  speedControl.addEventListener("change", function () {
-    video.playbackRate = parseFloat(this.value);
-  });
-
+    speed.onchange = () => {
+        video.playbackRate = speed.value;
+    };
 </script>
 
 </body>
