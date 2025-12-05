@@ -91,3 +91,16 @@ function changeSpeed() {
 
 </body>
 </html>
+<script>
+function openFullscreen() {
+    const videoContainer = document.getElementById("video-container");
+
+    if (videoContainer.requestFullscreen) {
+        videoContainer.requestFullscreen();
+    } else if (videoContainer.webkitRequestFullscreen) { 
+        videoContainer.webkitRequestFullscreen();
+    } else if (videoContainer.msRequestFullscreen) { 
+        videoContainer.msRequestFullscreen();
+    }
+}
+</script>
