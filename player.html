@@ -1,64 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HLS Player</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Player</title>
+
+    <!-- Video.js CDN -->
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet" />
 
     <style>
         body {
-            margin: 0;
             background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .video-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
         }
         video {
             width: 100%;
-            max-width: 900px;
-            outline: none;
-            background: #000;
+            height: 100vh;
         }
     </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
-
 <body>
 
-    <video id="video" controls autoplay playsinline></video>
-
-    <script>
-        // -----------------------------
-        // Get m3u8 URL from ?url=....
-        // -----------------------------
-        const urlParams = new URLSearchParams(window.location.search);
-        const videoUrl = urlParams.get("url");
-
-        const video = document.getElementById("video");
-
-        if (!videoUrl) {
-            alert("❌ No video URL provided.");
-        } else {
-            if (Hls.isSupported()) {
-                const hls = new Hls({
-                    maxMaxBufferLength: 60,
-                    enableWorker: true
-                });
-                hls.loadSource(videoUrl);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    video.play();
-                });
-            } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-                video.src = videoUrl;
-                video.play();
-            } else {
-                alert("HLS not supported in this browser.");
-            }
-        }
-    </script>
-
-</body>
-</html>
+<div class="video-container">
+    <video id="my-player" class="video-js vjs-default-skin" controls preload=">
