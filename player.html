@@ -1,31 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Player</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devcoderz Player</title>
 
-    <!-- Video.js CDN -->
-    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet" />
+<style>
+body { 
+    margin:0; 
+    background:#000; 
+    font-family: Arial, sans-serif;
+}
 
-    <style>
-        body {
-            background: #000;
-            margin: 0;
-            padding: 0;
-        }
-        .video-container {
-            max-width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        video {
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
+.header {
+    width:100%;
+    background:#101010;
+    padding:12px;
+    text-align:center;
+    color:#00eaff;
+    font-size:20px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
+video { 
+    width:100%; 
+    height:auto; 
+    background:#000;
+}
+
+.controls {
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    background:#111;
+    padding:12px;
+}
+
+button, select {
+    padding:10px 15px;
+    background:#222;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
+
 <body>
 
-<div class="video-container">
-    <video id="my-player" class="video-js vjs-default-skin" controls preload=">
+<div class="header">🔥 Devcoderz Player 🔥</div>
+
+<video id="video" controls></video>
+
+<div class="controls">
+    <button onclick="skip(-10)">⏪ 10s</button>
+    <button onclick="skip(10)">⏩ 10s</button>
+
+    <select id="speed" onchange="changeSpeed()">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+    </select>
+</div>
+
+<script>
+const url = new URLSearchParams(window.location.search).get("url");
+const video = document.getElementById("video");
+
+if (Hls.isSupported()) {
+    const hls = new Hls({ enableWorker: true });
+    hls.loadSource(url);
+    hls.attachMedia(video);
+} else if (video.canPlayType("application/vnd.apple.mpegURL")) {
+    video.src = url;
+}
+
+function skip(sec) { 
+    video.currentTime += sec; 
+}
+
+function changeSpeed() { 
+    video.playbackRate = document.getElementById("speed").value; 
+}
+</script>
+
+</body>
+</html>
