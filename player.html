@@ -1,91 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devansh Sharma's Player</title>
-
-    <style>
-        body {
-            background: black;
-            margin: 0;
-            padding: 0;
-            color: white;
-            font-family: Arial;
-        }
-        #player-container {
-            width: 100%;
-            height: 100vh;
-            position: relative;
-        }
-        #devcoderz-logo {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.6);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            z-index: 10;
-        }
-        video {
-            width: 100%;
-            height: 100%;
-            background: black;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Devcoderz Player</title>
+<style>
+    #header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0,0,0,0.75);
+        color: white;
+        text-align: center;
+        padding: 12px 0;
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        z-index: 9999;
+    }
+    video {
+        width: 100vw;
+        height: 100vh;
+        background:black;
+        margin-top: 60px;
+    }
+    body {
+        margin: 0;
+        background:black;
+    }
+</style>
 </head>
 
 <body>
 
-<div id="player-container">
-    <div id="devcoderz-logo">Devcoderz Player</div>
-    <video id="video" controls playsinline></video>
-</div>
+<!-- BIG TEXT HEADER -->
+<div id="header">DEVANSH SHARMA</div>
+
+<video id="v" controls></video>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-    function getUrlParam() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get("Url") || params.get("url") || params.get("x");
-    }
+const video = document.getElementById("v");
+const url = new URLSearchParams(window.location.search).get("Url");
 
-    const video = document.getElementById("video");
-    const url = getUrlParam();
-
-    if (!url) {
-        alert("Video URL Missing!");
-    } else {
-        if (Hls.isSupported()) {
-
-            const hls = new Hls({
-                maxBufferLength: 30,
-                liveSyncDuration: 3,       // LIVE STREAM FIX 🔥
-                liveMaxLatencyDuration: 10,
-                enableWorker: true,
-                lowLatencyMode: true,       // Low latency mode
-                backBufferLength: 90
-            });
-
-            hls.loadSource(url);
-            hls.attachMedia(video);
-
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                video.play();
-            });
-
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = url;
-            video.play();
-        }
-    }
-
-    // Forward/Backward Buttons (Optional)
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowRight") video.currentTime += 10;
-        if (e.key === "ArrowLeft") video.currentTime -= 10;
+if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        video.play();
     });
+} else {
+    video.src = url;
+    video.play();
+}
 </script>
 
 </body>
