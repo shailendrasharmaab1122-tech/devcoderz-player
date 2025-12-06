@@ -1,192 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>DevCoderz Player</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DevCoderz Premium Player (Neon)</title>
+
+<!-- HLS.js for quality switching (if stream is HLS) -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root{
+    --neon: #00eaff;
+    --neon-2: #8b33ff;
+    --bg: #050507;
+    --panel: rgba(255,255,255,0.03);
+  }
 
-    body {
-        background: #000;
-        height: 100vh;
-        overflow: hidden;
-        font-family: Arial, sans-serif;
-    }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background: linear-gradient(180deg,#030306 0%,#0b0c10 100%);
+    font-family: Inter, Poppins, Arial, sans-serif;
+    color:#eafcff;
+  }
 
-    /* APP MAIN LAYOUT */
-    #appContainer {
-        display: flex;
-        width: 100%;
-        height: 100vh;
-        background: #000;
-        overflow: hidden;
-    }
+  /* APP LAYOUT */
+  #appContainer{
+    display:flex;
+    height:100vh;
+    width:100%;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    padding:28px;
+    overflow:hidden;
+  }
 
-    /* LEFT ANIMATION SECTION */
-    #leftBrand {
-        width: 260px;
-        background: rgba(255,255,255,0.06);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        animation: glow 3s infinite alternate;
-    }
+  /* LEFT BRAND AREA */
+  #leftBrand{
+    width:260px;
+    min-width:220px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:16px;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 40px rgba(0,234,255,0.035) inset;
+    border:1px solid rgba(0,234,255,0.06);
+    animation: brandPulse 3s ease-in-out infinite alternate;
+  }
+  #leftBrand .logo{
+    width:110px;height:110px;border-radius:50%;
+    background:linear-gradient(135deg,var(--neon),var(--neon-2));
+    box-shadow: 0 6px 30px rgba(0,234,255,0.14), 0 0 18px rgba(139,51,255,0.12) inset;
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#001219;
+    font-size:22px;
+  }
+  #leftBrand h2{
+    margin-top:14px;color:var(--neon);font-size:22px;letter-spacing:0.6px;
+  }
+  @keyframes brandPulse{
+    from{transform:translateY(0) scale(1); filter:brightness(0.95)}
+    to{transform:translateY(-6px) scale(1.03); filter:brightness(1.06)}
+  }
 
-    #leftBrand h2 {
-        color: #00eaff;
-        font-size: 30px;
-        font-weight: bold;
-    }
+  /* VIDEO FRAME AREA */
+  .player-wrap{
+    flex:1; max-width:1200px; width:100%;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+  }
 
-    @keyframes glow {
-        0% { opacity: 0.6; transform: scale(1); }
-        100% { opacity: 1; transform: scale(1.05); }
-    }
+  /* NEON FRAME AROUND VIDEO */
+  .neon-frame{
+    width:100%;
+    border-radius:14px;
+    padding:10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+    box-shadow:
+      0 10px 40px rgba(0,0,0,0.7),
+      0 0 40px rgba(0,234,255,0.06) inset;
+    border: 1px solid rgba(255,255,255,0.03);
+    position:relative;
+    display:flex;justify-content:center;
+  }
 
-    /* VIDEO AREA */
-    #videoArea {
-        flex: 1;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
+  /* neon outline */
+  .neon-frame::before{
+    content:"";
+    position:absolute;inset:0;border-radius:14px;
+    padding:2px;
+    background: conic-gradient(from 180deg at 50% 50%, var(--neon), var(--neon-2));
+    -webkit-mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events:none;
+    filter: blur(14px);
+    opacity:0.85;
+  }
 
-    #player {
-        width: 90%;
-        height: 80%;
-        border-radius: 14px;
-        background: #111;
-    }
+  /* VIDEO ELEMENT */
+  video#player{
+    width:98%;
+    max-width:1150px;
+    height:640px;
+    background:#000;
+    border-radius:10px;
+    outline:none;
+  }
 
-    /* CUSTOM FULLSCREEN */
-    .fullscreen-mode {
-        width: 100vw !important;
-        height: 100vh !important;
-        position: fixed !important;
-        top: 0;
-        left: 0;
-        z-index: 99999;
-        display: flex !important;
-    }
+  /* CONTROLS ROW (under frame) */
+  .controls-row{
+    width:98%;
+    max-width:1150px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px;
+    background:var(--panel);
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  }
 
-    /* FULLSCREEN BUTTON */
-    #customFullBtn {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        background: #00eaff;
-        color: #000;
-        border: none;
-        padding: 12px 18px;
-        border-radius: 10px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-    }
+  .controls-left, .controls-right { display:flex; gap:10px; align-items:center; }
 
-    /* DEVELOPER CREDIT */
-    #creditBox {
-        margin-top: 10px;
-        color: white;
-        font-size: 17px;
-        text-align: center;
-    }
+  select, button {
+    background: rgba(255,255,255,0.03);
+    color: #e9f9ff;
+    border: 1px solid rgba(255,255,255,0.04);
+    padding:8px 12px;
+    border-radius:8px;
+    font-weight:600;
+  }
 
-    #creditBox a { color: #00eaff; font-weight: bold; }
+  select:focus, button:focus { outline: 2px solid rgba(0,234,255,0.12) }
 
-    /* POPUP BLOCKER */
-    #popupBlock {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.92);
-        z-index: 999999;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        text-align: center;
-        padding: 20px;
-    }
+  /* play/pause + volume small */
+  .small-btn {
+    padding:8px 10px;font-size:15px;
+  }
 
-    #popupBlock h1 {
-        font-size: 40px;
-        margin-bottom: 20px;
-        color: #00eaff;
-    }
+  /* fullscreen icon button (top-right of neon frame) */
+  #frameFullBtn{
+    position:absolute; right:18px; top:12px; z-index:5;
+    background:transparent; border:none; color:var(--neon); font-size:22px;
+    padding:8px; border-radius:8px; cursor:pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  }
 
-    #popupBlock a {
-        color: #fff;
-        background: #00eaff;
-        padding: 12px 20px;
-        border-radius: 10px;
-        font-size: 20px;
-        font-weight: bold;
-        text-decoration: none;
-    }
+  /* developer credit */
+  #creditBox{
+    width:98%; max-width:1150px; text-align:center; color:#cfeefc;
+    font-size:15px; padding-top:6px;
+  }
+  #creditBox b{ color:var(--neon) }
+
+  /* POPUP block (full-screen mandatory) */
+  #popupBlock{
+    position:fixed; inset:0; z-index:9999999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background: linear-gradient(180deg, rgba(0,0,0,0.92), rgba(4,4,4,0.94));
+    color:#dffaff; text-align:center; padding:26px;
+  }
+  #popupBlock h1{ color:var(--neon); font-size:36px; margin-bottom:10px; }
+  #popupBlock a.joinBtn{
+    display:inline-block; margin-top:12px; font-size:20px;
+    padding:12px 20px; border-radius:10px; background:var(--neon); color:#001219;
+    text-decoration:none; font-weight:800;
+  }
+  #popupBlock button.skipBtn{
+    margin-top:16px; padding:10px 16px; border-radius:8px; border:none;
+    background:#ffffff; color:#000; font-weight:700; cursor:pointer;
+  }
+
+  /* responsive */
+  @media (max-width:920px){
+    #leftBrand{display:none}
+    video#player{height:360px}
+    .controls-row{flex-direction:column; align-items:stretch}
+    .controls-left, .controls-right{justify-content:center;width:100%}
+  }
 
 </style>
 </head>
-
 <body>
 
-<!-- POPUP FIRST -->
+<!-- POPUP: join required -->
 <div id="popupBlock">
-    <h1>🔔 Join Telegram to Unlock Lecture</h1>
-    <p style="font-size: 22px; margin-bottom: 25px;">Lecture dekhne ke liye pehle Telegram group join karein.</p>
-    <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">JOIN TELEGRAM</a>
-    <br><br>
-    <button onclick="closePopup()" style="margin-top:10px;background:#fff;color:#000;padding:10px 20px;border-radius:8px;font-size:18px;">I Have Joined</button>
+  <h1>🔔 Lecture unlock karne ke liye Telegram join karein</h1>
+  <p style="font-size:18px; max-width:860px; line-height:1.4;">
+    Lecture dekhne se pehle hamara Telegram channel join karein — updates, notes aur resources waha milenge.
+  </p>
+  <a class="joinBtn" href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">Join Telegram</a>
+  <button class="skipBtn" onclick="onJoinConfirmed()">I Have Joined</button>
 </div>
 
-<!-- MAIN PLAYER -->
 <div id="appContainer">
 
-    <!-- LEFT BRAND AREA -->
-    <div id="leftBrand">
-        <h2>DevCoderz</h2>
+  <!-- LEFT BRAND -->
+  <div id="leftBrand">
+    <div class="logo">DC</div>
+    <h2>DevCoderz</h2>
+  </div>
+
+  <!-- PLAYER / FRAME -->
+  <div class="player-wrap">
+    <div class="neon-frame" id="neonFrame">
+      <!-- custom frame fullscreen button -->
+      <button id="frameFullBtn" title="Custom Fullscreen">⛶</button>
+
+      <!-- video -->
+      <video id="player" controls preload="metadata" playsinline></video>
     </div>
 
-    <!-- VIDEO AREA -->
-    <div id="videoArea">
-        <video id="player" controls></video>
-        <button id="customFullBtn">⛶ Fullscreen</button>
+    <!-- controls under the frame inside neon box -->
+    <div class="controls-row" id="controlsRow">
+      <div class="controls-left">
+        <!-- Speed -->
+        <label for="speedSelect" style="font-weight:700;color:#bfeeff;margin-right:6px">Speed</label>
+        <select id="speedSelect" title="Playback speed">
+          <option value="0.5">0.50x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1" selected>1.00x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.50x</option>
+          <option value="1.75">1.75x</option>
+          <option value="2">2.00x</option>
+          <option value="2.5">2.50x</option>
+          <option value="3">3.00x</option>
+          <option value="3.5">3.50x</option>
+          <option value="4">4.00x</option>
+        </select>
 
-        <div id="creditBox">
-            Developer: <b>Devansh Sharma</b><br>
-            Join Telegram: <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">Click Here</a>
-        </div>
+        <!-- Quality -->
+        <label for="qualitySelect" style="font-weight:700;color:#bfeeff;margin-left:12px;margin-right:6px">Quality</label>
+        <select id="qualitySelect" title="Quality / bitrate">
+          <option value="auto" selected>Auto</option>
+          <option value="144">144p</option>
+          <option value="240">240p</option>
+          <option value="360">360p</option>
+          <option value="480">480p</option>
+          <option value="720">720p</option>
+          <option value="1080">1080p</option>
+          <option value="2k">2160p
+</option>
+        </select>
+      </div>
+
+      <div class="controls-right">
+        <!-- small controls (mute/unmute) -->
+        <button id="muteBtn" class="small-btn">Mute</button>
+
+        <!-- Native fullscreen fallback -->
+        <button id="nativeFullBtn" class="small-btn">Fullscreen</button>
+      </div>
     </div>
 
+    <div id="creditBox">
+      Developer – <b>PT. Devansh Sharma</b> &nbsp; • &nbsp;
+      Telegram: <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">Join Channel</a>
+    </div>
+  </div>
 </div>
 
 <script>
-    // VIDEO URL LOADER
-    const urlParams = new URLSearchParams(window.location.search);
-    const videoURL = urlParams.get("Url");
-    document.getElementById("player").src = videoURL;
+/* -------------------------
+   CONFIG / DEFAULT SOURCE
+   ------------------------- */
+const DEFAULT_SRC = ""; // if you want to hardcode, put HLS/MP4 URL here
+// If using this file, pass video url as ?Url=encodedUrl in address bar (we already used this pattern in earlier code)
+const params = new URLSearchParams(location.search);
+const providedUrl = params.get("Url");
+const VIDEO_SRC = providedUrl || DEFAULT_SRC || "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"; // fallback demo HLS
 
-    // CUSTOM FULLSCREEN BUTTON
-    document.getElementById("customFullBtn").onclick = function () {
-        const app = document.getElementById("appContainer");
+/* -------------------------
+   ELEMENTS
+   ------------------------- */
+const player = document.getElementById("player");
+const popupBlock = document.getElementById("popupBlock");
+const speedSelect = document.getElementById("speedSelect");
+const qualitySelect = document.getElementById("qualitySelect");
+const muteBtn = document.getElementById("muteBtn");
+const frameFullBtn = document.getElementById("frameFullBtn");
+const nativeFullBtn = document.getElementById("nativeFullBtn");
+const appContainer = document.getElementById("appContainer");
+const leftBrand = document.getElementById("leftBrand");
 
-        if (!app.classList.contains("fullscreen-mode")) {
-            app.classList.add("fullscreen-mode");
-        } else {
-            app.classList.remove("fullscreen-mode");
+/* -------------------------
+   HLS.js SETUP (if supported)
+   ------------------------- */
+let hls = null;
+let availableLevels = []; // store levels {height, bitrate, index}
+
+function attachHls(url) {
+  if (Hls && Hls.isSupported()) {
+    hls = new Hls({
+      capLevelToPlayerSize: true,
+      maxBufferLength: 30
+    });
+    hls.attachMedia(player);
+    hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+      hls.loadSource(url);
+    });
+
+    hls.on(Hls.Events.LEVEL_LOADED, (evt, data) => {
+      // when first levels loaded, populate quality options dynamically
+      if (!availableLevels.length && hls.levels && hls.levels.length) {
+        availableLevels = hls.levels.map((lvl, idx) => ({
+          height: lvl?.attrs?.RESOLUTION ? parseInt(lvl.attrs.RESOLUTION.split('x')[1]) : (lvl.height || 0),
+          bitrate: lvl.bitrate || 0,
+          index: idx
+        })).filter(l => l.height > 0);
+        // sort unique heights
+        availableLevels.sort((a,b)=>a.height-b.height);
+        populateQualityOptionsFromLevels(availableLevels);
+      }
+    });
+
+    // If user selects quality, set hls.currentLevel
+    qualitySelect.addEventListener('change', () => {
+      const v = qualitySelect.value;
+      if (!hls) return; // no HLS
+      if (v === 'auto') {
+        hls.currentLevel = -1; // auto
+      } else {
+        // find closest level index by height matching v
+        const num = parseInt(v,10);
+        let lvl = availableLevels.find(l => l.height === num);
+        if (!lvl) {
+          // choose nearest
+          lvl = availableLevels.reduce((prev,curr)=>{
+            return Math.abs(curr.height - num) < Math.abs(prev.height - num) ? curr : prev;
+          }, availableLevels[0]);
         }
-    };
+        hls.currentLevel = lvl ? lvl.index : -1;
+      }
+    });
 
-    // POPUP CLOSE
-    function closePopup() {
-        document.getElementById("popupBlock").style.display = "none";
+    // when levels updated (e.g., alternate variants found), refresh options
+    hls.on(Hls.Events.LEVEL_SWITCHED, () => { /* optional UI update */ });
+  } else {
+    // Non-HLS: quality switching not available; keep generic quality options
+    qualitySelect.addEventListener('change', () => {
+      // Best we can do: reload URL with query param or show notice
+      if (qualitySelect.value !== 'auto') {
+        console.warn('Quality change requested but stream isn\'t HLS-supported. Provide different URLs for manual switching.');
+      }
+    });
+  }
+}
+
+function populateQualityOptionsFromLevels(levels){
+  // preserve auto option then insert found levels
+  // remove duplicates
+  const sel = qualitySelect;
+  // keep auto as first, then reset others
+  sel.innerHTML = '<option value="auto">Auto</option>';
+  const uniqueHeights = [...new Set(levels.map(l=>l.height))];
+  uniqueHeights.forEach(h => {
+    const opt = document.createElement('option');
+    opt.value = String(h);
+    opt.textContent = (h >= 1000) ? `${h}p` : `${h}p`;
+    sel.appendChild(opt);
+  });
+}
+
+/* -------------------------
+   Initialize source & HLS
+   ------------------------- */
+function initSource(){
+  if (!VIDEO_SRC) {
+    alert('No video URL provided. Set ?Url=... or DEFAULT_SRC in the script.');
+    return;
+  }
+  // If HLS and hls.js supported, attach
+  if (VIDEO_SRC.endsWith('.m3u8') && window.Hls && Hls.isSupported()) {
+    attachHls(VIDEO_SRC);
+  } else {
+    // direct attach mp4 or other
+    player.src = VIDEO_SRC;
+  }
+  // set src as well for HLS (player.src may be blank but hls attached)
+  try { player.setAttribute('src', VIDEO_SRC); } catch(e){}
+}
+initSource();
+
+/* -------------------------
+   Popup lock logic
+   ------------------------- */
+function onJoinConfirmed(){
+  popupBlock.style.display = 'none';
+  // allow controls & play
+  player.controls = true;
+  // try autoplay
+  player.play().catch(()=>{ /* mobile may block; user can tap play */ });
+}
+// initial lock: hide native controls to prevent play
+player.controls = true; // keep controls visible but playback blocked by popup overlay
+// we rely on overlay to block interaction (popupBlock covers whole page)
+
+/* -------------------------
+   Speed control
+   ------------------------- */
+speedSelect.addEventListener('change', () => {
+  const sp = parseFloat(speedSelect.value) || 1;
+  player.playbackRate = sp;
+});
+
+/* -------------------------
+   Mute / Unmute
+   ------------------------- */
+muteBtn.addEventListener('click', () => {
+  player.muted = !player.muted;
+  muteBtn.textContent = player.muted ? 'Unmute' : 'Mute';
+});
+
+/* -------------------------
+   Native Fullscreen (video element)
+   ------------------------- */
+nativeFullBtn.addEventListener('click', async () => {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
     }
+  } catch (e){ console.warn(e); }
+});
+
+/* -------------------------
+   Custom Fullscreen (retain left brand)
+   ------------------------- */
+let isCustomFullscreen = false;
+frameFullBtn.addEventListener('click', () => {
+  const container = document.getElementById('appContainer');
+  if (!isCustomFullscreen) {
+    container.classList.add('fullscreen-mode');
+    // Make appContainer fixed and fill viewport but keep leftBrand visible
+    container.style.position = 'fixed';
+    container.style.inset = '0';
+    container.style.zIndex = '99999';
+    container.style.padding = '40px';
+    // enlarge video height
+    player.style.height = '86vh';
+    player.style.width = 'calc(100% - 300px)';
+    player.style.maxWidth = 'none';
+    // ensure leftBrand visible on left
+    leftBrand.style.display = 'flex';
+    isCustomFullscreen = true;
+  } else {
+    container.classList.remove('fullscreen-mode');
+    container.style.position = '';
+    container.style.inset = '';
+    container.style.zIndex = '';
+    container.style.padding = '';
+    player.style.height = '';
+    player.style.width = '';
+    player.style.maxWidth = '';
+    isCustomFullscreen = false;
+  }
+});
+
+/* -------------------------
+   Accessibility / fallback
+   ------------------------- */
+// if HLS supported, attempt to attach hls and show levels after loaded
+if (VIDEO_SRC && VIDEO_SRC.endsWith('.m3u8') && window.Hls && Hls.isSupported()) {
+  // hls attach will happen in initSource
+} else {
+  // Not HLS: we still let qualitySelect exist for user selection but cannot switch automatically
+  // Optionally, you can implement mapping of quality -> different URLs if you host them.
+}
+
+/* -------------------------
+   UX: show which quality is active (for HLS)
+   ------------------------- */
+if (window.Hls && Hls.isSupported()) {
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // provide visual feedback when level changes
+    if (hls) {
+      hls.on(Hls.Events.LEVEL_SWITCHED, (evt,data) => {
+        const lvl = hls.levels[data.level];
+        if (lvl && lvl.height) {
+          // try to reflect in selector if present
+          const opt = [...qualitySelect.options].find(o => o.value == String(lvl.height));
+          if (opt) opt.selected = true;
+          else qualitySelect.value = 'auto';
+        }
+      });
+    }
+  });
+}
+
+/* -------------------------
+   Start muted for autoplay rules then unmute on user action
+   ------------------------- */
+player.muted = true;
+player.addEventListener('play', () => {
+  // once user plays, unmute button will toggle
+});
+
+/* -------------------------
+   Prevent right-click on video? (optional)
+   ------------------------- */
+player.addEventListener('contextmenu', (e)=>{ /* allow default */ });
+
 </script>
 
 </body>
