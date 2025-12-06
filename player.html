@@ -1,165 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>DevCoderz Player</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<meta charset="UTF-8">
+<title>DevCoderz Player</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      font-family: sans-serif;
-      overflow: hidden;
-    }
+<style>
+body {
+  background: #060606;
+  color: white;
+  font-family: Arial;
+  margin: 0;
+}
 
-    /* Always visible DevCoderz logo (fullscreen too) */
-    #devLogo {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      font-size: 26px;
-      color: #00eaff;
-      font-weight: bold;
-      z-index: 10000;
-      animation: glow 2s infinite alternate;
-      pointer-events: none;
-    }
+/* Neon Video Frame */
+.player-box {
+  width: 90%;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 8px;
+  border-radius: 18px;
+  background: #0f0f0f;
+  box-shadow: 0 0 25px #00eaff, inset 0 0 20px #007799;
+}
 
-    @keyframes glow {
-      0% { text-shadow: 0 0 10px #00eaff; }
-      100% { text-shadow: 0 0 25px #00eaff; }
-    }
+/* Video */
+video {
+  width: 100%;
+  border-radius: 14px;
+}
 
-    #popup {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 26px;
-      text-align: center;
-      z-index: 10;
-    }
+/* Controls */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
 
-    #startBtn {
-      margin-top: 20px;
-      padding: 14px 28px;
-      background: #ff4141;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-size: 22px;
-      cursor: pointer;
-    }
+button, select {
+  background: #00eaff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    #videoContainer {
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-    }
+/* Credits */
+#credit {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 22px;
+  text-shadow: 0 0 10px cyan;
+}
 
-    video {
-      width: 100%;
-      height: 100%;
-      background: black;
-    }
+/* Fullscreen Left Animation Text */
+#devAnim {
+  position: fixed;
+  top: 40%;
+  left: 10px;
+  font-size: 28px;
+  color: #00eaff;
+  font-weight: bold;
+  animation: glow 1.5s infinite alternate;
+  pointer-events: none;
+}
 
-    #controls {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      display: flex;
-      gap: 12px;
-      z-index: 5000;
-    }
+@keyframes glow {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
 
-    select, button {
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-  </style>
+/* FULLSCREEN POPUP */
+#popup {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0; left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.92);
+  flex-direction: column;
+  z-index: 9999;
+}
+
+#popup a {
+  color: #00eaff;
+  font-size: 26px;
+  margin: 12px;
+  font-weight: bold;
+  text-decoration: none;
+  text-shadow: 0 0 10px cyan;
+}
+
+#popup button {
+  background: #00eaff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+</style>
 </head>
-
 <body>
 
-<!-- Permanent Glow Logo -->
-<div id="devLogo">DevCoderz 🚀</div>
-
-<!-- Popup -->
+<!-- FULLSCREEN JOIN POPUP -->
 <div id="popup">
-  <div>
-    <b>Lecture shuru karne ke liye “Start Video” dabaye</b><br>
-    <button id="startBtn">Start Video</button>
+  <h2 style="color:white; font-size:30px;">📢 Lecture dekhne ke liye channel join karein</h2>
+
+  <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">
+    👉 Join Telegram Channel
+  </a>
+
+  <button onclick="closePopup()">Continue to Video</button>
+</div>
+
+<!-- Left Animation -->
+<div id="devAnim">DevCoderz</div>
+
+<!-- Neon Player -->
+<div class="player-box">
+  <video id="video" controls></video>
+
+  <div class="controls">
+    <select id="speedCtrl">
+      <option value="0.5">0.5x</option>
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+      <option value="3">3x</option>
+      <option value="4">4x</option>
+    </select>
+
+    <select id="qualityCtrl">
+      <option value="auto">Auto</option>
+      <option value="144">144p</option>
+      <option value="240">240p</option>
+      <option value="360">360p</option>
+      <option value="480">480p</option>
+      <option value="720">720p</option>
+      <option value="1080">1080p</option>
+      <option value="1440">2K</option>
+      <option value="2160">4K</option>
+    </select>
+
+    <button onclick="goFull()">Fullscreen</button>
   </div>
 </div>
 
-<!-- Video Player -->
-<div id="videoContainer">
-  <video id="video" controls></video>
-</div>
-
-<!-- Controls -->
-<div id="controls">
-  <select id="speed">
-    <option value="0.5">0.5×</option>
-    <option value="1" selected>1×</option>
-    <option value="1.5">1.5×</option>
-    <option value="2">2×</option>
-     option value="2.5">2.5×</option>
-    <option value="3">3×</option>
-    <option value="4">4×</option>
-  </select>
-
-  <select id="quality">
-    <option selected disabled>Loading…</option>
-  </select>
-
-  <button id="fs">Full Screen</button>
-</div>
+<div id="credit">Developer – PT. Devansh Sharma</div>
 
 <script>
-  const video = document.getElementById("video");
-  const qualitySelect = document.getElementById("quality");
-  const speedSelect = document.getElementById("speed");
-  const fsBtn = document.getElementById("fs");
+// Get URL Parameter
+const urlParams = new URLSearchParams(window.location.search);
+const videoURL = urlParams.get("Url");
 
-  document.getElementById("startBtn").onclick = () => {
-    document.getElementById("popup").style.display = "none";
-    startVideo();
-  };
+// Apply URL
+document.getElementById("video").src = videoURL;
 
-  // Keep logo visible in fullscreen
-  document.addEventListener("fullscreenchange", () => {
-    document.getElementById("devLogo").style.display = "block";
-  });
+// Speed change
+document.getElementById("speedCtrl").onchange = function() {
+  document.getElementById("video").playbackRate = this.value;
+};
 
-  function startVideo() {
-    const url = new URLSearchParams(window.location.search).get("Url");
+// Quality change (dummy switch)
+document.getElementById("qualityCtrl").onchange = function() {
+  alert("Quality switched to: " + this.value + "p");
+};
 
-    if (Hls.isSupported()) {
-      const hls = new Hls({ enableWorker: true });
-      hls.loadSource(url);
-      hls.attachMedia(video);
+// Fullscreen
+function goFull() {
+  document.getElementById("video").requestFullscreen();
+}
 
-      hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        qualitySelect.innerHTML = "";
+// Popup close
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
 
-        hls.levels.forEach((level, i) => {
-          const opt = document.createElement("option");
-          const height = level.height || 0;
-
-          if (height >= 2160) opt.textContent = "2160p (4K)";
-          else if (height > 0) opt.textContent = height + "p";
-          else opt.textContent = "Quality " + (i + 1);
-
-          opt.value = i;
-          qualitySelect.appendChild(opt);
-        });
-
-        qualitySelect.onchange = () => {
-          hls.currentLevel = parseInt(qualitySelect.value
-
+</script>
+</body>
+</html>
