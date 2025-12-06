@@ -1,128 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>DevCoderz Premium Player</title>
+  <title>DevCoderz Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <style>
     body {
       margin: 0;
-      background: #0f0f0f;
-      font-family: Poppins, sans-serif;
-      color: white;
-      text-align: center;
+      background: #000;
+      font-family: sans-serif;
+      overflow: hidden;
     }
 
-    /* FULL WIDTH BIG FRAME */
-    .container {
-      margin-top: 20px;
-      width: 100%;
+    #popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
       display: flex;
+      align-items: center;
       justify-content: center;
+      color: white;
+      font-size: 28px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    #startBtn {
+      padding: 15px 30px;
+      background: #ff3b3b;
+      color: #fff;
+      font-size: 22px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    #videoContainer {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: black;
     }
 
     video {
-      width: 95%;
-      max-width: 1200px;
-      border-radius: 16px;
-      border: 2px solid #00c3ff;
-      box-shadow: 0 0 25px rgba(0,195,255,0.4);
+      width: 100%;
+      height: 100%;
+      background: black;
     }
 
-    /* GLASS INFO BOX */
-    .glass-box {
-      margin-top: 20px;
-      padding: 18px;
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(12px);
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.2);
-      width: 95%;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .glass-box a {
-      color: #00e2ff;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    /* FULL SCREEN POPUP */
-    #fullPopup {
+    #controls {
       position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
+      bottom: 20px;
+      left: 20px;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      text-align: center;
+      gap: 10px;
     }
 
-    #fullPopup h2 {
-      font-size: 28px;
-      margin-bottom: 15px;
-      color: #00eaff;
-    }
-
-    #fullPopup a {
-      color: #fff;
-      font-size: 22px;
-      font-weight: bold;
-      text-decoration: none;
-    }
-
-    #closePopup {
-      margin-top: 25px;
-      padding: 12px 30px;
-      font-size: 18px;
-      background: #00c3ff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      color: black;
-      font-weight: bold;
+    select, button {
+      padding: 8px 14px;
+      font-size: 16px;
+      border-radius: 6px;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- FULL SCREEN JOIN POPUP -->
-  <div id="fullPopup">
-    <h2>📢 Lecture dekhne ke liye pehle channel join karein</h2>
-    <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">👉 Join Telegram Channel</a>
-    <button id="closePopup">Continue to Video</button>
+<div id="popup">
+  <div>
+    <b>Lecture dekhne ke liye “Start Video” dabaye</b><br>
+    <button id="startBtn">Start Video</button>
   </div>
+</div>
 
-  <div class="container">
-    <video id="player" controls preload="metadata">
-      <source src="https://example.com/video.m3u8" type="application/x-mpegURL">
-    </video>
-  </div>
+<div id="videoContainer">
+  <video id="video" controls></video>
+</div>
 
-  <div class="glass-box">
-    <h3>Developer – <b>Devansh Sharma</b></h3>
-    <p>Telegram:  
-      <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">Join Channel</a>
-    </p>
-  </div>
+<div id="controls">
+  <!-- Speed -->
+  <select id="speed">
+    <option value="0.5">0.5×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+    <option value="3">3×</option>
+    <option value="4">4×</option>
+  </select>
+
+  <!-- Quality -->
+  <select id="quality"></select>
+
+  <!-- Fullscreen -->
+  <button id="fs">Full Screen</button>
+</div>
 
 <script>
-  const popup = document.getElementById("fullPopup");
-  const player = document.getElementById("player");
+  const video = document.getElementById("video");
+  const qualitySelect = document.getElementById("quality");
+  const speedSelect = document.getElementById("speed");
+  const fsBtn = document.getElementById("fs");
 
-  // Video START NA HO — Controls disable mat karo!
-  player.pause();
-
-  document.getElementById("closePopup").onclick = () => {
-    popup.style.display = "none";   // popup hide
-    player.play();                  // auto play
+  document.getElementById("startBtn").onclick = () => {
+    document.getElementById("popup").style.display = "none";
+    startVideo();
   };
+
+  function startVideo() {
+    const url = new URLSearchParams(window.location.search).get("Url");
+
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        maxMaxBufferLength: 120,
+        enableWorker: true
+      });
+
+      hls.loadSource(url);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        qualitySelect.innerHTML = "";
+        hls.levels.forEach((level, index) => {
+          const opt = document.createElement("option");
+          opt.value = index;
+
+          // Example: 2160 → "2160p (4K)"
+          opt.textContent = level.height >= 2160 ? "2160p (4K)" : `${level.height}p`;
+
+          qualitySelect.appendChild(opt);
+        });
+
+        qualitySelect.onchange = () => {
+          hls.currentLevel = parseInt(qualitySelect.value);
+        };
+      });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = url;
+    }
+
+    speedSelect.onchange = () => {
+      video.playbackRate = parseFloat(speedSelect.value);
+    };
+
+    fsBtn.onclick = () => {
+      if (video.requestFullscreen) video.requestFullscreen();
+    };
+  }
 </script>
 
 </body>
