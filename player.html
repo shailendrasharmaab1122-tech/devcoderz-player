@@ -7,37 +7,74 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #0f0f0f, #1b1b1b);
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #fff;
+      background: #0f0f0f;
+      font-family: Poppins, sans-serif;
+      color: white;
+      text-align: center;
     }
 
     .container {
       margin-top: 30px;
-      width: 92%;
-      max-width: 780px;
+      width: 98%;
+      max-width: 950px;
       text-align: center;
-      padding-bottom: 40px;
     }
 
     video {
       width: 100%;
+      max-width: 950px;
       border-radius: 16px;
-      box-shadow: 0 0 25px rgba(0, 195, 255, 0.4);
-      border: 2px solid rgba(0, 195, 255, 0.4);
+      border: 2px solid #00c3ff;
+      box-shadow: 0 0 25px rgba(0,195,255,0.4);
+    }
+
+    /* FULL SCREEN POPUP */
+    #fullPopup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 9999;
+    }
+
+    #fullPopup h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    #fullPopup a {
+      color: #00eaff;
+      font-size: 20px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    #closePopup {
+      margin-top: 25px;
+      padding: 12px 28px;
+      font-size: 18px;
+      background: #00c3ff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: black;
+      font-weight: bold;
     }
 
     .glass-box {
       margin-top: 20px;
       padding: 18px;
+      background: rgba(255,255,255,0.08);
       backdrop-filter: blur(12px);
-      background: rgba(255, 255, 255, 0.08);
       border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255,255,255,0.2);
     }
 
     .glass-box a {
@@ -45,34 +82,20 @@
       text-decoration: none;
       font-weight: 600;
     }
-
-    #telegramPopup {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 16px 20px;
-      background: rgba(0, 180, 255, 0.25);
-      border: 1px solid rgba(0, 180, 255,0.4);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      color: #dff8ff;
-      box-shadow: 0 0 20px rgba(0,180,255,0.4);
-      display: none;
-      animation: fadeIn 0.6s ease-out;
-    }
-
-    #telegramPopup a {
-      color: #fff;
-      font-weight: bold;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
   </style>
 </head>
 <body>
+
+  <!-- 🔥 FULL SCREEN POPUP -->
+  <div id="fullPopup">
+    <h2>📢 Lecture dekhne ke liye pehle channel join karein</h2>
+
+    <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">
+      👉 Join Telegram Channel
+    </a>
+
+    <button id="closePopup">Continue to Video</button>
+  </div>
 
   <div class="container">
 
@@ -82,34 +105,26 @@
 
     <div class="glass-box">
       <h3>Developer – <b>Devansh Sharma</b></h3>
-      <p>
-        Telegram:  
-        <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">
-          Join Channel
-        </a>
+      <p>Telegram:  
+        <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">Join Channel</a>
       </p>
     </div>
 
   </div>
 
-  <div id="telegramPopup">
-    🔔 Join our Telegram for updates!  
-    <br><br>
-    <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">
-      Click to Join
-    </a>
-  </div>
-
   <script>
+    const popup = document.getElementById("fullPopup");
+    const btn = document.getElementById("closePopup");
     const player = document.getElementById("player");
-    const popup = document.getElementById("telegramPopup");
 
-    player.onplay = () => {
-      popup.style.display = "block";
+    // Video lock: Don't play until popup removed
+    player.pause();
+    player.controls = false;
 
-      setTimeout(() => {
-        popup.style.display = "none";
-      }, 4000);
+    btn.onclick = () => {
+      popup.style.display = "none";
+      player.controls = true;
+      player.play();
     };
   </script>
 
