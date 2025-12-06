@@ -1,394 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DevCoderz Player — Upgraded</title>
-
-<!-- HLS.js -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
+<meta charset="UTF-8">
+<title>DevCoderz Player</title>
 <style>
-  :root{
-    --accent: #00eaff;
-    --bg: #000;
-    --panel: rgba(0,0,0,0.6);
-    --glass: rgba(255,255,255,0.04);
-  }
-  html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:#fff;}
-  .player-wrap{position:relative;width:100%;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000;}
-  video{width:100%;height:100%;object-fit:cover;background:#000;display:block;}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* DevCoderz logo — always visible even in fullscreen */
-  #devLogo{
-    position:fixed;left:18px;top:18px;z-index:9999;
-    display:flex;align-items:center;gap:8px;pointer-events:none;
-    font-weight:700;font-size:20px;color:var(--accent);
-    text-shadow:0 0 10px rgba(0,234,255,0.25);
-    animation: glow 2.2s infinite linear;
-  }
-  #devLogo img{height:34px;width:34px;border-radius:6px;object-fit:cover;pointer-events:none;}
+    body {
+        background: #000;
+        height: 100vh;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
 
-  @keyframes glow{
-    0%{filter:drop-shadow(0 0 6px rgba(0,234,255,0.12));transform:translateY(0);}
-    50%{filter:drop-shadow(0 0 20px rgba(0,234,255,0.35));transform:translateY(-2px);}
-    100%{filter:drop-shadow(0 0 6px rgba(0,234,255,0.12));transform:translateY(0);}
-  }
+    /* APP MAIN LAYOUT */
+    #appContainer {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+        background: #000;
+        overflow: hidden;
+    }
 
-  /* Start popup */
-  #startPopup{
-    position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(180deg, rgba(0,0,0,0.75), rgba(0,0,0,0.9));
-    flex-direction:column;gap:14px;text-align:center;padding:18px;
-  }
-  #startPopup button{background:var(--accent);color:#000;border:none;padding:12px 20px;border-radius:10px;font-size:18px;cursor:pointer;}
+    /* LEFT ANIMATION SECTION */
+    #leftBrand {
+        width: 260px;
+        background: rgba(255,255,255,0.06);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        animation: glow 3s infinite alternate;
+    }
 
-  /* Controls panel */
-  .controls{
-    position:fixed;left:50%;transform:translateX(-50%);
-    bottom:14px;z-index:990;display:flex;align-items:center;gap:10px;
-    background:var(--panel);backdrop-filter: blur(6px);padding:8px;border-radius:12px;
-  }
+    #leftBrand h2 {
+        color: #00eaff;
+        font-size: 30px;
+        font-weight: bold;
+    }
 
-  .controls select, .controls button, .controls input[type="range"]{
-    background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06);
-    padding:6px 8px;border-radius:8px;font-size:15px;
-  }
+    @keyframes glow {
+        0% { opacity: 0.6; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.05); }
+    }
 
-  .time{font-size:13px;opacity:0.9;padding:0 6px;}
+    /* VIDEO AREA */
+    #videoArea {
+        flex: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 
-  /* Seekbar wide */
-  #seek{
-    width:420px; appearance:none;height:6px;border-radius:6px;
-    background:linear-gradient(90deg,var(--accent),rgba(255,255,255,0.12));
-    cursor:pointer;
-  }
-  #seek::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(0,0,0,0.6);}
+    #player {
+        width: 90%;
+        height: 80%;
+        border-radius: 14px;
+        background: #111;
+    }
 
-  /* Mobile responsive */
-  @media(max-width:720px){
-    #seek{width:180px;}
-    .controls{padding:6px;gap:6px;}
-    #devLogo{font-size:16px}
-  }
+    /* CUSTOM FULLSCREEN */
+    .fullscreen-mode {
+        width: 100vw !important;
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        z-index: 99999;
+        display: flex !important;
+    }
 
-  /* small top-right message */
-  #msg{position:fixed;right:14px;top:14px;z-index:999;color:#fff;font-size:13px;opacity:0.85;background:var(--glass);padding:6px 10px;border-radius:8px;}
+    /* FULLSCREEN BUTTON */
+    #customFullBtn {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: #00eaff;
+        color: #000;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* DEVELOPER CREDIT */
+    #creditBox {
+        margin-top: 10px;
+        color: white;
+        font-size: 17px;
+        text-align: center;
+    }
+
+    #creditBox a { color: #00eaff; font-weight: bold; }
+
+    /* POPUP BLOCKER */
+    #popupBlock {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.92);
+        z-index: 999999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+
+    #popupBlock h1 {
+        font-size: 40px;
+        margin-bottom: 20px;
+        color: #00eaff;
+    }
+
+    #popupBlock a {
+        color: #fff;
+        background: #00eaff;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
 </style>
 </head>
+
 <body>
 
-<div class="player-wrap" id="playerWrap">
+<!-- POPUP FIRST -->
+<div id="popupBlock">
+    <h1>🔔 Join Telegram to Unlock Lecture</h1>
+    <p style="font-size: 22px; margin-bottom: 25px;">Lecture dekhne ke liye pehle Telegram group join karein.</p>
+    <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">JOIN TELEGRAM</a>
+    <br><br>
+    <button onclick="closePopup()" style="margin-top:10px;background:#fff;color:#000;padding:10px 20px;border-radius:8px;font-size:18px;">I Have Joined</button>
+</div>
 
-  <!-- Logo (replace with PNG if you want) -->
-  <div id="devLogo">
-    <!-- Optional PNG: uncomment and replace src -->
-    <!-- <img src="path/to/devcoderz.png" alt="logo"> -->
-    <div>DevCoderz</div>
-  </div>
+<!-- MAIN PLAYER -->
+<div id="appContainer">
 
-  <!-- Start popup -->
-  <div id="startPopup">
-    <div style="font-size:20px;font-weight:600;">Lecture shuru karne ke liye “Start” dabaye</div>
-    <div style="opacity:0.85;font-size:14px;">Quality: Auto, 360p, 480p, 720p, 1080p, 2K, 4K · Speed: 0.25×–4×</div>
-    <button id="startBtn">Start</button>
-  </div>
+    <!-- LEFT BRAND AREA -->
+    <div id="leftBrand">
+        <h2>DevCoderz</h2>
+    </div>
 
-  <!-- Video element -->
-  <video id="video" playsinline webkit-playsinline></video>
+    <!-- VIDEO AREA -->
+    <div id="videoArea">
+        <video id="player" controls></video>
+        <button id="customFullBtn">⛶ Fullscreen</button>
 
-  <!-- Controls -->
-  <div class="controls" id="controls">
-    <button id="playPause">Play</button>
+        <div id="creditBox">
+            Developer: <b>Devansh Sharma</b><br>
+            Join Telegram: <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">Click Here</a>
+        </div>
+    </div>
 
-    <!-- seek -->
-    <input id="seek" type="range" min="0" max="100" value="0" step="0.01">
-
-    <div class="time" id="currentTime">0:00</div>
-
-    <!-- quality (fixed list chosen by user) -->
-    <select id="qualitySelect" title="Quality">
-      <option value="auto" selected>Auto</option>
-      <option value="360">360p</option>
-      <option value="480">480p</option>
-      <option value="720">720p</option>
-      <option value="1080">1080p</option>
-      <option value="1440">2K</option>
-      <option value="2160">4K</option>
-    </select>
-
-    <!-- speed -->
-    <select id="speedSelect" title="Speed">
-      <!-- 0.25 to 4 step 0.25 -->
-    </select>
-
-    <button id="fsBtn" title="Fullscreen">⛶</button>
-  </div>
-
-  <div id="msg" style="display:none;"></div>
 </div>
 
 <script>
-/* ---------------------------
-  CONFIG & helpers
-----------------------------*/
-const video = document.getElementById('video');
-const startBtn = document.getElementById('startBtn');
-const startPopup = document.getElementById('startPopup');
-const playPauseBtn = document.getElementById('playPause');
-const seek = document.getElementById('seek');
-const currentTimeLabel = document.getElementById('currentTime');
-const qualitySelect = document.getElementById('qualitySelect');
-const speedSelect = document.getElementById('speedSelect');
-const fsBtn = document.getElementById('fsBtn');
-const msg = document.getElementById('msg');
+    // VIDEO URL LOADER
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoURL = urlParams.get("Url");
+    document.getElementById("player").src = videoURL;
 
-const streamUrl = new URLSearchParams(window.location.search).get('Url') || ''; // m3u8
-if(!streamUrl){
-  alert('No Url provided. Pass ?Url=YOUR_M3U8_LINK');
-}
+    // CUSTOM FULLSCREEN BUTTON
+    document.getElementById("customFullBtn").onclick = function () {
+        const app = document.getElementById("appContainer");
 
-/* fill speed select 0.25 -> 4 */
-(function fillSpeeds(){
-  const speeds = [];
-  for(let s=0.25; s<=4.0001; s+=0.25){
-    speeds.push(Math.round(s*100)/100);
-  }
-  speeds.forEach(sp=>{
-    const opt = document.createElement('option');
-    opt.value = sp; opt.textContent = sp+'×';
-    if(sp===1) opt.selected = true;
-    speedSelect.appendChild(opt);
-  });
-})();
-
-/* storage key for resume per stream */
-const storageKey = 'devcoderz_resume_' + (streamUrl ? btoa(streamUrl).slice(0,12) : 'no-url');
-
-/* show temporary message */
-function showMsg(t){
-  msg.style.display = 'block'; msg.textContent = t;
-  clearTimeout(msg._t); msg._t = setTimeout(()=> msg.style.display='none',2500);
-}
-
-/* format time */
-function fmt(t){
-  if(isNaN(t) || !isFinite(t)) return '0:00';
-  const s = Math.floor(t%60).toString().padStart(2,'0');
-  const m = Math.floor(t/60);
-  return `${m}:${s}`;
-}
-
-/* ---------------------------
-  HLS + Quality logic
-----------------------------*/
-let hls = null;
-let levels = []; // from HLS manifest
-
-function initHls(){
-  if(!streamUrl) return;
-  if (Hls.isSupported()) {
-    hls = new Hls({ enableWorker:true, lowLatencyMode:false });
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MEDIA_ATTACHED, ()=> console.log('Media attached'));
-    hls.loadSource(streamUrl);
-
-    hls.on(Hls.Events.MANIFEST_PARSED, function(event, data){
-      levels = hls.levels || [];
-      populateQualitySelect(); // ensure fixed list mapping works with available levels
-      tryResume();
-    });
-
-    hls.on(Hls.Events.ERROR, function(event, data){
-      console.warn('HLS error', data);
-      if(data.fatal){
-        switch(data.type){
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            showMsg('Network error — retrying...');
-            hls.startLoad();
-            break;
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            showMsg('Playback error — trying recover...');
-            hls.recoverMediaError();
-            break;
-          default:
-            showMsg('Fatal error — reloading player');
-            setTimeout(()=> location.reload(), 1500);
-            break;
+        if (!app.classList.contains("fullscreen-mode")) {
+            app.classList.add("fullscreen-mode");
+        } else {
+            app.classList.remove("fullscreen-mode");
         }
-      }
-    });
-  } else {
-    // native fallback (Safari)
-    video.src = streamUrl;
-    video.addEventListener('loadedmetadata', tryResume);
-  }
-}
+    };
 
-/* Fixed quality list chosen by user (Auto + discrete heights). 
-   When user picks a height, we choose the best matching hls.level index.
-*/
-function populateQualitySelect(){
-  // qualitySelect already has fixed options in HTML. We keep them.
-  // If no levels available, Auto remains.
-  // On change we will map to the nearest available level.
-}
-
-/* find best level index for target height */
-function findBestLevelIndex(targetHeight){
-  if(!levels || levels.length===0) return -1; // auto
-  if(targetHeight===0) return -1; // auto
-
-  let bestIdx = -1;
-  let bestDiff = Infinity;
-  levels.forEach((lvl,i)=>{
-    const h = lvl.height || 0;
-    const diff = Math.abs(h - targetHeight);
-    if(diff < bestDiff){
-      bestDiff = diff; bestIdx = i;
+    // POPUP CLOSE
+    function closePopup() {
+        document.getElementById("popupBlock").style.display = "none";
     }
-  });
-  return bestIdx;
-}
-
-/* when user picks quality */
-qualitySelect.addEventListener('change', ()=>{
-  const v = qualitySelect.value;
-  const target = v === 'auto' ? 0 : parseInt(v,10);
-  if(hls){
-    if(target === 0) {
-      hls.currentLevel = -1; // auto
-      showMsg('Quality: Auto');
-    } else {
-      const idx = findBestLevelIndex(target);
-      if(idx === -1) {
-        showMsg('Requested quality not found — staying Auto');
-        hls.currentLevel = -1;
-      } else {
-        hls.currentLevel = idx;
-        showMsg('Quality set: ' + (target===2160?'4K':(target===1440?'2K':target+'p')));
-      }
-    }
-  } else {
-    showMsg('Quality control works for HLS streams');
-  }
-});
-
-/* ---------------------------
-  Player controls (play/pause, seek, time)
-----------------------------*/
-playPauseBtn.addEventListener('click', ()=>{
-  if(video.paused) video.play().catch(()=>showMsg('Play blocked — tap video'));
-  else video.pause();
-});
-
-video.addEventListener('play', ()=> playPauseBtn.textContent = 'Pause');
-video.addEventListener('pause', ()=> playPauseBtn.textContent = 'Play');
-
-video.addEventListener('timeupdate', ()=>{
-  // update seek and current time
-  if(!isNaN(video.duration) && video.duration>0){
-    const pct = (video.currentTime / video.duration) * 100;
-    seek.value = pct;
-    currentTimeLabel.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration);
-  } else {
-    currentTimeLabel.textContent = fmt(video.currentTime);
-  }
-  // save resume every 5s (debounced)
-  const now = Date.now();
-  if(!video._lastSave || (now - video._lastSave) > 5000){
-    localStorage.setItem(storageKey, Math.floor(video.currentTime));
-    video._lastSave = now;
-  }
-});
-
-seek.addEventListener('input', (e)=>{
-  // show scrub preview (don't jump yet)
-  if(!isNaN(video.duration) && video.duration>0){
-    const pct = parseFloat(e.target.value) / 100;
-    const t = video.duration * pct;
-    currentTimeLabel.textContent = fmt(t) + ' / ' + fmt(video.duration);
-  }
-});
-seek.addEventListener('change', (e)=>{
-  if(!isNaN(video.duration) && video.duration>0){
-    const pct = parseFloat(e.target.value) / 100;
-    video.currentTime = video.duration * pct;
-  }
-});
-
-/* speed */
-speedSelect.addEventListener('change', ()=>{
-  const s = parseFloat(speedSelect.value);
-  video.playbackRate = s;
-});
-
-/* fullscreen (container fullscreen so logo stays) */
-fsBtn.addEventListener('click', ()=>{
-  const wrap = document.getElementById('playerWrap');
-  if(!document.fullscreenElement){
-    wrap.requestFullscreen().catch(()=> showMsg('Fullscreen not supported'));
-  } else {
-    document.exitFullscreen();
-  }
-});
-document.addEventListener('fullscreenchange', ()=>{
-  // ensure logo visible
-  const devLogo = document.getElementById('devLogo');
-  if(document.fullscreenElement){
-    devLogo.style.display = 'flex';
-  } else {
-    devLogo.style.display = 'flex';
-  }
-});
-
-/* ---------------------------
-  Auto-resume & lifecycle
-----------------------------*/
-function tryResume(){
-  const saved = parseInt(localStorage.getItem(storageKey) || 0,10);
-  if(saved > 3){
-    // seek after small delay (metadata must be loaded)
-    setTimeout(()=> {
-      try { video.currentTime = Math.min(saved, Math.floor(video.duration || saved)); showMsg('Resumed at '+fmt(saved)); }
-      catch(e){ console.warn('resume fail', e); }
-    }, 500);
-  }
-}
-
-/* save on unload too */
-window.addEventListener('beforeunload', ()=> {
-  try{ localStorage.setItem(storageKey, Math.floor(video.currentTime)); }catch(e){}
-});
-
-/* ---------------------------
-  Start button initializes everything
-----------------------------*/
-startBtn.addEventListener('click', ()=>{
-  startPopup.style.display = 'none';
-  initHls();
-  // start playing
-  video.play().catch(()=> {
-    // user gesture required in some browsers; play on first interaction
-    showMsg('Tap video to play if blocked');
-  });
-});
-
-/* Auto-start sometimes if you want (commented)
-window.addEventListener('load', ()=> {
-  // startPopup.click(); // auto start — uncomment if you want automatic start
-});
-*/
-
-/* Error handling: show small message */
-function showError(e){
-  console.error(e);
-  showMsg('Playback error');
-}
-
-/* quick init: add small safety if URL present and user wants to auto-start */
-if(streamUrl && !startPopup) initHls();
-
 </script>
+
 </body>
 </html>
