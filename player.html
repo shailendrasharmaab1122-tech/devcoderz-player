@@ -1,152 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Devansh X Anuj Player</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>DevCoderz Premium Player</title>
 
-<!-- Basic Styling -->
-<style>
+  <style>
     body {
-        margin: 0;
-        background: #0d0d0d;
-        font-family: Arial, sans-serif;
-        color: white;
-        text-align: center;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0f0f0f, #1b1b1b);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
     }
 
-    h2 {
-        margin: 15px;
-        font-size: 26px;
-        font-weight: bold;
-        color: #00eaff;
-        text-shadow: 0px 0px 10px #00eaff;
-    }
-
-    .player-container {
-        width: 100%;
-        max-width: 900px;
-        margin: auto;
-        padding: 10px;
+    .container {
+      margin-top: 30px;
+      width: 92%;
+      max-width: 780px;
+      text-align: center;
+      padding-bottom: 40px;
     }
 
     video {
-        width: 100%;
-        border-radius: 12px;
-        background: black;
-        box-shadow: 0px 0px 20px rgba(0,255,255,0.4);
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(0, 195, 255, 0.4);
+      border: 2px solid rgba(0, 195, 255, 0.4);
     }
 
-    .controls {
-        background: rgba(255,255,255,0.1);
-        padding: 12px;
-        margin-top: 10px;
-        border-radius: 10px;
-        display: flex;
-        justify-content: space-around;
-        backdrop-filter: blur(10px);
+    .glass-box {
+      margin-top: 20px;
+      padding: 18px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    select {
-        padding: 6px 10px;
-        border-radius: 6px;
-        border: none;
-        font-size: 14px;
+    .glass-box a {
+      color: #00e2ff;
+      text-decoration: none;
+      font-weight: 600;
     }
 
-</style>
+    #telegramPopup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 20px;
+      background: rgba(0, 180, 255, 0.25);
+      border: 1px solid rgba(0, 180, 255,0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      color: #dff8ff;
+      box-shadow: 0 0 20px rgba(0,180,255,0.4);
+      display: none;
+      animation: fadeIn 0.6s ease-out;
+    }
 
-<!-- HLS Library -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    #telegramPopup a {
+      color: #fff;
+      font-weight: bold;
+    }
 
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
 
-<h2>Devansh X Anuj</h2>
+  <div class="container">
 
-<div class="player-container">
-    <video id="videoPlayer" controls></video>
+    <video id="player" controls>
+      <source src="https://example.com/video.m3u8" type="application/x-mpegURL">
+    </video>
 
-    <div class="controls">
-
-        <!-- Speed Control -->
-        <select id="speedControl">
-            <option value="0.25">0.25x</option>
-            <option value="0.5">0.5x</option>
-            <option value="1" selected>1x (Normal)</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2x</option>
-            <option value="2.5">2.5x</option>
-            <option value="3">3x</option>
-            <option value="4">4x</option>
-        </select>
-
-        <!-- Quality Control -->
-        <select id="qualityControl">
-            <option value="auto" selected>Auto Quality</option>
-            <option value="144">144p</option>
-            <option value="240">240p</option>
-            <option value="360">360p</option>
-            <option value="480">480p</option>
-            <option value="720">720p</option>
-            <option value="1080">1080p</option>
-        </select>
-
+    <div class="glass-box">
+      <h3>Developer – <b>Devansh Sharma</b></h3>
+      <p>
+        Telegram:  
+        <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">
+          Join Channel
+        </a>
+      </p>
     </div>
-</div>
 
-<script>
+  </div>
 
-// Detect URL parameter automatically
-function getVideoURL() {
-    const params = new URLSearchParams(window.location.search);
-    const keys = ["url", "Url", "URL", "video", "Video", "VIDEO", "u", "U"];
-    for (const key of keys) {
-        if (params.has(key)) return params.get(key);
-    }
-    return null;
-}
+  <div id="telegramPopup">
+    🔔 Join our Telegram for updates!  
+    <br><br>
+    <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank">
+      Click to Join
+    </a>
+  </div>
 
-const videoURL = getVideoURL();
-const video = document.getElementById("videoPlayer");
+  <script>
+    const player = document.getElementById("player");
+    const popup = document.getElementById("telegramPopup");
 
-if (!videoURL) {
-    alert("Error: No video URL found! Use ?url=YOUR_M3U8_LINK");
-} else {
+    player.onplay = () => {
+      popup.style.display = "block";
 
-    // Play video using HLS.js
-    if (Hls.isSupported()) {
-        window.hls = new Hls({ maxMaxBufferLength: 60 });
-        hls.loadSource(videoURL);
-        hls.attachMedia(video);
-
-        // Quality selector
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            const levels = hls.levels;
-            const qSelect = document.getElementById("qualityControl");
-
-            qSelect.onchange = () => {
-                const q = qSelect.value;
-                if (q === "auto") {
-                    hls.currentLevel = -1;
-                } else {
-                    let levelIndex = levels.findIndex(l => l.height == q);
-                    hls.currentLevel = levelIndex;
-                }
-            };
-        });
-
-    } else {
-        video.src = videoURL;
-    }
-}
-
-// Speed Control
-document.getElementById("speedControl").onchange = function () {
-    video.playbackRate = this.value;
-};
-
-</script>
+      setTimeout(() => {
+        popup.style.display = "none";
+      }, 4000);
+    };
+  </script>
 
 </body>
 </html>
