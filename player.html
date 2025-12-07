@@ -6,246 +6,190 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-    body {
-        margin: 0;
-        background: black;
+    body{
+        background:#000;
+        margin:0;
         font-family: Arial, sans-serif;
-        color: white;
+        color:white;
+        text-align:center;
     }
 
-    .container {
-        width: 98%;
-        max-width: 950px;
-        margin: auto;
-        margin-top: 25px;
+    .neon-frame{
+        border:2px solid #8a2be2;
+        box-shadow:0 0 20px #8a2be2,0 0 40px #8a2be2;
+        padding:10px;
+        border-radius:12px;
+        width:95%;
+        margin:auto;
+        margin-top:20px;
     }
 
-    .neon-frame {
-        border: 2px solid #a855f7;
-        padding: 10px;
-        border-radius: 16px;
-        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
+    #videoPlayer{
+        width:100%;
+        height:260px;
+        background:#111;
+        border-radius:10px;
     }
 
-    video {
-        width: 100%;
-        border-radius: 14px;
-        background: #000;
+    .controls{
+        margin-top:10px;
+        display:flex;
+        justify-content:center;
+        gap:10px;
     }
 
-    .dev-anim {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        font-size: 22px;
-        font-weight: bold;
-        color: #a855f7;
-        animation: glow 1.5s infinite alternate;
-        z-index: 50;
-        pointer-events: none;
+    select, button{
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        font-size:16px;
     }
 
-    @keyframes glow {
-        from { text-shadow: 0 0 10px #a855f7; }
-        to   { text-shadow: 0 0 25px #9333ea; }
+    /* Popup */
+    #join-popup{
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.85);
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        z-index:999;
     }
 
-    .credit {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 20px;
-        color: #a855f7;
+    .popup-box{
+        background:#111;
+        padding:25px;
+        border-radius:20px;
+        width:85%;
+        border:1px solid #8a2be2;
+        box-shadow:0 0 20px #8a2be2,0 0 40px #8a2be2;
     }
 
-    /* POPUP */
-    #join-popup {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.85);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 200;
-    }
-
-    .popup-card {
-        background: #111;
-        padding: 30px;
-        border-radius: 20px;
-        width: 85%;
-        max-width: 380px;
-        text-align: center;
-        border: 1px solid #a855f7;
-        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
-    }
-
-    .popup-btn {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        border-radius: 10px;
-        background: #9333ea;
-        border: none;
-        color: white;
-        font-size: 17px;
-        margin-top: 20px;
-    }
-
-    .skip-btn {
-        background: #444;
-        margin-top: 25px;
-    }
-
-    @keyframes ramglow {
-        from { text-shadow: 0 0 15px red; }
-        to   { text-shadow: 0 0 40px #ff2222; }
+    /* Jai Shree Ram Glow */
+    .ram-text{
+        color:red;
+        font-size:28px;
+        font-weight:bold;
+        text-shadow:0 0 10px red,0 0 20px red,0 0 30px #ff0000;
+        margin-top:25px;
     }
 </style>
+
 </head>
 <body>
 
-<div class="dev-anim">DevCoderz</div>
-
-<!-- POPUP -->
+<!-- Popup -->
 <div id="join-popup">
-    <div class="popup-card">
-        <h2 style="color:#d8b4fe; font-size:26px; margin-bottom:15px;">Join Telegram</h2>
+    <div class="popup-box">
+        <h2 style="color:#d09bff; font-size:24px;">Join Telegram</h2>
 
-        <p style="font-size:17px;">
+        <p style="font-size:18px;">
             Other lectures dekhne ke liye<br>
-            please join Telegram channel first
+            hamare Telegram channel ko join kare.
         </p>
 
         <br><br>
 
-        <a href="https://t.me/+QVhljL_D32RlOTg1" class="popup-btn">Join Telegram</a>
+        <a href="https://t.me/+QVhljL_D32RlOTg1"
+           style="background:#8a2be2; padding:12px 20px; display:block; border-radius:10px; margin-bottom:20px; color:white; text-decoration:none;">
+            Join Telegram
+        </a>
 
-        <button id="skip-btn" class="popup-btn skip-btn">Skip</button>
+        <button onclick="closePopup()"
+            style="background:#333; color:white; padding:10px 20px; border-radius:10px;">
+            Skip
+        </button>
     </div>
 </div>
 
-<div class="container">
-    <div class="neon-frame">
-        <video id="video" controls playsinline></video>
-    </div>
+<div class="neon-frame">
 
-    <!-- Speed + 
-Quality Menu -->
-    <div style="margin-top:25px; text-align:center;">
+    <!-- Video Player -->
+    <video id="videoPlayer" controls></video>
 
-        <!-- SPEED -->
-        <label style="font-size:20px; margin-right:10px; color:#c084fc;">Speed:</label>
-        <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+    <!-- Controls -->
+    <div class="controls">
+
+        <!-- Speed -->
+        <select id="speedControl">
             <option value="0.5">0.5x</option>
-            <option value="1" selected>1x (Normal)</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x Normal</option>
+            <option value="1.25">1.25x</option>
             <option value="1.5">1.5x</option>
             <option value="2">2x</option>
-            <option value="2.5">2.5x</option>
             <option value="3">3x</option>
             <option value="4">4x</option>
         </select>
 
-        
-
-<!-- QUALITY -->
-        <label style="font-size:20px; margin-left:25px; color:#c084fc;">Quality:</label>
-        <select id="qualityMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
-            <option value="auto" selected>Auto</option>
-            <option value="360">360p</option>
-            <option value="480">480p</option>
-            <option value="720">720p</option>
+        <!-- Quality -->
+        <select id="qualityControl">
+            <option value="auto">Auto</option>
             <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
         </select>
 
+        <!-- Full Screen -->
+        <button onclick="openFullscreen()">Full Screen</button>
+
     </div>
 
-    <!-- Developer Credit -->
-    <div class="credit">
-        Developer – PT. Devansh Sharma
-        Admin - Anuj Yadav
-    </div>
+    <!-- Developer Name -->
+    <p style="margin-top:20px; font-size:18px;">Developer – PT. Devansh Sharma</p>
 
-    <br><br>
+    <!-- Telegram Link Below -->
+    <p style="color:#aaa; margin-top:5px;">
+        Join our Telegram :  
+        <a href="https://t.me/+QVhljL_D32RlOTg1" style="color:#8a2be2;">Click Here</a>
+    </p>
 
-    <!-- जय श्री राम -->
-    <div style="
-        text-align:center;
-        font-size:34px;
-        font-weight:bold;
-        color:red;
-        animation: ramglow 1.4s infinite alternate;
-    ">
-        जय श्री राम 🚩
-    </div>
+    <div class="ram-text">जय श्री राम</div>
 
-    <!-- Telegram Link -->
-    <div style="text-align:center; margin-top:15px;">
-        <a href="https://t.me/+QVhljL_D32RlOTg1"
-           style="color:#60a5fa; font-size:20px; text-decoration:none;">
-           👉 Click here to Join Telegram Channel for more updates
-        </a>
-    </div>
+    <!-- 1DM download (safe redirect) -->
+    <button id="idm-download"
+        style="background:red; padding:12px 20px; color:white; border-radius:12px; margin-top:20px;">
+        Download via 1DM
+    </button>
 
 </div>
 
-<!-- HLS -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <script>
-    const video = document.getElementById("video");
+let player = document.getElementById("videoPlayer");
 
-    // URL Fix — Normal + Encoded dono
-    const urlParams = new URLSearchParams(window.location.search);
-    const videoURL = decodeURIComponent(urlParams.get("Url"));
+// URL fetch
+const urlParams = new URLSearchParams(window.location.search);
+const videoURL = urlParams.get("Url");
 
-    // HLS Player
-    let hls;
-    if (Hls.isSupported()) {
-        hls = new Hls({
-            maxMaxBufferLength: 60,
-            enableWorker: true
-        });
-        hls.loadSource(videoURL);
-        hls.attachMedia(video);
-    } else {
-        video.src = videoURL;
-    }
+// Load video
+player.src = videoURL;
 
-    // POPUP
-    const popup = document.getElementById("join-popup");
-    const skipBtn = document.getElementById("skip-btn");
+// Speed change
+document.getElementById("speedControl").onchange = function(){
+    player.playbackRate = this.value;
+};
 
-    window.onload = () => {
-        popup.style.display = "flex";
-        video.pause();
-    };
+// Popup Close
+function closePopup(){
+    document.getElementById("join-popup").style.display = "none";
+    player.play();
+}
 
-    skipBtn.onclick = () => {
-        popup.style.display = "none";
-        video.play();
-    };
+// Fullscreen
+function openFullscreen() {
+    if (player.requestFullscreen) player.requestFullscreen();
+}
 
-    // SPEED CONTROL
-    document.getElementById("speedMenu").addEventListener("change", function() {
-        video.playbackRate = Number(this.value);
-    });
+// 1DM Redirect (safe)
+document.getElementById("idm-download").onclick = () => {
+    window.location.href = "idm://download/" + encodeURIComponent(videoURL);
 
-    // QUALITY CONTROL (Auto + Manual)
-    document.getElementById("qualityMenu").addEventListener("change", function () {
-        if (!hls) return;
-
-        let q = this.value;
-
-        if (q === "auto") {
-            hls.currentLevel = -1;
-        } else {
-            hls.levels.forEach((level, index) => {
-                if (level.height == q) {
-                    hls.currentLevel = index;
-                }
-            });
-        }
-    });
+    setTimeout(() => {
+        window.location.href =
+          "https://play.google.com/store/apps/details?id=idm.internet.download.manager";
+    }, 800);
+};
 </script>
 
 </body>
