@@ -48,17 +48,6 @@
         font-weight: bold;
     }
 
-    #offlineStatus {
-        margin-top: 15px;
-        padding: 10px 15px;
-        border-radius: 12px;
-        display: inline-block;
-        font-size: 18px;
-        font-weight: bold;
-        background: #444;
-        color: #ccc;
-    }
-
     .ram {
         font-size: 32px;
         margin-top: 25px;
@@ -78,6 +67,7 @@
 
     <!-- Controls -->
     <div class="control-row">
+
         <!-- SPEED MENU -->
         <select id="speedMenu" onchange="setSpeed(this.value)">
             <option value="0.25">0.25x</option>
@@ -99,19 +89,13 @@
         <button onclick="fullscreen()">Fullscreen</button>
     </div>
 
-    <!-- Offline Status -->
-    <div id="offlineStatus">Loading...</div>
-    <br>
-    <button onclick="toggleOffline()" 
-        style="margin-top:10px;background:#0a84ff;color:white;">Mark / Unmark Offline</button>
-
     <!-- Developer Info -->
     <p style="margin-top:18px;font-size:17px;">
         Developer – <b>PT. Devansh Sharma</b>
     </p>
 
     <p>
-        Join Telegram:  
+        Join Telegram:
         <a href="https://t.me/+QVhljL_D32RlOTg1" style="color:#00eaff;">Click Here</a>
     </p>
 
@@ -124,10 +108,11 @@
 <script>
     const video = document.getElementById("video");
 
-    // Load URL from parameter
+    // Load URL from query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const fileURL = urlParams.get("Url");
 
+    // HLS Loader
     if (Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(fileURL);
@@ -145,41 +130,6 @@
     function fullscreen() {
         if (video.requestFullscreen) video.requestFullscreen();
     }
-
-    /* -------------------------
-       OFFLINE INDICATOR (UI ONLY)
-       ------------------------- */
-    const videoId = "offline_" + btoa(fileURL);
-
-    function loadStatus() {
-        const saved = localStorage.getItem(videoId);
-        const box = document.getElementById("offlineStatus");
-
-        if (saved === "true") {
-            box.textContent = "Available Offline";
-            box.style.background = "#1d9100";
-            box.style.color = "white";
-            box.style.boxShadow = "0 0 10px #4cff00";
-        } else {
-            box.textContent = "Not Available Offline";
-            box.style.background = "#444";
-            box.style.color = "#ccc";
-            box.style.boxShadow = "none";
-        }
-    }
-
-    function toggleOffline() {
-        const saved = localStorage.getItem(videoId);
-
-        if (saved === "true")
-            localStorage.setItem(videoId, "false");
-        else
-            localStorage.setItem(videoId, "true");
-
-        loadStatus();
-    }
-
-    loadStatus();
 </script>
 
 </body>
