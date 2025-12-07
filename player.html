@@ -182,13 +182,6 @@ function closePopup(){
 function openFullscreen() {
     if (player.requestFullscreen) player.requestFullscreen();
 }
-
-// 1DM Redirect (safe)
-document.getElementById("idm-download").onclick = () => {
-    window.location.href = "idm://download/" + encodeURIComponent(videoURL);
-
-    setTimeout(() => {
-        window.location.href =
           "https://play.google.com/store/apps/details?id=idm.internet.download.manager";
     }, 800);
 };
