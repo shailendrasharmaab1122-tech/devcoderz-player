@@ -3,9 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DevCoderz — Plyr + HLS Player</title>
+<title>DevCoderz — Plyr HLS Player</title>
 
-<!-- Plyr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
 
 <style>
@@ -16,120 +15,121 @@
     --accent:#8b33ff;
     --muted:#9aa4ad;
   }
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#020204,#0b0c10);font-family:Inter, Arial, sans-serif;color:#eafcff}
-  .app{display:flex;gap:18px;align-items:flex-start;padding:20px;box-sizing:border-box;min-height:100vh}
-  /* left brand */
-  .left {
-    width:220px; min-width:160px; background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
-    border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,0.6);
-    border:1px solid rgba(0,234,255,0.06); animation:bp 3s ease-in-out infinite alternate;
+  html,body{height:100%;margin:0;background:#020204;font-family:Inter, Arial, sans-serif;color:#eafcff}
+  .app{display:flex;gap:18px;align-items:flex-start;padding:20px;min-height:100vh;box-sizing:border-box}
+  
+  .left{
+    width:220px;background:rgba(255,255,255,0.02);
+    border-radius:12px;padding:16px;display:flex;
+    flex-direction:column;align-items:center;
+    border:1px solid rgba(0,234,255,0.06);
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    animation:bp 3s ease-in-out infinite alternate;
   }
-  .logo { width:96px;height:96px;border-radius:999px;background:linear-gradient(135deg,var(--neon),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;color:#001219;font-size:24px }
+  
+  .logo{width:96px;height:96px;border-radius:999px;
+        background:linear-gradient(135deg,var(--neon),var(--accent));
+        display:flex;align-items:center;justify-content:center;
+        font-weight:900;color:#001219;font-size:24px}
   .left h3{margin-top:12px;color:var(--neon);font-size:18px}
+
   @keyframes bp{from{transform:translateY(0)}to{transform:translateY(-6px)}}
 
-  /* main */
-  .main { flex:1; display:flex;flex-direction:column;gap:12px;align-items:center }
-  .playerWrap{ width:100%; max-width:1100px; position:relative; border-radius:12px; padding:10px; background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0.01)); box-shadow:0 12px 40px rgba(0,0,0,0.6) }
-  .playerWrap::before{ content:""; position:absolute; inset:0; border-radius:12px; padding:2px;
-    background:conic-gradient(from 180deg at 50% 50%, var(--neon), var(--accent));
-    -webkit-mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
-    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; filter:blur(12px); opacity:.9; }
+  .main{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px}
+  
+  .playerWrap{
+    width:100%;max-width:1100px;position:relative;
+    border-radius:12px;padding:10px;
+    background:rgba(255,255,255,0.02);
+    box-shadow:0 12px 40px rgba(0,0,0,0.6);
+  }
 
-  /* plyr container */
-  .plyr__video-embed, video.plyr__video {
-    border-radius:10px;
-    background:#000;
-    width:100%;
+  .playerWrap::before{
+    content:"";position:absolute;inset:0;border-radius:12px;padding:2px;
+    background:conic-gradient(from 180deg,var(--neon),var(--accent));
+    -webkit-mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    pointer-events:none;filter:blur(12px);opacity:.9;
+  }
+
+  video.plyr__video{
+    width:100%;border-radius:10px;background:#000;
     max-height:72vh;
   }
 
-  /* top-right custom buttons (keeps visible in custom fullscreen) */
-  .frameButtons{ position:absolute; right:14px; top:12px; z-index:5; display:flex; gap:8px }
-  .btn{ background:rgba(255,255,255,0.04); border:none; color:var(--neon); padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700 }
+  .frameButtons{position:absolute;right:14px;top:12px;z-index:20;display:flex;gap:8px}
+  .btn{background:rgba(255,255,255,0.04);border:none;color:var(--neon);
+       padding:8px 10px;border-radius:8px;font-weight:700;cursor:pointer}
 
-  /* controls row (custom outside plyr) */
-  .controlsRow{ width:100%; max-width:1100px; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:8px 10px }
-  .group{ display:flex; gap:10px; align-items:center; }
+  .controlsRow{width:100%;max-width:1100px;display:flex;justify-content:space-between;align-items:center;padding:8px}
+  .group{display:flex;gap:10px}
+  .custom{padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:#eafcff;font-weight:700}
 
-  select.custom, button.custom { padding:8px 12px; border-radius:8px; border:none; background:rgba(255,255,255,0.03); color:#eafcff; font-weight:700; }
+  .meta{text-align:center;color:#cfeefc;width:100%;max-width:1100px}
+  .meta a{color:var(--neon);font-weight:800;text-decoration:none}
 
-  /* metadata and credits */
-  .meta{ width:100%; max-width:1100px; text-align:center; color:#cfeefc; padding-top:6px }
-  .meta a{ color:var(--neon); text-decoration:none; font-weight:800 }
+  .ram{font-size:36px;color:red;font-weight:900;text-shadow:0 0 12px red,0 0 28px red;}
+  
+  .popupOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);
+                display:flex;align-items:center;justify-content:center;z-index:99999}
+  .popupCard{background:#0b0b0d;padding:24px;border-radius:14px;width:92%;max-width:420px;text-align:center;border:1px solid rgba(139,51,255,0.14)}
 
-  /* Jai Shree Ram */
-  .ram{ font-size:36px; margin-top:8px; color:red; text-shadow:0 0 12px red,0 0 28px #ff2222; font-weight:900 }
+  .spinner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+           width:50px;height:50px;border-radius:999px;border:5px solid rgba(255,255,255,0.1);
+           border-top-color:var(--neon);animation:spin 1s linear infinite;display:none;z-index:50}
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 
-  /* popup */
-  .popupOverlay{ position:fixed; inset:0; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; z-index:99999 }
-  .popupCard{ background:#0b0b0d; padding:24px; border-radius:14px; width:92%; max-width:420px; text-align:center; border:1px solid rgba(139,51,255,0.14) }
-
-  /* spinner (center of video) */
-  .spinner{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:999px; border:5px solid rgba(255,255,255,0.06); border-top-color:var(--neon); animation:spin 1s linear infinite; display:none; z-index:6 }
-  @keyframes spin{ to{ transform:translate(-50%,-50%) rotate(360deg) } }
-
-  /* responsive */
-  @media (max-width:900px){ .left{display:none} .ram{font-size:28px} .controlsRow{flex-direction:column; align-items:stretch} }
+  @media(max-width:900px){
+    .left{display:none}
+    .ram{font-size:28px}
+    .controlsRow{flex-direction:column;gap:10px}
+  }
 </style>
 </head>
 <body>
 
-<!-- Plyr script (after CSS) -->
-<!-- Hls.js + Plyr.js -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.min.js"></script>
 
-<div class="app" role="application">
+<div class="app">
 
-  <!-- left brand -->
-  <aside class="left" aria-hidden="true">
+  <aside class="left">
     <div class="logo">DC</div>
     <h3>DevCoderz</h3>
   </aside>
 
-  <!-- main -->
   <main class="main">
 
-    <!-- popup (join required) -->
-    <div id="popup" class="popupOverlay" role="dialog" aria-modal="true">
+    <div id="popup" class="popupOverlay">
       <div class="popupCard">
-        <h2 style="color:var(--neon);margin:0 0 8px">🔔 Lecture unlock karne ke liye Telegram join karein</h2>
-        <p style="color:var(--muted);font-size:15px;line-height:1.4;margin-bottom:14px">
-          Other lectures aur resources ke liye hamara Telegram join karein.
-        </p>
-
-        <!-- 2 lines gap -->
+        <h2 style="color:var(--neon);">🔔 Lecture unlock ke liye Telegram join karein</h2>
+        <p style="color:var(--muted);">Other lectures & resources ke liye Telegram join karein.</p>
         <div style="height:18px"></div>
 
-        <a id="joinLink" class="popupJoin" href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener"
-           style="display:inline-block;padding:12px 18px;border-radius:10px;background:var(--neon);color:#001219;font-weight:800;text-decoration:none;margin-bottom:12px">
-          Join Telegram
+        <a href="https://t.me/+QVhljL_D32RlOTg1"
+           style="display:inline-block;padding:12px 18px;border-radius:10px;background:var(--neon);color:#001219;font-weight:900;text-decoration:none;">
+           Join Telegram
         </a>
-        <br>
-        <button id="popupSkip" class="popupSkip" style="margin-top:12px;padding:10px 14px;border-radius:8px;background:#222;color:#fff;border:none;cursor:pointer">
+
+        <br><br>
+        <button id="popupSkip" style="padding:10px 14px;border-radius:8px;background:#222;color:#fff;border:none;cursor:pointer">
           I Have Joined / Skip
         </button>
       </div>
     </div>
 
-    <!-- player area -->
-    <div class="playerWrap" aria-label="Video player container">
+    <div class="playerWrap">
+      <div class="spinner" id="spinner"></div>
 
-      <div class="spinner" id="spinner" aria-hidden="true"></div>
-
-      <div class="frameButtons" aria-hidden="true">
-        <button id="customFull" class="btn" aria-label="Custom fullscreen">⛶</button>
-        <button id="nativeFull" class="btn" aria-label="Browser fullscreen">⤢</button>
+      <div class="frameButtons">
+        <button id="customFull" class="btn">⛶</button>
+        <button id="nativeFull" class="btn">⤢</button>
       </div>
 
-      <!-- Plyr video element -->
-      <!-- We will attach hls.js programmatically for m3u8 -->
-      <video id="plyrVideo" class="plyr__video-embed" playsinline controls crossorigin></video>
+      <video id="videoElement" class="plyr__video" playsinline controls></video>
     </div>
 
-    <!-- controls row (outside plyr) -->
-    <div class="controlsRow" role="toolbar" aria-label="Player controls">
+    <div class="controlsRow">
       <div class="group">
         <button id="btnPlay" class="custom">Play</button>
         <button id="btnPause" class="custom">Pause</button>
@@ -138,12 +138,12 @@
         <button id="btnMute" class="custom">Mute</button>
       </div>
 
-      <div class="group" aria-label="Settings">
-        <label style="color:var(--muted);font-weight:800">Quality</label>
-        <select id="qualitySel" class="custom" aria-label="Quality selector"><option>Auto</option></select>
+      <div class="group">
+        <label>Quality</label>
+        <select id="qualitySel" class="custom"><option>Auto</option></select>
 
-        <label style="color:var(--muted);font-weight:800;margin-left:8px">Speed</label>
-        <select id="speedSel" class="custom" aria-label="Speed selector">
+        <label>Speed</label>
+        <select id="speedSel" class="custom">
           <option value="0.25">0.25x</option>
           <option value="0.5">0.5x</option>
           <option value="0.75">0.75x</option>
@@ -161,189 +161,154 @@
       </div>
     </div>
 
-    <!-- meta -->
     <div class="meta">
-      Developer – <b>PT. Devansh Sharma</b> &nbsp; • &nbsp;
-      Telegram: <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener">Join Channel</a>
+      Developer – <b>PT. Devansh Sharma</b> •  
+      <a href="https://t.me/+QVhljL_D32RlOTg1">Join Telegram</a>
     </div>
 
-    <div class="ram" aria-hidden="true">जय श्री राम</div>
+    <div class="ram">जय श्री राम</div>
+
   </main>
 </div>
 
 <script>
-/* ====== Setup: get video URL (supports encoded or plaintext) ====== */
-const params = new URLSearchParams(location.search || '');
-let rawUrl = params.get('Url') || '';
-try { rawUrl = rawUrl ? decodeURIComponent(rawUrl) : ''; } catch(e){ /* ignore */ }
-const VIDEO_URL = rawUrl || ''; // required
+let params=new URLSearchParams(location.search);
+let raw=params.get("Url")||"";
+try{raw=decodeURIComponent(raw)}catch(e){}
+const VIDEO_URL=raw;
 
-/* ====== Plyr init ====== */
-const playerElement = document.getElementById('plyrVideo');
+const video=document.getElementById("videoElement");
+const spinner=document.getElementById("spinner");
+const qualitySel=document.getElementById("qualitySel");
+const speedSel=document.getElementById("speedSel");
 
-/* create a real <video> element inside plyr container (plyr expects either iframe/embed or video tag) */
-const videoTag = document.createElement('video');
-videoTag.setAttribute('id','videoElement');
-videoTag.setAttribute('playsinline','');
-videoTag.setAttribute('controls','');
-videoTag.className = 'plyr__video';
-playerElement.replaceWith(videoTag); // replace placeholder with actual video tag
+const plyr=new Plyr(video,{controls:['play','progress','current-time','mute','volume','settings','fullscreen'],settings:['quality','speed']});
 
-// initialize Plyr
-const plyr = new Plyr(videoTag, {
-  controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
-  settings: ['quality','speed'],
-  i18n: { restart: 'Restart', rewind: 'Rewind 10 seconds' }
-});
+let hls=null;
 
-/* ===== HLS attach and quality population ===== */
-let hls = null;
-const qualitySel = document.getElementById('qualitySel');
-const speedSel = document.getElementById('speedSel');
-const spinner = document.getElementById('spinner');
+function loadHls(url){
+  if(hls){try{hls.destroy()}catch(e){}}
+  if(Hls.isSupported()){
+    hls=new Hls({capLevelToPlayerSize:true});
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));
 
-function attachHls(src){
-  if (!src) return;
-  // destroy previous
-  if (hls) { try { hls.destroy(); } catch(e){} hls = null; }
-  if (Hls.isSupported()){
-    hls = new Hls({capLevelToPlayerSize:true, maxBufferLength:30});
-    hls.attachMedia(videoTag);
-    hls.on(Hls.Events.MEDIA_ATTACHED, ()=> {
-      hls.loadSource(src);
-    });
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+      qualitySel.innerHTML="";
+      let a=document.createElement("option");
+      a.value=-1;a.text="Auto";qualitySel.appendChild(a);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, ()=> {
-      // gather levels
-      const levels = hls.levels.map((lv, idx)=>({
-        idx: idx,
-        height: lv?.attrs?.RESOLUTION ? parseInt(lv.attrs.RESOLUTION.split('x')[1]) : (lv.height||0),
-        bitrate: lv?.bitrate || 0
-      })).filter(l => l.height > 0);
-
-      // dedupe heights & sort
-      const map = new Map();
-      levels.forEach(l => { if (!map.has(l.height)) map.set(l.height,l); });
-      const uniq = Array.from(map.values()).sort((a,b)=>a.height-b.height);
-
-      // populate quality select (Auto + each height)
-      qualitySel.innerHTML = '';
-      const autoOpt = document.createElement('option'); autoOpt.value = -1; autoOpt.text = 'Auto'; qualitySel.appendChild(autoOpt);
-      uniq.forEach(l => {
-        const o = document.createElement('option'); o.value = l.idx; o.text = l.height + 'p'; qualitySel.appendChild(o);
+      let levels=hls.levels;
+      let used=new Set();
+      levels.forEach((lv,i)=>{
+        let h=lv.height||0;
+        if(h>0 && !used.has(h)){
+          used.add(h);
+          let o=document.createElement("option");
+          o.value=i;o.text=h+"p";
+          qualitySel.appendChild(o);
+        }
       });
     });
 
-    hls.on(Hls.Events.LEVEL_SWITCHED, (evt,data) => {
-      // reflect current level
-      // find option with value === data.level
-      const opt = [...qualitySel.options].find(o => Number(o.value) === data.level);
-      if (opt) opt.selected = true;
-    });
-
-    hls.on(Hls.Events.ERROR, (errType, data) => {
-      console.warn('HLS error', errType, data);
+    hls.on(Hls.Events.LEVEL_SWITCHED,(_,d)=>{
+      let opt=[...qualitySel.options].find(o=>Number(o.value)===d.level);
+      if(opt)opt.selected=true;
     });
 
   } else {
-    // native support fallback (Safari)
-    videoTag.src = src;
+    video.src=url;
   }
 }
 
-/* attach now */
-attachHls(VIDEO_URL);
+loadHls(VIDEO_URL);
 
-/* ===== Popup logic: block playback until skip ===== */
-const popup = document.getElementById('popup');
-const popupSkip = document.getElementById('popupSkip');
-popup.style.display = 'flex';
-videoTag.controls = true;
-videoTag.pause();
-popupSkip.addEventListener('click', ()=> {
-  popup.style.display = 'none';
-  videoTag.play().catch(()=>{ /* autoplay might be blocked */ });
-});
+/* popup */
+document.getElementById("popupSkip").onclick=()=>{
+  document.getElementById("popup").style.display="none";
+};
 
-/* ===== Controls wiring (custom) ===== */
-document.getElementById('btnPlay').addEventListener('click', ()=> videoTag.play());
-document.getElementById('btnPause').addEventListener('click', ()=> videoTag.pause());
-document.getElementById('btnBack').addEventListener('click', ()=> videoTag.currentTime = Math.max(0, videoTag.currentTime - 10));
-document.getElementById('btnFwd').addEventListener('click', ()=> videoTag.currentTime = Math.min((videoTag.duration||0), videoTag.currentTime + 10));
-document.getElementById('btnMute').addEventListener('click', ()=> {
-  videoTag.muted = !videoTag.muted;
-  document.getElementById('btnMute').textContent = videoTag.muted ? 'Unmute' : 'Mute';
-});
+/* custom controls */
+document.getElementById("btnPlay").onclick=()=>video.play();
+document.getElementById("btnPause").onclick=()=>video.pause();
+document.getElementById("btnBack").onclick=()=>video.currentTime-=10;
+document.getElementById("btnFwd").onclick=()=>video.currentTime+=10;
+document.getElementById("btnMute").onclick=()=>{
+  video.muted=!video.muted;
+  document.getElementById("btnMute").textContent=video.muted?"Unmute":"Mute";
+};
 
-/* speed selector */
-speedSel.addEventListener('change', ()=> {
-  const v = parseFloat(speedSel.value || 1);
-  videoTag.playbackRate = v;
-  // also update plyr's interface
-  try { plyr.speed = v; } catch(e){}
-});
+speedSel.onchange=()=>video.playbackRate=parseFloat(speedSel.value);
 
-/* quality selector */
-qualitySel.addEventListener('change', ()=> {
-  if (!hls) return;
-  const v = Number(qualitySel.value);
-  if (v === -1) {
-    hls.currentLevel = -1; // auto
-  } else {
-    hls.currentLevel = v;
+qualitySel.onchange=()=>{
+  if(hls){
+    let v=Number(qualitySel.value);
+    hls.currentLevel=v;
   }
-});
+};
 
-/* spinner show/hide */
-videoTag.addEventListener('waiting', ()=> spinner.style.display = 'block');
-videoTag.addEventListener('playing', ()=> spinner.style.display = 'none');
+/* spinner */
+video.addEventListener("waiting",()=>spinner.style.display="block");
+video.addEventListener("playing",()=>spinner.style.display="none");
 
-/* sync plyr UI with native events */
-videoTag.addEventListener('play', ()=> plyr.play());
-videoTag.addEventListener('pause', ()=> plyr.pause());
+/* custom fullscreen */
+const app=document.querySelector(".app");
+const left=document.querySelector(".left");
+let customFull=false;
 
-/* keyboard shortcuts */
-document.addEventListener('keydown', (e)=> {
-  if (e.code === 'Space') { e.preventDefault(); if (videoTag.paused) videoTag.play(); else videoTag.pause(); }
-  if (e.key === 'ArrowRight') videoTag.currentTime += 10;
-  if (e.key === 'ArrowLeft') videoTag.currentTime -= 10;
-});
+document.getElementById("customFull").onclick=()=>{
+  if(!customFull){
+    app.style.position="fixed";
+    app.style.top="0";
+    app.style.left="0";
+    app.style.width="100vw";
+    app.style.height="100vh";
+    app.style.zIndex="99999";
+    app.style.background="#000";
+    app.style.padding="0";
+    app.style.overflow="hidden";
 
-/* custom fullscreen (keeps left brand) */
-const app = document.querySelector('.app');
-const left = document.querySelector('.left');
-let customFull = false;
-document.getElementById('customFull').addEventListener('click', ()=> {
-  if (!customFull){
-    app.style.position = 'fixed'; app.style.inset = '0'; app.style.zIndex = 99999; app.style.padding='28px';
-    videoTag.style.height = '86vh'; videoTag.style.width = 'calc(100% - 260px)'; videoTag.style.maxWidth='none';
-    left.style.display = 'flex';
-    customFull = true;
+    left.style.display="flex";
+    left.style.height="100vh";
+    left.style.minWidth="200px";
+
+    video.style.width="100%";
+    video.style.height="100vh";
+    video.style.maxHeight="100vh";
+    video.style.objectFit="contain";
+
+    customFull=true;
   } else {
-    app.style.position = ''; app.style.inset = ''; app.style.zIndex = ''; app.style.padding='';
-    videoTag.style.height = ''; videoTag.style.width=''; videoTag.style.maxWidth='';
-    customFull = false;
+    app.style.position="";
+    app.style.top="";
+    app.style.left="";
+    app.style.width="";
+    app.style.height="";
+    app.style.zIndex="";
+    app.style.background="";
+    app.style.padding="";
+    app.style.overflow="";
+
+    left.style.display="";
+    left.style.height="";
+    left.style.minWidth="";
+
+    video.style.width="";
+    video.style.height="";
+    video.style.maxHeight="";
+    video.style.objectFit="";
+
+    customFull=false;
   }
-});
+};
 
-/* native fullscreen button */
-document.getElementById('nativeFull').addEventListener('click', async ()=> {
-  try {
-    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
-    else await document.exitFullscreen();
-  } catch(e){}
-});
-
-/* Plyr settings: ensure plyr settings show speed & quality options in menu if desired */
-plyr.on('ready', ()=> {
-  // set initial speed selection from plyr
-  try { speedSel.value = String(videoTag.playbackRate || 1); } catch(e){}
-});
-
-/* accessibility & fallback */
-if (!VIDEO_URL) {
-  alert('No video URL provided. Use player.html?Url=THE_M3U8_LINK (encoded if needed).');
-}
+/* native fullscreen */
+document.getElementById("nativeFull").onclick=async()=>{
+  if(!document.fullscreenElement)
+    await document.documentElement.requestFullscreen();
+  else
+    await document.exitFullscreen();
+};
 </script>
 
 </body>
