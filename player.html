@@ -1,135 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>DevCoderz Player</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevCoderz Player</title>
 
-<!-- HLS Support -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-<style>
+  <style>
     body {
-        background: #000;
-        color: white;
-        font-family: Arial;
-        margin: 0;
-        padding: 20px;
-        text-align: center;
-    }
-
-    .player-box {
-        width: 90%;
-        max-width: 900px;
-        margin: auto;
-        padding: 15px;
-        border-radius: 18px;
-        box-shadow: 0 0 25px #00f2ff;
-        background: #111;
+      background: #000;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      color: white;
+      font-family: Arial, sans-serif;
     }
 
     video {
-        width: 100%;
-        border-radius: 12px;
-        outline: none;
+      width: 100%;
+      height: 80vh;
+      background: #111;
     }
 
-    .control-row {
-        margin-top: 15px;
-        display: flex;
-        justify-content: center;
-        gap: 12px;
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background: #111;
     }
 
-    select, button {
-        padding: 10px 15px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: none;
-        font-weight: bold;
+    select {
+      padding: 6px;
+      border-radius: 5px;
     }
+  </style>
 
-    .ram {
-        font-size: 32px;
-        margin-top: 25px;
-        color: red;
-        text-shadow: 0 0 20px red, 0 0 40px orange;
-        font-weight: bold;
-    }
-</style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 
-<div class="player-box">
+  <video id="video" controls></video>
 
-    <h2 style="margin-bottom:10px;">🔥 DevCoderz Premium Player</h2>
+  <div class="controls">
+    <span>Playback Speed:</span>
 
-    <video id="video" controls></video>
+    <select id="speed">
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="1.75">1.75x</option>
+      <option value="2">2x</option>
+      <option value="2.25">2.25x</option>
+      <option value="2.5">2.5x</option>
+    </select>
+  </div>
 
-    <!-- Controls -->
-    <div class="control-row">
-
-        <!-- SPEED MENU -->
-        <select id="speedMenu" onchange="setSpeed(this.value)">
-            <option value="0.25">0.25x</option>
-            <option value="0.5">0.5x</option>
-            <option value="0.75">0.75x</option>
-            <option value="1" selected>1x (Normal)</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="1.75">1.75x</option>
-            <option value="2">2x</option>
-            <option value="2.25">2.25x</option>
-            <option value="2.5">2.5x</option>
-            <option value="3">3x</option>
-            <option value="3.5">3.5x</option>
-            <option value="4">4x</option>
-        </select>
-
-        <!-- FULLSCREEN -->
-        <button onclick="fullscreen()">Fullscreen</button>
-    </div>
-
-    <!-- Developer Info -->
-    <p style="margin-top:18px;font-size:17px;">
-        Developer – <b>PT. Devansh Sharma</b>
-    </p>
-
-    <p>
-        Join Telegram:
-        <a href="https://t.me/+QVhljL_D32RlOTg1" style="color:#00eaff;">Click Here</a>
-    </p>
-
-    <!-- JAI SHREE RAM GLOW -->
-    <div class="ram">॥ जय श्री राम ॥</div>
-
-</div>
-
-<!-- SCRIPT LOGIC -->
 <script>
-    const video = document.getElementById("video");
+  const urlParams = new URLSearchParams(window.location.search);
+  const videoUrl = urlParams.get("Url");
+  const video = document.getElementById("video");
+  const speed = document.getElementById("speed");
 
-    // Load URL from query parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const fileURL = urlParams.get("Url");
+  // Load HLS
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(videoUrl);
+    hls.attachMedia(video);
+  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = videoUrl;
+  }
 
-    // HLS Loader
-    if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(fileURL);
-        hls.attachMedia(video);
-    } else {
-        video.src = fileURL;
-    }
-
-    // SPEED CHANGE
-    function setSpeed(v) {
-        video.playbackRate = parseFloat(v);
-    }
-
-    // FULLSCREEN
-    function fullscreen() {
-        if (video.requestFullscreen) video.requestFullscreen();
-    }
+  // Speed control
+  speed.addEventListener("change", () => {
+    video.playbackRate = parseFloat(speed.value);
+  });
 </script>
 
 </body>
