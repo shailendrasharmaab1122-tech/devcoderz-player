@@ -3,371 +3,245 @@
 <head>
 <meta charset="UTF-8">
 <title>DevCoderz Player</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- Video.js CDN -->
-<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-    background: #000;
-    margin: 0;
-    font-family: Poppins, sans-serif;
-    color: white;
-}
+    body {
+        margin: 0;
+        background: black;
+        font-family: Arial, sans-serif;
+        color: white;
+    }
 
-/* Video Frame Neon Border */
-#videoContainer {
-    margin: 20px;
-    border: 3px solid #00eaff;
-    box-shadow: 0 0 25px #00eaffaa;
-    border-radius: 18px;
-    padding: 10px;
-    position: relative;
-}
+    .container {
+        width: 98%;
+        max-width: 950px;
+        margin: auto;
+        margin-top: 25px;
+    }
 
-/* DevCoderz Watermark */
-#watermark {
-    position: absolute;
-    top: 10px;
-    left: 12px;
-    font-size: 18px;
-    font-weight: 700;
-    color: #00eaff;
-    text-shadow: 0 0 10px #00eaff;
-    z-index: 9999;
-}
+    .neon-frame {
+        border: 2px solid #a855f7;
+        padding: 10px;
+        border-radius: 16px;
+        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
+    }
 
-/* Glow Jai Shree Ram inside player */
-#ramTop {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 22px;
-    font-weight: 900;
-    color: #ff7b00;
-    text-shadow: 0 0 15px #ff7b00;
-    animation: ramPulse 1.5s infinite;
-    z-index: 9999;
-}
-@keyframes ramPulse {
-    0% { text-shadow: 0 0 10px #ff7b00; }
-    50% { text-shadow: 0 0 25px #ff9b42; }
-    100% { text-shadow: 0 0 10px #ff7b00; }
-}
+    video {
+        width: 100%;
+        border-radius: 14px;
+        background: #000;
+    }
 
-/* Speed menu button */
-.vjs-menu-button-popup .vjs-menu {
-    background: #111;
-    border: 1px solid #00eaff;
-    border-radius: 8px;
-}
+    .dev-anim {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #a855f7;
+        animation: glow 1.5s infinite alternate;
+        z-index: 50;
+        pointer-events: none;
+    }
 
-/* Popup Overlay */
-#tgPopupOverlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999999;
-    backdrop-filter: blur(4px);
-}
+    @keyframes glow {
+        from { text-shadow: 0 0 10px #a855f7; }
+        to   { text-shadow: 0 0 25px #9333ea; }
+    }
 
-#tgPopup {
-    width: 85%;
-    max-width: 380px;
-    background: white;
-    color: black;
-    padding: 20px;
-    border-radius: 16px;
-    text-align: center;
-    border: 2px solid #00eaff;
-    box-shadow: 0 0 20px #00eaffaa;
-    animation: popFade .4s ease;
-}
+    .credit {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 20px;
+        color: #a855f7;
+    }
 
-@keyframes popFade {
-    from { opacity: 0; transform: scale(.7); }
-    to   { opacity: 1; transform: scale(1); }
-}
+    /* POPUP */
+    #join-popup {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+    }
 
-#joinBtn {
-    display: inline-block;
-    background: #0088cc;
-    color: white;
-    padding: 12px 18px;
-    font-weight: 700;
-    border-radius: 10px;
-    margin-top: 12px;
-    text-decoration: none;
-}
+    .popup-card {
+        background: #111;
+        padding: 30px;
+        border-radius: 20px;
+        width: 85%;
+        max-width: 380px;
+        text-align: center;
+        border: 1px solid #a855f7;
+        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
+    }
 
-#skipBtn {
-    margin-top: 10px;
-    background: transparent;
-    border: none;
-    color: #444;
-    font-size: 16px;
-    text-decoration: underline;
-}
+    .popup-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        background: #9333ea;
+        border: none;
+        color: white;
+        font-size: 17px;
+        margin-top: 20px;
+    }
 
-/* Developer Section */
-.dev-box {
-    width: 90%;
-    margin: 20px auto;
-    padding: 20px;
-    background: rgba(0,0,0,0.35);
-    border-radius: 18px;
-    border: 2px solid #00eaff;
-    box-shadow: 0 0 20px #00eaff88;
-    text-align: center;
-}
-.dev-title {
-    font-size: 23px;
-    font-weight: 700;
-    color: #00eaff;
-    text-shadow: 0 0 20px #00eaff;
-}
-.ram-glow {
-    font-size: 28px;
-    color: #ff7b00;
-    text-shadow: 0 0 25px #ff7b00;
-    font-weight: 900;
-}
-.tg-btn {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 12px 20px;
-    background: #0088cc;
-    color: white;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 600;
-}
+    .skip-btn {
+        background: #444;
+        margin-top: 25px;
+    }
+
+    @keyframes ramglow {
+        from { text-shadow: 0 0 15px red; }
+        to   { text-shadow: 0 0 40px #ff2222; }
+    }
 </style>
 </head>
 <body>
-<!-- ================= PART-2: VIDEO MARKUP + CONTROLS + SCRIPTS ================= -->
 
-<!-- Video container (fills the neon frame from PART-1 CSS) -->
-<div id="videoContainer">
-    <div id="watermark">DevCoderz</div>
-    <div id="ramTop">🚩 जय श्री राम 🚩</div>
+<div class="dev-anim">DevCoderz</div>
 
-    <!-- Video.js player element -->
-    <video
-      id="vjsPlayer"
-      class="video-js vjs-default-skin"
-      controls
-      preload="auto"
-      playsinline
-      data-setup='{}'
-      ></video>
+<!-- POPUP -->
+<div id="join-popup">
+    <div class="popup-card">
+        <h2 style="color:#d8b4fe; font-size:26px; margin-bottom:15px;">Join Telegram</h2>
 
-    <!-- Small controls (Quality + Speed) placed visually under the player -->
-    <div style="display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:10px;">
-        <label style="color:#cfeefc;font-weight:700;">Quality:</label>
-        <select id="qualitySelect" style="padding:6px;border-radius:8px;background:#0b0b0d;color:#fff;">
-            <option value="-1">Auto</option>
-        </select>
+        <p style="font-size:17px;">
+            Other lectures dekhne ke liye<br>
+            hamare Telegram channel ko join kare.
+        </p>
 
-        <label style="color:#cfeefc;font-weight:700;margin-left:8px;">Speed:</label>
-        <select id="speedSelect" style="padding:6px;border-radius:8px;background:#0b0b0d;color:#fff;">
+        <br><br>
+
+        <a href="https://t.me/+QVhljL_D32RlOTg1" class="popup-btn">Join Telegram</a>
+
+        <button id="skip-btn" class="popup-btn skip-btn">Skip</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="neon-frame">
+        <video id="video" controls playsinline></video>
+    </div>
+
+    <!-- Speed + Quality Menu -->
+    <div style="margin-top:25px; text-align:center;">
+
+        <!-- SPEED -->
+        <label style="font-size:20px; margin-right:10px; color:#c084fc;">Speed:</label>
+        <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
             <option value="0.5">0.5x</option>
-            <option value="0.75">0.75x</option>
-            <option value="1" selected>1x</option>
-            <option value="1.25">1.25x</option>
+            <option value="1" selected>1x (Normal)</option>
             <option value="1.5">1.5x</option>
-            <option value="1.75">1.75x</option>
             <option value="2">2x</option>
-            <option value="2.25">2.25x</option>
-            <option value="2.5">2.5x</option>
             <option value="3">3x</option>
-            <option value="3.5">3.5x</option>
             <option value="4">4x</option>
         </select>
+
+        <!-- QUALITY -->
+        <label style="font-size:20px; margin-left:25px; color:#c084fc;">Quality:</label>
+        <select id="qualityMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="auto" selected>Auto</option>
+            <option value="360">360p</option>
+            <option value="480">480p</option>
+            <option value="720">720p</option>
+            <option value="1080">1080p</option>
+        </select>
+
     </div>
+
+    <!-- Developer Credit -->
+    <div class="credit">
+        Developer – PT. Devansh Sharma
+    </div>
+
+    <br><br>
+
+    <!-- जय श्री राम -->
+    <div style="
+        text-align:center;
+        font-size:34px;
+        font-weight:bold;
+        color:red;
+        animation: ramglow 1.4s infinite alternate;
+    ">
+        जय श्री राम 🚩
+    </div>
+
+    <!-- Telegram Link -->
+    <div style="text-align:center; margin-top:15px;">
+        <a href="https://t.me/+QVhljL_D32RlOTg1"
+           style="color:#60a5fa; font-size:20px; text-decoration:none;">
+           👉 हमारी Telegram Classes Join करें
+        </a>
+    </div>
+
 </div>
 
-<!-- Popup (markup) -->
-<div id="tgPopupOverlay" aria-hidden="false" role="dialog">
-  <div id="tgPopup" role="document">
-    <h2>Join Telegram Channel</h2>
-    <p>For more updates, notes, and discussion</p>
+<!-- HLS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-    <a id="joinBtn" href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener">👉 Click here to join Telegram channel</a>
-
-    <div>
-      <button id="skipBtn">Skip</button>
-    </div>
-  </div>
-</div>
-
-<!-- Debug / error area (hidden unless error) -->
-<div id="playerError" style="display:none; max-width:1100px; margin:12px auto; background:#2b0000; color:#ffb3b3; padding:10px; border-radius:8px;"></div>
-
-<!-- Scripts: HLS + Video.js already loaded in PART-1 head; now initialize -->
 <script>
-(function(){
-  // --- config & elements ---
-  const params = new URLSearchParams(location.search || '');
-  let raw = params.get('Url') || '';
-  try { raw = raw ? decodeURIComponent(raw) : ''; } catch(e){}
-  const VIDEO_URL = raw || '';
+    const video = document.getElementById("video");
 
-  const qualitySelect = document.getElementById('qualitySelect');
-  const speedSelect = document.getElementById('speedSelect');
-  const popup = document.getElementById('tgPopupOverlay');
-  const skipBtn = document.getElementById('skipBtn');
-  const playerError = document.getElementById('playerError');
+    // URL Fix — Normal + Encoded dono
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoURL = decodeURIComponent(urlParams.get("Url"));
 
-  function dbg(msg){ console.log('[PLAYER]', msg); }
-
-  if (!VIDEO_URL) {
-    playerError.style.display = 'block';
-    playerError.textContent = 'No video URL provided. Use ?Url=<m3u8>';
-    throw new Error('No video URL');
-  }
-
-  // Initialize video.js player
-  const vjsPlayer = videojs('vjsPlayer', {
-    fluid: true,
-    controls: true,
-    preload: 'auto',
-    html5: {
-      hls: { overrideNative: true }
-    },
-    controlBar: {
-      volumePanel: { inline: false }
-    }
-  });
-
-  // HLS attach using hls.js for robust quality control
-  let hls = null;
-
-  function showErrorBox(msg){
-    playerError.style.display = 'block';
-    playerError.textContent = msg;
-    dbg('ERROR: ' + msg);
-  }
-
-  function attachHls(src){
-    if (hls) { try { hls.destroy(); } catch(e){} hls = null; }
-    if (Hls.isSupported()){
-      hls = new Hls({capLevelToPlayerSize:true, maxBufferLength:60, debug:false});
-      hls.on(Hls.Events.ERROR, function(event, data){
-        dbg('HLS ERROR: ' + JSON.stringify(data));
-        if (data && data.response && data.response.code) {
-          dbg('HTTP code: ' + data.response.code);
-        }
-        // friendly messages for common cases
-        if (data && data.details && (data.details.includes('manifestLoadError') || data.details.includes('levelLoadError') || data.details.includes('fragLoadError'))) {
-          showErrorBox('Playback error: manifest or segments failed to load. Likely CORS / 403 / token expired.');
-        }
-      });
-
-      hls.on(Hls.Events.MANIFEST_PARSED, function(){
-        dbg('Manifest parsed, levels: ' + (hls.levels ? hls.levels.length : 0));
-        populateQualityOptions();
-      });
-
-      hls.attachMedia(vjsPlayer.tech_.el_);
-      hls.loadSource(src);
+    // HLS Player
+    let hls;
+    if (Hls.isSupported()) {
+        hls = new Hls({
+            maxMaxBufferLength: 60,
+            enableWorker: true
+        });
+        hls.loadSource(videoURL);
+        hls.attachMedia(video);
     } else {
-      // fallback: let video.js use native HLS (Safari)
-      vjsPlayer.src({ src: src, type: 'application/vnd.apple.mpegurl' });
+        video.src = videoURL;
     }
-  }
 
-  // Populate quality select from hls.levels (unique heights)
-  function populateQualityOptions(){
-    if (!hls || !hls.levels) return;
-    const levels = hls.levels;
-    const map = new Map();
-    levels.forEach((lv, idx) => {
-      const h = lv.height || 0;
-      if (h > 0 && !map.has(h)) map.set(h, {idx, height:h});
-    });
-    // sort ascending
-    const arr = Array.from(map.values()).sort((a,b)=>a.height-b.height);
-    // reset select but keep Auto
-    qualitySelect.innerHTML = '<option value="-1">Auto</option>';
-    arr.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item.idx;
-      opt.textContent = item.height + 'p';
-      qualitySelect.appendChild(opt);
-    });
-    dbg('Quality options populated: ' + arr.map(a => a.height).join(','));
-  }
+    // POPUP
+    const popup = document.getElementById("join-popup");
+    const skipBtn = document.getElementById("skip-btn");
 
-  // Quality change handler
-  qualitySelect.addEventListener('change', function(){
-    const v = Number(this.value);
-    if (!hls) return;
-    if (v === -1) {
-      hls.currentLevel = -1; // auto
-      dbg('Quality set to Auto');
-    } else {
-      hls.currentLevel = v;
-      dbg('Quality forced to level index ' + v);
-    }
-  });
+    window.onload = () => {
+        popup.style.display = "flex";
+        video.pause();
+    };
 
-  // Speed handler (applies to video element)
-  speedSelect.addEventListener('change', function(){
-    const s = Number(this.value);
-    try {
-      vjsPlayer.playbackRate(s);
-      dbg('Playback speed set to ' + s);
-    } catch(e){ dbg('Speed set error: '+e); }
-  });
+    skipBtn.onclick = () => {
+        popup.style.display = "none";
+        video.play();
+    };
 
-  // Fullscreen resize fix: ensure player fills correctly
-  document.addEventListener('fullscreenchange', function(){
-    setTimeout(()=> {
-      try {
-        vjsPlayer.requestFullscreen && dbg('fullscreen state changed');
-        // video.js handles resizing internally; just trigger a fluid resize
-        vjsPlayer.fluid(true);
-      } catch(e){}
-    }, 150);
-  });
-
-  // Popup skip
-  skipBtn.addEventListener('click', function(){
-    popup.style.display = 'none';
-    // Try autoplay if allowed
-    vjsPlayer.play().catch(()=>{ dbg('Autoplay blocked; user interaction required'); });
-  });
-
-  // Try attach HLS
-  attachHls(VIDEO_URL);
-
-  // helpful debug: fetch manifest headers too (CORS visibility)
-  fetch(VIDEO_URL, { method:'GET', mode:'cors' })
-    .then(r => {
-      dbg('Manifest fetch status: ' + r.status + ' ' + r.statusText);
-      // log headers (will show CORS header presence)
-      const headers = Array.from(r.headers.entries()).map(h=>h.join(': ')).join('\n');
-      dbg('Manifest headers:\n' + headers);
-      if (!r.ok) {
-        showErrorBox('Manifest fetch returned ' + r.status + '. Video host may block playback (signed URL or CORS).');
-      }
-    })
-    .catch(err => {
-      dbg('Manifest fetch failed: ' + err);
-      showErrorBox('Manifest fetch failed (possible CORS or network error). Check console for details.');
+    // SPEED CONTROL
+    document.getElementById("speedMenu").addEventListener("change", function() {
+        video.playbackRate = Number(this.value);
     });
 
-  // If user wants, they can copy debug logs; ensure console prints too
-  dbg('Player initialized. If video does not play, copy console output & manifest fetch status and send to provider.');
+    // QUALITY CONTROL (Auto + Manual)
+    document.getElementById("qualityMenu").addEventListener("change", function () {
+        if (!hls) return;
 
-})();
+        let q = this.value;
+
+        if (q === "auto") {
+            hls.currentLevel = -1;
+        } else {
+            hls.levels.forEach((level, index) => {
+                if (level.height == q) {
+                    hls.currentLevel = index;
+                }
+            });
+        }
+    });
 </script>
 
-<!-- ================= END PART-2 ================= -->
+</body>
+</html>
