@@ -2,274 +2,92 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DevCoderz Player</title>
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+
+<!-- Plyr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3/dist/plyr.css" />
 
 <style>
-    body{
-        background:#000;
-        margin:0;
-        padding:0;
-        font-family:Arial;
+    body {
+        margin: 0;
+        background: #000;
+        font-family: Arial, sans-serif;
+    }
+    #playerContainer {
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        background: black;
     }
 
-    .app{
-        display:flex;
-        gap:10px;
-        padding:15px;
+    .telegram-join {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 1000;
+        background: rgba(0,0,0,0.5);
+        padding: 8px 14px;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 14px;
+        text-decoration: none;
+        border: 1px solid #ffffff30;
     }
 
-    .left{
-        width:220px;
-        padding:20px;
-        background:#111;
-        border:2px solid #0ff;
-        border-radius:15px;
-        text-align:center;
-    }
-
-    .left h2{
-        color:#0ff;
-    }
-
-    .player-area{
-        flex:1;
-    }
-
-    video{
-        width:100%;
-        max-height:70vh;
-        border:2px solid #0ff;
-        border-radius:12px;
-        background:#000;
-    }
-
-    .controls{
-        margin-top:15px;
-        display:flex;
-        gap:10px;
-        flex-wrap:wrap;
-    }
-
-    button{
-        background:#222;
-        color:white;
-        padding:10px 15px;
-        border-radius:8px;
-        border:1px solid #555;
-        font-size:15px;
-    }
-
-    .info{
-        margin-top:20px;
-        color:white;
-        font-size:18px;
-        text-align:center;
-    }
-
-    .info h3{
-        margin-bottom:5px;
-    }
-
-    .ram{
-        margin-top:15px;
-        font-size:28px;
-        color:red;
-        font-weight:bold;
-        text-shadow:0 0 10px red,0 0 25px red;
-    }
-
-    /* FULLSCREEN FIX */
-    @media(max-width:900px){
-      .left.full-hide{
-        display:none !important;
-      }
-    }
-
-    /* Popup */
-    #popup{
-        position:fixed;
-        inset:0;
-        background:rgba(0,0,0,0.9);
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        z-index:99999;
-    }
-
-    #popup-box{
-        background:#111;
-        padding:25px;
-        border-radius:12px;
-        border:2px solid #0ff;
-        text-align:center;
-        width:85%;
-        max-width:380px;
-    }
-
-    #popup button{
-        margin-top:20px;
-        background:#0ff;
-        color:#000;
-        font-weight:bold;
+    .telegram-join:hover {
+        background: rgba(255,255,255,0.25);
     }
 </style>
 </head>
-
 <body>
 
-<!-- POPUP -->
-<div id="popup">
-   <div id="popup-box">
-      <h2 style="color:#0ff">Join Telegram</h2>
-      <p style="color:white;font-size:17px;">Other lectures ke liye Telegram join kare.</p>
+<div id="playerContainer">
+    <a class="telegram-join" href="https://t.me/DevCoderz" target="_blank">
+        👉 Click here to join Telegram Channel
+    </a>
 
-      <br><br>
-
-      <a href="YOUR_TELEGRAM_LINK_HERE" target="_blank">
-         <button style="width:100%;padding:12px;">Join Telegram</button>
-      </a>
-
-      <button onclick="closePopup()" style="margin-top:25px;width:100%;padding:12px;">Skip</button>
-   </div>
+    <video id="player" controls playsinline></video>
 </div>
 
-<div class="app" id="app">
-    <div class="left" id="leftpanel">
-        <img src="https://i.ibb.co/fF3B1zC/dc.png" width="140">
-        <h2>DevCoderz</h2>
-    </div>
+<!-- Plyr JS -->
+<script src="https://cdn.jsdelivr.net/npm/plyr@3"></script>
 
-    <div class="player-area">
-        <video id="player" playsinline controls></video>
-
-        <div class="controls">
-
-            <!-- SPEED -->
-            <select id="speed" style="padding:10px;background:#111;color:white;">
-              <option value="0.5">0.5x</option>
-              <option value="1" selected>1x</option>
-              <option value="1.25">1.25x</option>
-              <option value="1.5">1.5x</option>
-              <option value="1.75">1.75x</option>
-              <option value="2">2x</option>
-              <option value="2.25">2.25x</option>
-              <option value="2.5">2.5x</option>
-              <option value="3">3x</option>
-              <option value="4">4x</option>
-            </select>
-
-            <!-- AUTO QUALITY -->
-            <select id="quality" style="padding:10px;background:#111;color:white;">
-              <option value="auto">Auto</option>
-            </select>
-
-            <button id="customFull">Fullscreen+</button>
-
-        </div>
-
-        <div class="info">
-            <h3>Developer – PT. Devansh Sharma</h3>
-            <a href="YOUR_TELEGRAM_LINK_HERE" target="_blank" style="color:#0ff;text-decoration:none;font-size:17px;">
-                Telegram: Join Here
-            </a>
-
-            <div class="ram">जय श्री राम</div>
-        </div>
-
-    </div>
-</div>
-
+<!-- HLS Support -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 
 <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoURL = urlParams.get("Url");
 
-function closePopup(){
-    document.getElementById("popup").style.display="none";
-}
-
-const urlParams = new URLSearchParams(window.location.search);
-const videoURL = urlParams.get("Url");
-
-const video = document.getElementById("player");
-let hls;
-
-if(Hls.isSupported()){
-    hls = new Hls({
-        maxMaxBufferLength:60
+    const video = document.getElementById('player');
+    const player = new Plyr(video, {
+        controls: [
+            'play', 'progress', 'current-time', 'mute', 'volume',
+            'settings', 'fullscreen'
+        ],
+        settings: ['quality', 'speed'],
     });
-    hls.loadSource(videoURL);
-    hls.attachMedia(video);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, function(event,data){
-        const q = document.getElementById("quality");
-        data.levels.forEach((lvl,i)=>{
-            let op = document.createElement("option");
-            op.value = i;
-            op.text = lvl.height + "p";
-            q.appendChild(op);
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoURL);
+        hls.attachMedia(video);
+
+        // Quality options
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            const levels = hls.levels.map((l, i) => ({ label: l.height + "p", value: i }));
+            player.config.quality = {
+                default: 0,
+                options: levels.map(l => l.value),
+                forced: true,
+                onChange: (q) => { hls.currentLevel = q; }
+            };
         });
-    });
 
-} else {
-    video.src = videoURL;
-}
-
-const plyrPlayer = new Plyr(video);
-
-document.getElementById("speed").onchange = function(){
-    plyrPlayer.speed = parseFloat(this.value);
-};
-
-document.getElementById("quality").onchange = function(){
-    if(this.value === "auto"){
-        hls.currentLevel = -1;
     } else {
-        hls.currentLevel = parseInt(this.value);
+        video.src = videoURL;
     }
-};
-
-/* CUSTOM FULLSCREEN */
-let customFull = false;
-const app = document.getElementById("app");
-const left = document.getElementById("leftpanel");
-
-document.getElementById("customFull").onclick = () => {
-    if (!customFull){
-
-        app.style.position = "fixed";
-        app.style.top = 0;
-        app.style.left = 0;
-        app.style.width = "100vw";
-        app.style.height = "100vh";
-        app.style.zIndex = "99999";
-        app.style.background = "#000";
-        app.style.padding = 0;
-        app.style.overflow = "hidden";
-
-        if (window.innerWidth < 900){
-            left.classList.add("full-hide");
-        }
-
-        video.style.width = "100%";
-        video.style.height = "100vh";
-        video.style.objectFit = "contain";
-
-        customFull = true;
-    }
-    else {
-
-        app.style = "";
-        left.classList.remove("full-hide");
-
-        video.style.width = "";
-        video.style.height = "";
-        video.style.objectFit = "";
-
-        customFull = false;
-    }
-};
 </script>
 
 </body>
