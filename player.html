@@ -151,3 +151,223 @@ body {
 </style>
 </head>
 <body>
+<!-- ================= PART-2: VIDEO MARKUP + CONTROLS + SCRIPTS ================= -->
+
+<!-- Video container (fills the neon frame from PART-1 CSS) -->
+<div id="videoContainer">
+    <div id="watermark">DevCoderz</div>
+    <div id="ramTop">🚩 जय श्री राम 🚩</div>
+
+    <!-- Video.js player element -->
+    <video
+      id="vjsPlayer"
+      class="video-js vjs-default-skin"
+      controls
+      preload="auto"
+      playsinline
+      data-setup='{}'
+      ></video>
+
+    <!-- Small controls (Quality + Speed) placed visually under the player -->
+    <div style="display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:10px;">
+        <label style="color:#cfeefc;font-weight:700;">Quality:</label>
+        <select id="qualitySelect" style="padding:6px;border-radius:8px;background:#0b0b0d;color:#fff;">
+            <option value="-1">Auto</option>
+        </select>
+
+        <label style="color:#cfeefc;font-weight:700;margin-left:8px;">Speed:</label>
+        <select id="speedSelect" style="padding:6px;border-radius:8px;background:#0b0b0d;color:#fff;">
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
+            <option value="2.25">2.25x</option>
+            <option value="2.5">2.5x</option>
+            <option value="3">3x</option>
+            <option value="3.5">3.5x</option>
+            <option value="4">4x</option>
+        </select>
+    </div>
+</div>
+
+<!-- Popup (markup) -->
+<div id="tgPopupOverlay" aria-hidden="false" role="dialog">
+  <div id="tgPopup" role="document">
+    <h2>Join Telegram Channel</h2>
+    <p>For more updates, notes, and discussion</p>
+
+    <a id="joinBtn" href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener">👉 Click here to join Telegram channel</a>
+
+    <div>
+      <button id="skipBtn">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Debug / error area (hidden unless error) -->
+<div id="playerError" style="display:none; max-width:1100px; margin:12px auto; background:#2b0000; color:#ffb3b3; padding:10px; border-radius:8px;"></div>
+
+<!-- Scripts: HLS + Video.js already loaded in PART-1 head; now initialize -->
+<script>
+(function(){
+  // --- config & elements ---
+  const params = new URLSearchParams(location.search || '');
+  let raw = params.get('Url') || '';
+  try { raw = raw ? decodeURIComponent(raw) : ''; } catch(e){}
+  const VIDEO_URL = raw || '';
+
+  const qualitySelect = document.getElementById('qualitySelect');
+  const speedSelect = document.getElementById('speedSelect');
+  const popup = document.getElementById('tgPopupOverlay');
+  const skipBtn = document.getElementById('skipBtn');
+  const playerError = document.getElementById('playerError');
+
+  function dbg(msg){ console.log('[PLAYER]', msg); }
+
+  if (!VIDEO_URL) {
+    playerError.style.display = 'block';
+    playerError.textContent = 'No video URL provided. Use ?Url=<m3u8>';
+    throw new Error('No video URL');
+  }
+
+  // Initialize video.js player
+  const vjsPlayer = videojs('vjsPlayer', {
+    fluid: true,
+    controls: true,
+    preload: 'auto',
+    html5: {
+      hls: { overrideNative: true }
+    },
+    controlBar: {
+      volumePanel: { inline: false }
+    }
+  });
+
+  // HLS attach using hls.js for robust quality control
+  let hls = null;
+
+  function showErrorBox(msg){
+    playerError.style.display = 'block';
+    playerError.textContent = msg;
+    dbg('ERROR: ' + msg);
+  }
+
+  function attachHls(src){
+    if (hls) { try { hls.destroy(); } catch(e){} hls = null; }
+    if (Hls.isSupported()){
+      hls = new Hls({capLevelToPlayerSize:true, maxBufferLength:60, debug:false});
+      hls.on(Hls.Events.ERROR, function(event, data){
+        dbg('HLS ERROR: ' + JSON.stringify(data));
+        if (data && data.response && data.response.code) {
+          dbg('HTTP code: ' + data.response.code);
+        }
+        // friendly messages for common cases
+        if (data && data.details && (data.details.includes('manifestLoadError') || data.details.includes('levelLoadError') || data.details.includes('fragLoadError'))) {
+          showErrorBox('Playback error: manifest or segments failed to load. Likely CORS / 403 / token expired.');
+        }
+      });
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function(){
+        dbg('Manifest parsed, levels: ' + (hls.levels ? hls.levels.length : 0));
+        populateQualityOptions();
+      });
+
+      hls.attachMedia(vjsPlayer.tech_.el_);
+      hls.loadSource(src);
+    } else {
+      // fallback: let video.js use native HLS (Safari)
+      vjsPlayer.src({ src: src, type: 'application/vnd.apple.mpegurl' });
+    }
+  }
+
+  // Populate quality select from hls.levels (unique heights)
+  function populateQualityOptions(){
+    if (!hls || !hls.levels) return;
+    const levels = hls.levels;
+    const map = new Map();
+    levels.forEach((lv, idx) => {
+      const h = lv.height || 0;
+      if (h > 0 && !map.has(h)) map.set(h, {idx, height:h});
+    });
+    // sort ascending
+    const arr = Array.from(map.values()).sort((a,b)=>a.height-b.height);
+    // reset select but keep Auto
+    qualitySelect.innerHTML = '<option value="-1">Auto</option>';
+    arr.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.idx;
+      opt.textContent = item.height + 'p';
+      qualitySelect.appendChild(opt);
+    });
+    dbg('Quality options populated: ' + arr.map(a => a.height).join(','));
+  }
+
+  // Quality change handler
+  qualitySelect.addEventListener('change', function(){
+    const v = Number(this.value);
+    if (!hls) return;
+    if (v === -1) {
+      hls.currentLevel = -1; // auto
+      dbg('Quality set to Auto');
+    } else {
+      hls.currentLevel = v;
+      dbg('Quality forced to level index ' + v);
+    }
+  });
+
+  // Speed handler (applies to video element)
+  speedSelect.addEventListener('change', function(){
+    const s = Number(this.value);
+    try {
+      vjsPlayer.playbackRate(s);
+      dbg('Playback speed set to ' + s);
+    } catch(e){ dbg('Speed set error: '+e); }
+  });
+
+  // Fullscreen resize fix: ensure player fills correctly
+  document.addEventListener('fullscreenchange', function(){
+    setTimeout(()=> {
+      try {
+        vjsPlayer.requestFullscreen && dbg('fullscreen state changed');
+        // video.js handles resizing internally; just trigger a fluid resize
+        vjsPlayer.fluid(true);
+      } catch(e){}
+    }, 150);
+  });
+
+  // Popup skip
+  skipBtn.addEventListener('click', function(){
+    popup.style.display = 'none';
+    // Try autoplay if allowed
+    vjsPlayer.play().catch(()=>{ dbg('Autoplay blocked; user interaction required'); });
+  });
+
+  // Try attach HLS
+  attachHls(VIDEO_URL);
+
+  // helpful debug: fetch manifest headers too (CORS visibility)
+  fetch(VIDEO_URL, { method:'GET', mode:'cors' })
+    .then(r => {
+      dbg('Manifest fetch status: ' + r.status + ' ' + r.statusText);
+      // log headers (will show CORS header presence)
+      const headers = Array.from(r.headers.entries()).map(h=>h.join(': ')).join('\n');
+      dbg('Manifest headers:\n' + headers);
+      if (!r.ok) {
+        showErrorBox('Manifest fetch returned ' + r.status + '. Video host may block playback (signed URL or CORS).');
+      }
+    })
+    .catch(err => {
+      dbg('Manifest fetch failed: ' + err);
+      showErrorBox('Manifest fetch failed (possible CORS or network error). Check console for details.');
+    });
+
+  // If user wants, they can copy debug logs; ensure console prints too
+  dbg('Player initialized. If video does not play, copy console output & manifest fetch status and send to provider.');
+
+})();
+</script>
+
+<!-- ================= END PART-2 ================= -->
