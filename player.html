@@ -250,3 +250,17 @@ Quality Menu -->
 
 </body>
 </html>
+const idmBtn = document.getElementById("idm-download");
+
+// Tumhare player me jo video URL load hota hai
+const videoURL = player.src || url;
+
+idmBtn.onclick = () => {
+    // Try open in 1DM
+    window.location.href = "idm://download/" + encodeURIComponent(videoURL);
+
+    // If not installed
+    setTimeout(() => {
+        window.location.href = "https://play.google.com/store/apps/details?id=idm.internet.download.manager";
+    }, 800);
+};
