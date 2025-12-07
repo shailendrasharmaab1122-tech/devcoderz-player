@@ -1,81 +1,453 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DevCoderz Player</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DevCoderz Premium Player</title>
 
-  <style>
-    body {
-      background: #000;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+<!-- HLS.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-    video {
-      width: 100%;
-      height: 80vh;
-      background: #111;
-    }
+<style>
+  :root{
+    --bg:#06060a;
+    --panel:#0f1114;
+    --neon:#00eaff;
+    --accent:#8b33ff;
+    --muted:#9aa4ad;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#020204,#0b0b10);font-family:Inter, Arial, sans-serif;color:#eafcff}
+  /* App layout */
+  #app{
+    display:flex;
+    gap:20px;
+    height:100vh;
+    padding:22px;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
 
-    .controls {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px;
-      background: #111;
-    }
+  /* Left brand/animation */
+  #leftBrand{
+    width:230px;
+    min-width:180px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    border:1px solid rgba(0,234,255,0.06);
+    animation:brandPulse 3s ease-in-out infinite alternate;
+  }
+  .logoCircle{
+    width:110px;height:110px;border-radius:999px;background:linear-gradient(135deg,var(--neon),var(--accent));
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#001219;font-size:28px;
+    box-shadow: 0 6px 30px rgba(0,234,255,0.12), 0 0 18px rgba(139,51,255,0.08) inset;
+  }
+  #leftBrand h2{margin-top:12px;color:var(--neon);font-size:20px}
+  @keyframes brandPulse{from{transform:translateY(0) scale(1)}to{transform:translateY(-6px) scale(1.03)}}
 
-    select {
-      padding: 6px;
-      border-radius: 5px;
-    }
-  </style>
+  /* Player column */
+  #playerCol{
+    flex:1;
+    max-width:1180px;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  /* Neon frame */
+  .neonWrap{
+    width:100%;
+    border-radius:14px;
+    padding:10px;
+    position:relative;
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+    box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+  }
+  .neonWrap::before{
+    content:"";
+    position:absolute;inset:0;border-radius:14px;padding:2px;
+    background:conic-gradient(from 180deg at 50% 50%, var(--neon), var(--accent));
+    -webkit-mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events:none;filter:blur(12px);opacity:0.9;
+  }
+
+  /* video element */
+  video#player{
+    width:100%;
+    max-height:72vh;
+    border-radius:10px;
+    background:#000;
+  }
+
+  /* top-right frame controls */
+  #frameTopRight{
+    position:absolute; right:18px; top:12px; z-index:5; display:flex; gap:8px;
+  }
+  .iconBtn{
+    background:rgba(255,255,255,0.04); border:none; color:var(--neon); padding:8px 10px; border-radius:8px; cursor:pointer;
+    font-weight:700;
+  }
+
+  /* controls bar under video */
+  .controlsBar{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+    padding:12px 6px;
+    border-radius:8px;
+  }
+
+  .upperControls{
+    width:98%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .group{display:flex;align-items:center;gap:10px}
+
+  select, button.control{
+    padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:#eafcff;font-weight:700;
+  }
+
+  /* progress */
+  .progressRow{width:98%;display:flex;align-items:center;gap:10px}
+  input[type="range"].seek{
+    width:100%;
+    -webkit-appearance:none; appearance:none;
+    height:6px;border-radius:8px;background:linear-gradient(90deg,var(--neon),var(--accent));
+    outline:none; cursor:pointer;
+  }
+
+  .timeLabel{font-size:13px;color:var(--muted);min-width:58px;text-align:center}
+
+  /* small control buttons */
+  .small{
+    padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);border:none;color:#eafcff;font-weight:700;cursor:pointer;
+  }
+
+  /* developer credit and telegram */
+  .metaRow{width:98%;max-width:1150px;text-align:center;color:#cfeefc;padding-top:6px}
+  .metaRow a{color:var(--neon);font-weight:800;text-decoration:none}
+
+  /* Jai Shree Ram */
+  .ram{
+    margin-top:8px;font-size:34px;color:red;font-weight:800;text-shadow:0 0 12px red, 0 0 28px #ff2222;letter-spacing:2px;
+  }
+
+  /* loading spinner */
+  .spinner{width:56px;height:56px;border-radius:999px;border:5px solid rgba(255,255,255,0.06);border-top-color:var(--neon);animation:spin 1s linear infinite;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;z-index:6}
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+  /* popup overlay */
+  #joinPopup{
+    position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.92), rgba(2,2,2,0.96));z-index:99999;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .popupCard{
+    background:#0b0b0d;padding:26px;border-radius:16px;width:95%;max-width:420px;text-align:center;border:1px solid rgba(139,51,255,0.18);
+    box-shadow:0 10px 40px rgba(0,0,0,0.6);
+  }
+  .popupCard h2{color:var(--neon);margin-bottom:12px}
+  .popupJoin{display:inline-block;padding:12px 20px;border-radius:12px;background:var(--neon);color:#001219;font-weight:800;text-decoration:none;margin-top:10px}
+  .popupSkip{display:inline-block;padding:10px 14px;border-radius:10px;background:#222;color:#fff;border:none;margin-top:14px;cursor:pointer}
+
+  /* watermark */
+  .watermark{position:absolute;left:16px;bottom:16px;color:rgba(255,255,255,0.08);font-weight:900;font-size:20px;pointer-events:none}
+
+  /* responsive */
+  @media (max-width:900px){
+    #leftBrand{display:none}
+    .ram{font-size:26px}
+  }
+</style>
 </head>
 <body>
 
-  <video id="video" controls></video>
+<div id="app" aria-live="polite">
 
-  <div class="controls">
-    <span>Playback Speed:</span>
-
-    <select id="speed">
-      <option value="0.5">0.5x</option>
-      <option value="1" selected>1x</option>
-      <option value="1.25">1.25x</option>
-      <option value="1.5">1.5x</option>
-      <option value="1.75">1.75x</option>
-      <option value="2">2x</option>
-      <option value="2.25">2.25x</option>
-      <option value="2.5">2.5x</option>
-    </select>
+  <!-- Left animated brand -->
+  <div id="leftBrand" aria-hidden="true">
+    <div class="logoCircle">DC</div>
+    <h2>DevCoderz</h2>
   </div>
 
+  <!-- Player Column -->
+  <div id="playerCol">
+
+    <!-- Popup (mandatory) -->
+    <div id="joinPopup" role="dialog" aria-modal="true">
+      <div class="popupCard">
+        <h2>🔔 Lecture unlock karne ke liye Telegram join karein</h2>
+        <p style="color:var(--muted);font-size:15px;line-height:1.4">
+          Other lectures aur resources ke liye hamara Telegram channel join karein — notes, updates aur doubt sessions waha milte hain.
+        </p>
+
+        <!-- 2 line gap -->
+        <div style="height:22px"></div>
+
+        <a id="joinLink" class="popupJoin" href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener">Join Telegram</a>
+
+        <div>
+          <button id="skipBtn" class="popupSkip">I Have Joined / Skip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Neon frame -->
+    <div class="neonWrap" id="neonWrap" aria-label="Video frame">
+
+      <!-- spinner -->
+      <div class="spinner" id="spinner" aria-hidden="true"></div>
+
+      <!-- top-right custom frame controls -->
+      <div id="frameTopRight" aria-hidden="true">
+        <button id="customFullBtn" class="iconBtn" title="Custom Fullscreen">⛶</button>
+        <button id="nativeFullBtn" class="iconBtn" title="Browser Fullscreen">⤢</button>
+      </div>
+
+      <!-- watermark -->
+      <div class="watermark">DevCoderz</div>
+
+      <!-- video -->
+      <video id="player" playsinline controls preload="metadata" aria-label="Lecture video"></video>
+    </div>
+
+    <!-- Controls -->
+    <div class="controlsBar" role="region" aria-label="Player controls">
+
+      <div class="upperControls">
+        <div class="group">
+          <button id="playPause" class="small">Play</button>
+          <button id="back10" class="small">« 10s</button>
+          <button id="fwd10" class="small">10s »</button>
+          <button id="muteBtn" class="small">Mute</button>
+        </div>
+
+        <div class="group">
+          <label for="qualitySel" style="color:var(--muted);font-weight:700">Quality</label>
+          <select id="qualitySel" aria-label="Quality selector"></select>
+
+          <label for="speedSel" style="color:var(--muted);font-weight:700;margin-left:8px">Speed</label>
+          <select id="speedSel" aria-label="Speed selector">
+            <option value="0.25">0.25x</option>
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
+            <option value="2.25">2.25x</option>
+            <option value="2.5">2.5x</option>
+            <option value="3">3x</option>
+            <option value="3.5">3.5x</option>
+            <option value="4">4x</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="progressRow">
+        <span class="timeLabel" id="curTime">00:00</span>
+        <input type="range" class="seek" id="seekBar" min="0" max="100" value="0" aria-label="Seek bar">
+        <span class="timeLabel" id="durTime">00:00</span>
+      </div>
+
+    </div>
+
+    <!-- meta -->
+    <div class="metaRow" role="contentinfo">
+      Developer – <b>PT. Devansh Sharma</b> &nbsp; • &nbsp;
+      Telegram: <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener">Join Channel</a>
+    </div>
+
+    <!-- Jai Shree Ram -->
+    <div class="ram" role="note">जय श्री राम</div>
+
+  </div>
+</div>
+
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const videoUrl = urlParams.get("Url");
-  const video = document.getElementById("video");
-  const speed = document.getElementById("speed");
+/* ======= Utilities ======= */
+function fmtTime(s){
+  if (!isFinite(s)) return '00:00';
+  s = Math.floor(s);
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
 
-  // Load HLS
-  if (Hls.isSupported()) {
-    const hls = new Hls();
-    hls.loadSource(videoUrl);
-    hls.attachMedia(video);
-  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = videoUrl;
+/* ======= Setup video source (accept encoded or plain) ======= */
+const params = new URLSearchParams(location.search || '');
+let raw = params.get('Url') || '';
+try { raw = raw ? decodeURIComponent(raw) : ''; } catch(e){ /* ignore */ }
+const VIDEO_SRC = raw || '';  // if empty, user must pass ?Url=
+
+const player = document.getElementById('player');
+const spinner = document.getElementById('spinner');
+const joinPopup = document.getElementById('joinPopup');
+const skipBtn = document.getElementById('skipBtn');
+const playPauseBtn = document.getElementById('playPause');
+const back10 = document.getElementById('back10');
+const fwd10 = document.getElementById('fwd10');
+const muteBtn = document.getElementById('muteBtn');
+const speedSel = document.getElementById('speedSel');
+const qualitySel = document.getElementById('qualitySel');
+const seekBar = document.getElementById('seekBar');
+const curTime = document.getElementById('curTime');
+const durTime = document.getElementById('durTime');
+const customFullBtn = document.getElementById('customFullBtn');
+const nativeFullBtn = document.getElementById('nativeFullBtn');
+const leftBrand = document.getElementById('leftBrand');
+const app = document.getElementById('app');
+
+let hls = null;
+let levels = []; // hls levels
+let isCustomFull = false;
+
+/* ======= HLS attach & quality population ======= */
+function attachHls(src){
+  if (!src) return;
+  if (hls) { try { hls.destroy(); } catch(e){} hls = null; }
+  if (Hls.isSupported()){
+    hls = new Hls({capLevelToPlayerSize:true, maxBufferLength:30});
+    hls.attachMedia(player);
+    hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(src) );
+    hls.on(Hls.Events.MANIFEST_PARSED, ()=> {
+      // build quality options
+      levels = hls.levels.map((lv, idx)=> ({index:idx,height: lv?.attrs?.RESOLUTION ? parseInt(lv.attrs.RESOLUTION.split('x')[1]) : (lv.height||0)})).filter(l=>l.height>0);
+      // remove dup heights and sort
+      const uniq = [...new Map(levels.map(l=>[l.height,l])).values()].sort((a,b)=>a.height-b.height);
+      // populate select
+      qualitySel.innerHTML = '';
+      const autoOpt = document.createElement('option'); autoOpt.value = -1; autoOpt.text='Auto'; qualitySel.appendChild(autoOpt);
+      uniq.forEach(l=>{
+        const o=document.createElement('option'); o.value = l.index; o.text = l.height + 'p'; qualitySel.appendChild(o);
+      });
+    });
+    hls.on(Hls.Events.LEVEL_SWITCHED, (evt,data)=>{
+      const lvl = hls.levels[data.level];
+      if (lvl && lvl.height){
+        // find option by index
+        const opt = [...qualitySel.options].find(o => Number(o.value) === data.level);
+        if (opt) { opt.selected = true; }
+      }
+    });
+    hls.on(Hls.Events.ERROR, (e,d)=> {
+      console.warn('HLS error', e, d);
+    });
+  } else {
+    // native
+    player.src = src;
   }
+}
 
-  // Speed control
-  speed.addEventListener("change", () => {
-    video.playbackRate = parseFloat(speed.value);
-  });
+/* attach */
+attachHls(VIDEO_SRC);
+
+/* ======= Popup logic ======= */
+function showPopup(){ joinPopup.style.display = 'flex'; player.pause(); }
+function hidePopup(){ joinPopup.style.display = 'none'; try{ player.play(); }catch(e){} }
+
+showPopup();
+skipBtn.addEventListener('click', ()=> hidePopup());
+
+/* ======= Playback controls ======= */
+playPauseBtn.addEventListener('click', ()=> {
+  if (player.paused) { player.play(); } else { player.pause(); }
+});
+player.addEventListener('play', ()=> { playPauseBtn.textContent = 'Pause'; spinner.style.display='none'; });
+player.addEventListener('pause', ()=> { playPauseBtn.textContent = 'Play'; });
+
+back10.addEventListener('click', ()=> { player.currentTime = Math.max(0, player.currentTime - 10); });
+fwd10.addEventListener('click', ()=> { player.currentTime = Math.min(player.duration||0, player.currentTime + 10); });
+
+muteBtn.addEventListener('click', ()=> {
+  player.muted = !player.muted;
+  muteBtn.textContent = player.muted ? 'Unmute' : 'Mute';
+});
+
+/* speed */
+speedSel.addEventListener('change', ()=> player.playbackRate = parseFloat(speedSel.value || 1));
+
+/* quality */
+qualitySel.addEventListener('change', ()=> {
+  const v = Number(qualitySel.value);
+  if (!hls) return;
+  if (v === -1) hls.currentLevel = -1;
+  else hls.currentLevel = v;
+});
+
+/* seek handling */
+player.addEventListener('loadedmetadata', ()=> {
+  seekBar.max = Math.floor(player.duration || 0);
+  durTime.textContent = fmtTime(player.duration || 0);
+});
+player.addEventListener('timeupdate', ()=> {
+  if (!isNaN(player.duration)) {
+    seekBar.value = Math.floor(player.currentTime);
+    curTime.textContent = fmtTime(player.currentTime);
+  }
+});
+seekBar.addEventListener('input', ()=> {
+  player.currentTime = Number(seekBar.value);
+});
+
+/* spinner show/hide on waiting */
+player.addEventListener('waiting', ()=> spinner.style.display='block');
+player.addEventListener('playing', ()=> spinner.style.display='none');
+
+/* keyboard: space toggle */
+document.addEventListener('keydown', (e)=> {
+  if (e.code === 'Space') { e.preventDefault(); if (player.paused) player.play(); else player.pause(); }
+  if (e.key === 'ArrowRight') player.currentTime += 10;
+  if (e.key === 'ArrowLeft') player.currentTime -= 10;
+});
+
+/* native fullscreen */
+nativeFullBtn.addEventListener('click', async ()=> {
+  try {
+    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch(e){ console.warn(e); }
+});
+
+/* custom fullscreen: keep left brand visible */
+customFullBtn.addEventListener('click', ()=> {
+  if (!isCustomFull){
+    app.style.position='fixed'; app.style.inset='0'; app.style.zIndex='99999'; app.style.padding='28px';
+    player.style.height='86vh'; player.style.width='calc(100% - 300px)'; player.style.maxWidth='none';
+    leftBrand.style.display='flex';
+    isCustomFull = true;
+  } else {
+    app.style.position=''; app.style.inset=''; app.style.zIndex=''; app.style.padding='';
+    player.style.height=''; player.style.width=''; player.style.maxWidth='';
+    isCustomFull = false;
+  }
+});
+
+/* watermark click disabled */
+document.querySelectorAll('.watermark').forEach(w => w.onclick = e => e.preventDefault());
+
+/* accessibility: announce when popup present */
+if (joinPopup && joinPopup.style.display !== 'none') joinPopup.setAttribute('aria-hidden','false');
+
+/* safety: if no URL provided, show message */
+if (!VIDEO_SRC){
+  alert('No video URL provided. Use ?Url=... in address bar (encoded or plain).');
+}
 </script>
 
 </body>
