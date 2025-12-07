@@ -1,172 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
 <title>DevCoderz Player</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3/dist/plyr.css" />
+<!-- Video.js CDN -->
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
 <style>
-    body {
-        margin: 0;
-        background: #000;
-        font-family: Arial;
-    }
+body {
+    background: #000;
+    margin: 0;
+    font-family: Poppins, sans-serif;
+    color: white;
+}
 
-    #player-container {
-        width: 100%;
-        height: 65vh;
-        background: black;
-        position: relative;
-    }
+/* Video Frame Neon Border */
+#videoContainer {
+    margin: 20px;
+    border: 3px solid #00eaff;
+    box-shadow: 0 0 25px #00eaffaa;
+    border-radius: 18px;
+    padding: 10px;
+    position: relative;
+}
 
-    .below-info {
-        padding: 15px;
-        color: white;
-        text-align: center;
-    }
+/* DevCoderz Watermark */
+#watermark {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #00eaff;
+    text-shadow: 0 0 10px #00eaff;
+    z-index: 9999;
+}
 
-    .telegram {
-        text-decoration: none;
-        color: #00eaff;
-        font-size: 18px;
-        font-weight: bold;
-    }
+/* Glow Jai Shree Ram inside player */
+#ramTop {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 22px;
+    font-weight: 900;
+    color: #ff7b00;
+    text-shadow: 0 0 15px #ff7b00;
+    animation: ramPulse 1.5s infinite;
+    z-index: 9999;
+}
+@keyframes ramPulse {
+    0% { text-shadow: 0 0 10px #ff7b00; }
+    50% { text-shadow: 0 0 25px #ff9b42; }
+    100% { text-shadow: 0 0 10px #ff7b00; }
+}
 
-    .credit {
-        margin-top: 10px;
-        font-size: 16px;
-        opacity: 0.8;
-    }
+/* Speed menu button */
+.vjs-menu-button-popup .vjs-menu {
+    background: #111;
+    border: 1px solid #00eaff;
+    border-radius: 8px;
+}
 
-    .ram {
-        margin-top: 20px;
-        font-size: 28px;
-        font-weight: bold;
-        color: red;
-        text-shadow: 0 0 15px red, 0 0 30px yellow;
-        animation: glow 1s infinite alternate;
-    }
+/* Popup Overlay */
+#tgPopupOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    backdrop-filter: blur(4px);
+}
 
-    @keyframes glow {
-        from { text-shadow: 0 0 10px red; }
-        to { text-shadow: 0 0 25px yellow; }
-    }
+#tgPopup {
+    width: 85%;
+    max-width: 380px;
+    background: white;
+    color: black;
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    border: 2px solid #00eaff;
+    box-shadow: 0 0 20px #00eaffaa;
+    animation: popFade .4s ease;
+}
 
-    /* Quality / Speed Menu */
-    .menu-box {
-        background: #111;
-        padding: 10px;
-        margin: 10px auto;
-        width: 90%;
-        border-radius: 10px;
-        color: #fff;
-        text-align: center;
-    }
+@keyframes popFade {
+    from { opacity: 0; transform: scale(.7); }
+    to   { opacity: 1; transform: scale(1); }
+}
 
-    .menu-box button {
-        margin: 5px;
-        padding: 8px 15px;
-        background: #333;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 15px;
-    }
+#joinBtn {
+    display: inline-block;
+    background: #0088cc;
+    color: white;
+    padding: 12px 18px;
+    font-weight: 700;
+    border-radius: 10px;
+    margin-top: 12px;
+    text-decoration: none;
+}
+
+#skipBtn {
+    margin-top: 10px;
+    background: transparent;
+    border: none;
+    color: #444;
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+/* Developer Section */
+.dev-box {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background: rgba(0,0,0,0.35);
+    border-radius: 18px;
+    border: 2px solid #00eaff;
+    box-shadow: 0 0 20px #00eaff88;
+    text-align: center;
+}
+.dev-title {
+    font-size: 23px;
+    font-weight: 700;
+    color: #00eaff;
+    text-shadow: 0 0 20px #00eaff;
+}
+.ram-glow {
+    font-size: 28px;
+    color: #ff7b00;
+    text-shadow: 0 0 25px #ff7b00;
+    font-weight: 900;
+}
+.tg-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: #0088cc;
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+}
 </style>
 </head>
-
 <body>
-
-<div id="player-container">
-    <video id="player" controls playsinline></video>
-</div>
-
-<!-- Quality Menu -->
-<div class="menu-box">
-    <div><b>📺 Quality</b></div>
-    <button onclick="setQuality('auto')">Auto</button>
-    <button onclick="setQuality(1080)">1080p</button>
-    <button onclick="setQuality(720)">720p</button>
-    <button onclick="setQuality(480)">480p</button>
-    <button onclick="setQuality(360)">360p</button>
-    <button onclick="setQuality(240)">240p</button>
-</div>
-
-<!-- Speed Menu -->
-<div class="menu-box">
-    <div><b>⚡ Speed</b></div>
-    <button onclick="setSpeed(0.5)">0.5x</button>
-    <button onclick="setSpeed(1)">1x</button>
-    <button onclick="setSpeed(1.5)">1.5x</button>
-    <button onclick="setSpeed(2)">2x</button>
-    <button onclick="setSpeed(2.25)">2.25x</button>
-    <button onclick="setSpeed(2.5)">2.5x</button>
-</div>
-
-<!-- Info section -->
-<div class="below-info">
-    <a class="telegram" href="https://t.me/DevCoderz" target="_blank">👉 Click here to Join Telegram Channel</a>
-
-    <div class="credit">Developer — PT. Devansh Sharma</div>
-
-    <div class="ram">🔥 जय श्री राम 🔥</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/plyr@3"></script>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-<script>
-    const url = new URLSearchParams(location.search).get("Url");
-    const video = document.getElementById("player");
-
-    let hls; // global
-
-    const player = new Plyr(video, {
-        controls: [
-            'play', 'progress', 'current-time',
-            'mute', 'volume', 'fullscreen'
-        ],
-    });
-
-    // Load HLS
-    function loadVideo(source) {
-        if (Hls.isSupported()) {
-            if (hls) hls.destroy();
-            hls = new Hls({ startLevel: -1 });
-            hls.loadSource(source);
-            hls.attachMedia(video);
-        } else {
-            video.src = source;
-        }
-    }
-
-    loadVideo(url);
-
-    // Quality Control
-    function setQuality(q) {
-        if (!hls) return;
-
-        if (q === "auto") {
-            hls.currentLevel = -1;
-            alert("Auto Quality Enabled");
-        } else {
-            // find level index
-            let levelIndex = hls.levels.findIndex(l => l.height === q);
-            if (levelIndex !== -1) {
-                hls.currentLevel = levelIndex;
-                alert(q + "p Selected");
-            } else {
-                alert("This quality not available for this video");
-            }
-        }
-    }
-
-    // Speed Control
-    function setSpeed(s) {
-        player.speed = s;
-    }
-</script>
-
-</body>
-</html>
