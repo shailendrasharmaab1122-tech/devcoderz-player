@@ -3,450 +3,346 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DevCoderz Premium Player</title>
+<title>DevCoderz — Plyr + HLS Player</title>
 
-<!-- HLS.js -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- Plyr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
 
 <style>
   :root{
-    --bg:#06060a;
-    --panel:#0f1114;
+    --bg:#050507;
+    --panel:#0d0f12;
     --neon:#00eaff;
     --accent:#8b33ff;
     --muted:#9aa4ad;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#020204,#0b0b10);font-family:Inter, Arial, sans-serif;color:#eafcff}
-  /* App layout */
-  #app{
-    display:flex;
-    gap:20px;
-    height:100vh;
-    padding:22px;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#020204,#0b0c10);font-family:Inter, Arial, sans-serif;color:#eafcff}
+  .app{display:flex;gap:18px;align-items:flex-start;padding:20px;box-sizing:border-box;min-height:100vh}
+  /* left brand */
+  .left {
+    width:220px; min-width:160px; background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+    border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    border:1px solid rgba(0,234,255,0.06); animation:bp 3s ease-in-out infinite alternate;
   }
+  .logo { width:96px;height:96px;border-radius:999px;background:linear-gradient(135deg,var(--neon),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;color:#001219;font-size:24px }
+  .left h3{margin-top:12px;color:var(--neon);font-size:18px}
+  @keyframes bp{from{transform:translateY(0)}to{transform:translateY(-6px)}}
 
-  /* Left brand/animation */
-  #leftBrand{
-    width:230px;
-    min-width:180px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:14px;
-    padding:18px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-    border:1px solid rgba(0,234,255,0.06);
-    animation:brandPulse 3s ease-in-out infinite alternate;
-  }
-  .logoCircle{
-    width:110px;height:110px;border-radius:999px;background:linear-gradient(135deg,var(--neon),var(--accent));
-    display:flex;align-items:center;justify-content:center;font-weight:900;color:#001219;font-size:28px;
-    box-shadow: 0 6px 30px rgba(0,234,255,0.12), 0 0 18px rgba(139,51,255,0.08) inset;
-  }
-  #leftBrand h2{margin-top:12px;color:var(--neon);font-size:20px}
-  @keyframes brandPulse{from{transform:translateY(0) scale(1)}to{transform:translateY(-6px) scale(1.03)}}
-
-  /* Player column */
-  #playerCol{
-    flex:1;
-    max-width:1180px;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:12px;
-  }
-
-  /* Neon frame */
-  .neonWrap{
-    width:100%;
-    border-radius:14px;
-    padding:10px;
-    position:relative;
-    background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
-    box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-  }
-  .neonWrap::before{
-    content:"";
-    position:absolute;inset:0;border-radius:14px;padding:2px;
+  /* main */
+  .main { flex:1; display:flex;flex-direction:column;gap:12px;align-items:center }
+  .playerWrap{ width:100%; max-width:1100px; position:relative; border-radius:12px; padding:10px; background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0.01)); box-shadow:0 12px 40px rgba(0,0,0,0.6) }
+  .playerWrap::before{ content:""; position:absolute; inset:0; border-radius:12px; padding:2px;
     background:conic-gradient(from 180deg at 50% 50%, var(--neon), var(--accent));
     -webkit-mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    pointer-events:none;filter:blur(12px);opacity:0.9;
-  }
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; filter:blur(12px); opacity:.9; }
 
-  /* video element */
-  video#player{
-    width:100%;
-    max-height:72vh;
+  /* plyr container */
+  .plyr__video-embed, video.plyr__video {
     border-radius:10px;
     background:#000;
-  }
-
-  /* top-right frame controls */
-  #frameTopRight{
-    position:absolute; right:18px; top:12px; z-index:5; display:flex; gap:8px;
-  }
-  .iconBtn{
-    background:rgba(255,255,255,0.04); border:none; color:var(--neon); padding:8px 10px; border-radius:8px; cursor:pointer;
-    font-weight:700;
-  }
-
-  /* controls bar under video */
-  .controlsBar{
     width:100%;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    align-items:center;
-    padding:12px 6px;
-    border-radius:8px;
+    max-height:72vh;
   }
 
-  .upperControls{
-    width:98%;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-  }
-  .group{display:flex;align-items:center;gap:10px}
+  /* top-right custom buttons (keeps visible in custom fullscreen) */
+  .frameButtons{ position:absolute; right:14px; top:12px; z-index:5; display:flex; gap:8px }
+  .btn{ background:rgba(255,255,255,0.04); border:none; color:var(--neon); padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700 }
 
-  select, button.control{
-    padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:#eafcff;font-weight:700;
-  }
+  /* controls row (custom outside plyr) */
+  .controlsRow{ width:100%; max-width:1100px; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:8px 10px }
+  .group{ display:flex; gap:10px; align-items:center; }
 
-  /* progress */
-  .progressRow{width:98%;display:flex;align-items:center;gap:10px}
-  input[type="range"].seek{
-    width:100%;
-    -webkit-appearance:none; appearance:none;
-    height:6px;border-radius:8px;background:linear-gradient(90deg,var(--neon),var(--accent));
-    outline:none; cursor:pointer;
-  }
+  select.custom, button.custom { padding:8px 12px; border-radius:8px; border:none; background:rgba(255,255,255,0.03); color:#eafcff; font-weight:700; }
 
-  .timeLabel{font-size:13px;color:var(--muted);min-width:58px;text-align:center}
-
-  /* small control buttons */
-  .small{
-    padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);border:none;color:#eafcff;font-weight:700;cursor:pointer;
-  }
-
-  /* developer credit and telegram */
-  .metaRow{width:98%;max-width:1150px;text-align:center;color:#cfeefc;padding-top:6px}
-  .metaRow a{color:var(--neon);font-weight:800;text-decoration:none}
+  /* metadata and credits */
+  .meta{ width:100%; max-width:1100px; text-align:center; color:#cfeefc; padding-top:6px }
+  .meta a{ color:var(--neon); text-decoration:none; font-weight:800 }
 
   /* Jai Shree Ram */
-  .ram{
-    margin-top:8px;font-size:34px;color:red;font-weight:800;text-shadow:0 0 12px red, 0 0 28px #ff2222;letter-spacing:2px;
-  }
+  .ram{ font-size:36px; margin-top:8px; color:red; text-shadow:0 0 12px red,0 0 28px #ff2222; font-weight:900 }
 
-  /* loading spinner */
-  .spinner{width:56px;height:56px;border-radius:999px;border:5px solid rgba(255,255,255,0.06);border-top-color:var(--neon);animation:spin 1s linear infinite;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;z-index:6}
-  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+  /* popup */
+  .popupOverlay{ position:fixed; inset:0; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; z-index:99999 }
+  .popupCard{ background:#0b0b0d; padding:24px; border-radius:14px; width:92%; max-width:420px; text-align:center; border:1px solid rgba(139,51,255,0.14) }
 
-  /* popup overlay */
-  #joinPopup{
-    position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.92), rgba(2,2,2,0.96));z-index:99999;
-    display:flex;align-items:center;justify-content:center;padding:20px;
-  }
-  .popupCard{
-    background:#0b0b0d;padding:26px;border-radius:16px;width:95%;max-width:420px;text-align:center;border:1px solid rgba(139,51,255,0.18);
-    box-shadow:0 10px 40px rgba(0,0,0,0.6);
-  }
-  .popupCard h2{color:var(--neon);margin-bottom:12px}
-  .popupJoin{display:inline-block;padding:12px 20px;border-radius:12px;background:var(--neon);color:#001219;font-weight:800;text-decoration:none;margin-top:10px}
-  .popupSkip{display:inline-block;padding:10px 14px;border-radius:10px;background:#222;color:#fff;border:none;margin-top:14px;cursor:pointer}
-
-  /* watermark */
-  .watermark{position:absolute;left:16px;bottom:16px;color:rgba(255,255,255,0.08);font-weight:900;font-size:20px;pointer-events:none}
+  /* spinner (center of video) */
+  .spinner{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:999px; border:5px solid rgba(255,255,255,0.06); border-top-color:var(--neon); animation:spin 1s linear infinite; display:none; z-index:6 }
+  @keyframes spin{ to{ transform:translate(-50%,-50%) rotate(360deg) } }
 
   /* responsive */
-  @media (max-width:900px){
-    #leftBrand{display:none}
-    .ram{font-size:26px}
-  }
+  @media (max-width:900px){ .left{display:none} .ram{font-size:28px} .controlsRow{flex-direction:column; align-items:stretch} }
 </style>
 </head>
 <body>
 
-<div id="app" aria-live="polite">
+<!-- Plyr script (after CSS) -->
+<!-- Hls.js + Plyr.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.min.js"></script>
 
-  <!-- Left animated brand -->
-  <div id="leftBrand" aria-hidden="true">
-    <div class="logoCircle">DC</div>
-    <h2>DevCoderz</h2>
-  </div>
+<div class="app" role="application">
 
-  <!-- Player Column -->
-  <div id="playerCol">
+  <!-- left brand -->
+  <aside class="left" aria-hidden="true">
+    <div class="logo">DC</div>
+    <h3>DevCoderz</h3>
+  </aside>
 
-    <!-- Popup (mandatory) -->
-    <div id="joinPopup" role="dialog" aria-modal="true">
+  <!-- main -->
+  <main class="main">
+
+    <!-- popup (join required) -->
+    <div id="popup" class="popupOverlay" role="dialog" aria-modal="true">
       <div class="popupCard">
-        <h2>🔔 Lecture unlock karne ke liye Telegram join karein</h2>
-        <p style="color:var(--muted);font-size:15px;line-height:1.4">
-          Other lectures aur resources ke liye hamara Telegram channel join karein — notes, updates aur doubt sessions waha milte hain.
+        <h2 style="color:var(--neon);margin:0 0 8px">🔔 Lecture unlock karne ke liye Telegram join karein</h2>
+        <p style="color:var(--muted);font-size:15px;line-height:1.4;margin-bottom:14px">
+          Other lectures aur resources ke liye hamara Telegram join karein.
         </p>
 
-        <!-- 2 line gap -->
-        <div style="height:22px"></div>
+        <!-- 2 lines gap -->
+        <div style="height:18px"></div>
 
-        <a id="joinLink" class="popupJoin" href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener">Join Telegram</a>
-
-        <div>
-          <button id="skipBtn" class="popupSkip">I Have Joined / Skip</button>
-        </div>
+        <a id="joinLink" class="popupJoin" href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener"
+           style="display:inline-block;padding:12px 18px;border-radius:10px;background:var(--neon);color:#001219;font-weight:800;text-decoration:none;margin-bottom:12px">
+          Join Telegram
+        </a>
+        <br>
+        <button id="popupSkip" class="popupSkip" style="margin-top:12px;padding:10px 14px;border-radius:8px;background:#222;color:#fff;border:none;cursor:pointer">
+          I Have Joined / Skip
+        </button>
       </div>
     </div>
 
-    <!-- Neon frame -->
-    <div class="neonWrap" id="neonWrap" aria-label="Video frame">
+    <!-- player area -->
+    <div class="playerWrap" aria-label="Video player container">
 
-      <!-- spinner -->
       <div class="spinner" id="spinner" aria-hidden="true"></div>
 
-      <!-- top-right custom frame controls -->
-      <div id="frameTopRight" aria-hidden="true">
-        <button id="customFullBtn" class="iconBtn" title="Custom Fullscreen">⛶</button>
-        <button id="nativeFullBtn" class="iconBtn" title="Browser Fullscreen">⤢</button>
+      <div class="frameButtons" aria-hidden="true">
+        <button id="customFull" class="btn" aria-label="Custom fullscreen">⛶</button>
+        <button id="nativeFull" class="btn" aria-label="Browser fullscreen">⤢</button>
       </div>
 
-      <!-- watermark -->
-      <div class="watermark">DevCoderz</div>
-
-      <!-- video -->
-      <video id="player" playsinline controls preload="metadata" aria-label="Lecture video"></video>
+      <!-- Plyr video element -->
+      <!-- We will attach hls.js programmatically for m3u8 -->
+      <video id="plyrVideo" class="plyr__video-embed" playsinline controls crossorigin></video>
     </div>
 
-    <!-- Controls -->
-    <div class="controlsBar" role="region" aria-label="Player controls">
-
-      <div class="upperControls">
-        <div class="group">
-          <button id="playPause" class="small">Play</button>
-          <button id="back10" class="small">« 10s</button>
-          <button id="fwd10" class="small">10s »</button>
-          <button id="muteBtn" class="small">Mute</button>
-        </div>
-
-        <div class="group">
-          <label for="qualitySel" style="color:var(--muted);font-weight:700">Quality</label>
-          <select id="qualitySel" aria-label="Quality selector"></select>
-
-          <label for="speedSel" style="color:var(--muted);font-weight:700;margin-left:8px">Speed</label>
-          <select id="speedSel" aria-label="Speed selector">
-            <option value="0.25">0.25x</option>
-            <option value="0.5">0.5x</option>
-            <option value="0.75">0.75x</option>
-            <option value="1" selected>1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="1.75">1.75x</option>
-            <option value="2">2x</option>
-            <option value="2.25">2.25x</option>
-            <option value="2.5">2.5x</option>
-            <option value="3">3x</option>
-            <option value="3.5">3.5x</option>
-            <option value="4">4x</option>
-          </select>
-        </div>
+    <!-- controls row (outside plyr) -->
+    <div class="controlsRow" role="toolbar" aria-label="Player controls">
+      <div class="group">
+        <button id="btnPlay" class="custom">Play</button>
+        <button id="btnPause" class="custom">Pause</button>
+        <button id="btnBack" class="custom">« 10s</button>
+        <button id="btnFwd" class="custom">10s »</button>
+        <button id="btnMute" class="custom">Mute</button>
       </div>
 
-      <div class="progressRow">
-        <span class="timeLabel" id="curTime">00:00</span>
-        <input type="range" class="seek" id="seekBar" min="0" max="100" value="0" aria-label="Seek bar">
-        <span class="timeLabel" id="durTime">00:00</span>
-      </div>
+      <div class="group" aria-label="Settings">
+        <label style="color:var(--muted);font-weight:800">Quality</label>
+        <select id="qualitySel" class="custom" aria-label="Quality selector"><option>Auto</option></select>
 
+        <label style="color:var(--muted);font-weight:800;margin-left:8px">Speed</label>
+        <select id="speedSel" class="custom" aria-label="Speed selector">
+          <option value="0.25">0.25x</option>
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1" selected>1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="1.75">1.75x</option>
+          <option value="2">2x</option>
+          <option value="2.25">2.25x</option>
+          <option value="2.5">2.5x</option>
+          <option value="3">3x</option>
+          <option value="3.5">3.5x</option>
+          <option value="4">4x</option>
+        </select>
+      </div>
     </div>
 
     <!-- meta -->
-    <div class="metaRow" role="contentinfo">
+    <div class="meta">
       Developer – <b>PT. Devansh Sharma</b> &nbsp; • &nbsp;
       Telegram: <a href="https://t.me/+QVhljL_D32RlOTg1" target="_blank" rel="noopener">Join Channel</a>
     </div>
 
-    <!-- Jai Shree Ram -->
-    <div class="ram" role="note">जय श्री राम</div>
-
-  </div>
+    <div class="ram" aria-hidden="true">जय श्री राम</div>
+  </main>
 </div>
 
 <script>
-/* ======= Utilities ======= */
-function fmtTime(s){
-  if (!isFinite(s)) return '00:00';
-  s = Math.floor(s);
-  const m = Math.floor(s/60);
-  const sec = s%60;
-  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
-}
-
-/* ======= Setup video source (accept encoded or plain) ======= */
+/* ====== Setup: get video URL (supports encoded or plaintext) ====== */
 const params = new URLSearchParams(location.search || '');
-let raw = params.get('Url') || '';
-try { raw = raw ? decodeURIComponent(raw) : ''; } catch(e){ /* ignore */ }
-const VIDEO_SRC = raw || '';  // if empty, user must pass ?Url=
+let rawUrl = params.get('Url') || '';
+try { rawUrl = rawUrl ? decodeURIComponent(rawUrl) : ''; } catch(e){ /* ignore */ }
+const VIDEO_URL = rawUrl || ''; // required
 
-const player = document.getElementById('player');
-const spinner = document.getElementById('spinner');
-const joinPopup = document.getElementById('joinPopup');
-const skipBtn = document.getElementById('skipBtn');
-const playPauseBtn = document.getElementById('playPause');
-const back10 = document.getElementById('back10');
-const fwd10 = document.getElementById('fwd10');
-const muteBtn = document.getElementById('muteBtn');
-const speedSel = document.getElementById('speedSel');
-const qualitySel = document.getElementById('qualitySel');
-const seekBar = document.getElementById('seekBar');
-const curTime = document.getElementById('curTime');
-const durTime = document.getElementById('durTime');
-const customFullBtn = document.getElementById('customFullBtn');
-const nativeFullBtn = document.getElementById('nativeFullBtn');
-const leftBrand = document.getElementById('leftBrand');
-const app = document.getElementById('app');
+/* ====== Plyr init ====== */
+const playerElement = document.getElementById('plyrVideo');
 
+/* create a real <video> element inside plyr container (plyr expects either iframe/embed or video tag) */
+const videoTag = document.createElement('video');
+videoTag.setAttribute('id','videoElement');
+videoTag.setAttribute('playsinline','');
+videoTag.setAttribute('controls','');
+videoTag.className = 'plyr__video';
+playerElement.replaceWith(videoTag); // replace placeholder with actual video tag
+
+// initialize Plyr
+const plyr = new Plyr(videoTag, {
+  controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
+  settings: ['quality','speed'],
+  i18n: { restart: 'Restart', rewind: 'Rewind 10 seconds' }
+});
+
+/* ===== HLS attach and quality population ===== */
 let hls = null;
-let levels = []; // hls levels
-let isCustomFull = false;
+const qualitySel = document.getElementById('qualitySel');
+const speedSel = document.getElementById('speedSel');
+const spinner = document.getElementById('spinner');
 
-/* ======= HLS attach & quality population ======= */
 function attachHls(src){
   if (!src) return;
+  // destroy previous
   if (hls) { try { hls.destroy(); } catch(e){} hls = null; }
   if (Hls.isSupported()){
     hls = new Hls({capLevelToPlayerSize:true, maxBufferLength:30});
-    hls.attachMedia(player);
-    hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(src) );
+    hls.attachMedia(videoTag);
+    hls.on(Hls.Events.MEDIA_ATTACHED, ()=> {
+      hls.loadSource(src);
+    });
+
     hls.on(Hls.Events.MANIFEST_PARSED, ()=> {
-      // build quality options
-      levels = hls.levels.map((lv, idx)=> ({index:idx,height: lv?.attrs?.RESOLUTION ? parseInt(lv.attrs.RESOLUTION.split('x')[1]) : (lv.height||0)})).filter(l=>l.height>0);
-      // remove dup heights and sort
-      const uniq = [...new Map(levels.map(l=>[l.height,l])).values()].sort((a,b)=>a.height-b.height);
-      // populate select
+      // gather levels
+      const levels = hls.levels.map((lv, idx)=>({
+        idx: idx,
+        height: lv?.attrs?.RESOLUTION ? parseInt(lv.attrs.RESOLUTION.split('x')[1]) : (lv.height||0),
+        bitrate: lv?.bitrate || 0
+      })).filter(l => l.height > 0);
+
+      // dedupe heights & sort
+      const map = new Map();
+      levels.forEach(l => { if (!map.has(l.height)) map.set(l.height,l); });
+      const uniq = Array.from(map.values()).sort((a,b)=>a.height-b.height);
+
+      // populate quality select (Auto + each height)
       qualitySel.innerHTML = '';
-      const autoOpt = document.createElement('option'); autoOpt.value = -1; autoOpt.text='Auto'; qualitySel.appendChild(autoOpt);
-      uniq.forEach(l=>{
-        const o=document.createElement('option'); o.value = l.index; o.text = l.height + 'p'; qualitySel.appendChild(o);
+      const autoOpt = document.createElement('option'); autoOpt.value = -1; autoOpt.text = 'Auto'; qualitySel.appendChild(autoOpt);
+      uniq.forEach(l => {
+        const o = document.createElement('option'); o.value = l.idx; o.text = l.height + 'p'; qualitySel.appendChild(o);
       });
     });
-    hls.on(Hls.Events.LEVEL_SWITCHED, (evt,data)=>{
-      const lvl = hls.levels[data.level];
-      if (lvl && lvl.height){
-        // find option by index
-        const opt = [...qualitySel.options].find(o => Number(o.value) === data.level);
-        if (opt) { opt.selected = true; }
-      }
+
+    hls.on(Hls.Events.LEVEL_SWITCHED, (evt,data) => {
+      // reflect current level
+      // find option with value === data.level
+      const opt = [...qualitySel.options].find(o => Number(o.value) === data.level);
+      if (opt) opt.selected = true;
     });
-    hls.on(Hls.Events.ERROR, (e,d)=> {
-      console.warn('HLS error', e, d);
+
+    hls.on(Hls.Events.ERROR, (errType, data) => {
+      console.warn('HLS error', errType, data);
     });
+
   } else {
-    // native
-    player.src = src;
+    // native support fallback (Safari)
+    videoTag.src = src;
   }
 }
 
-/* attach */
-attachHls(VIDEO_SRC);
+/* attach now */
+attachHls(VIDEO_URL);
 
-/* ======= Popup logic ======= */
-function showPopup(){ joinPopup.style.display = 'flex'; player.pause(); }
-function hidePopup(){ joinPopup.style.display = 'none'; try{ player.play(); }catch(e){} }
-
-showPopup();
-skipBtn.addEventListener('click', ()=> hidePopup());
-
-/* ======= Playback controls ======= */
-playPauseBtn.addEventListener('click', ()=> {
-  if (player.paused) { player.play(); } else { player.pause(); }
-});
-player.addEventListener('play', ()=> { playPauseBtn.textContent = 'Pause'; spinner.style.display='none'; });
-player.addEventListener('pause', ()=> { playPauseBtn.textContent = 'Play'; });
-
-back10.addEventListener('click', ()=> { player.currentTime = Math.max(0, player.currentTime - 10); });
-fwd10.addEventListener('click', ()=> { player.currentTime = Math.min(player.duration||0, player.currentTime + 10); });
-
-muteBtn.addEventListener('click', ()=> {
-  player.muted = !player.muted;
-  muteBtn.textContent = player.muted ? 'Unmute' : 'Mute';
+/* ===== Popup logic: block playback until skip ===== */
+const popup = document.getElementById('popup');
+const popupSkip = document.getElementById('popupSkip');
+popup.style.display = 'flex';
+videoTag.controls = true;
+videoTag.pause();
+popupSkip.addEventListener('click', ()=> {
+  popup.style.display = 'none';
+  videoTag.play().catch(()=>{ /* autoplay might be blocked */ });
 });
 
-/* speed */
-speedSel.addEventListener('change', ()=> player.playbackRate = parseFloat(speedSel.value || 1));
+/* ===== Controls wiring (custom) ===== */
+document.getElementById('btnPlay').addEventListener('click', ()=> videoTag.play());
+document.getElementById('btnPause').addEventListener('click', ()=> videoTag.pause());
+document.getElementById('btnBack').addEventListener('click', ()=> videoTag.currentTime = Math.max(0, videoTag.currentTime - 10));
+document.getElementById('btnFwd').addEventListener('click', ()=> videoTag.currentTime = Math.min((videoTag.duration||0), videoTag.currentTime + 10));
+document.getElementById('btnMute').addEventListener('click', ()=> {
+  videoTag.muted = !videoTag.muted;
+  document.getElementById('btnMute').textContent = videoTag.muted ? 'Unmute' : 'Mute';
+});
 
-/* quality */
+/* speed selector */
+speedSel.addEventListener('change', ()=> {
+  const v = parseFloat(speedSel.value || 1);
+  videoTag.playbackRate = v;
+  // also update plyr's interface
+  try { plyr.speed = v; } catch(e){}
+});
+
+/* quality selector */
 qualitySel.addEventListener('change', ()=> {
-  const v = Number(qualitySel.value);
   if (!hls) return;
-  if (v === -1) hls.currentLevel = -1;
-  else hls.currentLevel = v;
-});
-
-/* seek handling */
-player.addEventListener('loadedmetadata', ()=> {
-  seekBar.max = Math.floor(player.duration || 0);
-  durTime.textContent = fmtTime(player.duration || 0);
-});
-player.addEventListener('timeupdate', ()=> {
-  if (!isNaN(player.duration)) {
-    seekBar.value = Math.floor(player.currentTime);
-    curTime.textContent = fmtTime(player.currentTime);
+  const v = Number(qualitySel.value);
+  if (v === -1) {
+    hls.currentLevel = -1; // auto
+  } else {
+    hls.currentLevel = v;
   }
 });
-seekBar.addEventListener('input', ()=> {
-  player.currentTime = Number(seekBar.value);
-});
 
-/* spinner show/hide on waiting */
-player.addEventListener('waiting', ()=> spinner.style.display='block');
-player.addEventListener('playing', ()=> spinner.style.display='none');
+/* spinner show/hide */
+videoTag.addEventListener('waiting', ()=> spinner.style.display = 'block');
+videoTag.addEventListener('playing', ()=> spinner.style.display = 'none');
 
-/* keyboard: space toggle */
+/* sync plyr UI with native events */
+videoTag.addEventListener('play', ()=> plyr.play());
+videoTag.addEventListener('pause', ()=> plyr.pause());
+
+/* keyboard shortcuts */
 document.addEventListener('keydown', (e)=> {
-  if (e.code === 'Space') { e.preventDefault(); if (player.paused) player.play(); else player.pause(); }
-  if (e.key === 'ArrowRight') player.currentTime += 10;
-  if (e.key === 'ArrowLeft') player.currentTime -= 10;
+  if (e.code === 'Space') { e.preventDefault(); if (videoTag.paused) videoTag.play(); else videoTag.pause(); }
+  if (e.key === 'ArrowRight') videoTag.currentTime += 10;
+  if (e.key === 'ArrowLeft') videoTag.currentTime -= 10;
 });
 
-/* native fullscreen */
-nativeFullBtn.addEventListener('click', async ()=> {
+/* custom fullscreen (keeps left brand) */
+const app = document.querySelector('.app');
+const left = document.querySelector('.left');
+let customFull = false;
+document.getElementById('customFull').addEventListener('click', ()=> {
+  if (!customFull){
+    app.style.position = 'fixed'; app.style.inset = '0'; app.style.zIndex = 99999; app.style.padding='28px';
+    videoTag.style.height = '86vh'; videoTag.style.width = 'calc(100% - 260px)'; videoTag.style.maxWidth='none';
+    left.style.display = 'flex';
+    customFull = true;
+  } else {
+    app.style.position = ''; app.style.inset = ''; app.style.zIndex = ''; app.style.padding='';
+    videoTag.style.height = ''; videoTag.style.width=''; videoTag.style.maxWidth='';
+    customFull = false;
+  }
+});
+
+/* native fullscreen button */
+document.getElementById('nativeFull').addEventListener('click', async ()=> {
   try {
     if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
     else await document.exitFullscreen();
-  } catch(e){ console.warn(e); }
+  } catch(e){}
 });
 
-/* custom fullscreen: keep left brand visible */
-customFullBtn.addEventListener('click', ()=> {
-  if (!isCustomFull){
-    app.style.position='fixed'; app.style.inset='0'; app.style.zIndex='99999'; app.style.padding='28px';
-    player.style.height='86vh'; player.style.width='calc(100% - 300px)'; player.style.maxWidth='none';
-    leftBrand.style.display='flex';
-    isCustomFull = true;
-  } else {
-    app.style.position=''; app.style.inset=''; app.style.zIndex=''; app.style.padding='';
-    player.style.height=''; player.style.width=''; player.style.maxWidth='';
-    isCustomFull = false;
-  }
+/* Plyr settings: ensure plyr settings show speed & quality options in menu if desired */
+plyr.on('ready', ()=> {
+  // set initial speed selection from plyr
+  try { speedSel.value = String(videoTag.playbackRate || 1); } catch(e){}
 });
 
-/* watermark click disabled */
-document.querySelectorAll('.watermark').forEach(w => w.onclick = e => e.preventDefault());
-
-/* accessibility: announce when popup present */
-if (joinPopup && joinPopup.style.display !== 'none') joinPopup.setAttribute('aria-hidden','false');
-
-/* safety: if no URL provided, show message */
-if (!VIDEO_SRC){
-  alert('No video URL provided. Use ?Url=... in address bar (encoded or plain).');
+/* accessibility & fallback */
+if (!VIDEO_URL) {
+  alert('No video URL provided. Use player.html?Url=THE_M3U8_LINK (encoded if needed).');
 }
 </script>
 
