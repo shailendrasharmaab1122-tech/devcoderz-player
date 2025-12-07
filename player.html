@@ -17,7 +17,7 @@
         width: 98%;
         max-width: 950px;
         margin: auto;
-        margin-top: 20px;
+        margin-top: 25px;
     }
 
     .neon-frame {
@@ -52,13 +52,12 @@
 
     .credit {
         text-align: center;
-        margin-top: 15px;
-        font-size: 18px;
+        margin-top: 20px;
+        font-size: 20px;
         color: #a855f7;
     }
 
     /* POPUP */
-
     #join-popup {
         position: fixed;
         inset: 0;
@@ -96,6 +95,11 @@
         background: #444;
         margin-top: 25px;
     }
+
+    @keyframes ramglow {
+        from { text-shadow: 0 0 15px red; }
+        to   { text-shadow: 0 0 40px #ff2222; }
+    }
 </style>
 </head>
 <body>
@@ -125,23 +129,74 @@
         <video id="video" controls playsinline></video>
     </div>
 
+    <!-- Speed + Quality Menu -->
+    <div style="margin-top:25px; text-align:center;">
+
+        <!-- SPEED -->
+        <label style="font-size:20px; margin-right:10px; color:#c084fc;">Speed:</label>
+        <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x (Normal)</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+            <option value="3">3x</option>
+            <option value="4">4x</option>
+        </select>
+
+        <!-- QUALITY -->
+        <label style="font-size:20px; margin-left:25px; color:#c084fc;">Quality:</label>
+        <select id="qualityMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="auto" selected>Auto</option>
+            <option value="360">360p</option>
+            <option value="480">480p</option>
+            <option value="720">720p</option>
+            <option value="1080">1080p</option>
+        </select>
+
+    </div>
+
+    <!-- Developer Credit -->
     <div class="credit">
         Developer – PT. Devansh Sharma
     </div>
+
+    <br><br>
+
+    <!-- जय श्री राम -->
+    <div style="
+        text-align:center;
+        font-size:34px;
+        font-weight:bold;
+        color:red;
+        animation: ramglow 1.4s infinite alternate;
+    ">
+        जय श्री राम 🚩
+    </div>
+
+    <!-- Telegram Link -->
+    <div style="text-align:center; margin-top:15px;">
+        <a href="https://t.me/+QVhljL_D32RlOTg1"
+           style="color:#60a5fa; font-size:20px; text-decoration:none;">
+           👉 हमारी Telegram Classes Join करें
+        </a>
+    </div>
+
 </div>
 
+<!-- HLS -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
     const video = document.getElementById("video");
 
-    // URL Fix — encoded & normal dono chalenge
+    // URL Fix — Normal + Encoded dono
     const urlParams = new URLSearchParams(window.location.search);
     const videoURL = decodeURIComponent(urlParams.get("Url"));
 
-    // HLS Player (Quality Auto–4K)
+    // HLS Player
+    let hls;
     if (Hls.isSupported()) {
-        const hls = new Hls({
+        hls = new Hls({
             maxMaxBufferLength: 60,
             enableWorker: true
         });
@@ -151,7 +206,7 @@
         video.src = videoURL;
     }
 
-    // POPUP LOGIC
+    // POPUP
     const popup = document.getElementById("join-popup");
     const skipBtn = document.getElementById("skip-btn");
 
@@ -164,6 +219,28 @@
         popup.style.display = "none";
         video.play();
     };
+
+    // SPEED CONTROL
+    document.getElementById("speedMenu").addEventListener("change", function() {
+        video.playbackRate = Number(this.value);
+    });
+
+    // QUALITY CONTROL (Auto + Manual)
+    document.getElementById("qualityMenu").addEventListener("change", function () {
+        if (!hls) return;
+
+        let q = this.value;
+
+        if (q === "auto") {
+            hls.currentLevel = -1;
+        } else {
+            hls.levels.forEach((level, index) => {
+                if (level.height == q) {
+                    hls.currentLevel = index;
+                }
+            });
+        }
+    });
 </script>
 
 </body>
