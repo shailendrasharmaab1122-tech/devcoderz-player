@@ -1,92 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DevCoderz Player</title>
 
-<!-- Plyr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3/dist/plyr.css" />
 
 <style>
     body {
         margin: 0;
         background: #000;
-        font-family: Arial, sans-serif;
+        font-family: Arial;
     }
-    #playerContainer {
+
+    #player-container {
         width: 100%;
-        height: 100vh;
-        position: relative;
+        height: 65vh;
         background: black;
+        position: relative;
     }
 
-    .telegram-join {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        z-index: 1000;
-        background: rgba(0,0,0,0.5);
-        padding: 8px 14px;
-        border-radius: 6px;
-        color: #fff;
-        font-size: 14px;
+    .below-info {
+        padding: 15px;
+        color: white;
+        text-align: center;
+    }
+
+    .telegram {
         text-decoration: none;
-        border: 1px solid #ffffff30;
+        color: #00eaff;
+        font-size: 18px;
+        font-weight: bold;
     }
 
-    .telegram-join:hover {
-        background: rgba(255,255,255,0.25);
+    .credit {
+        margin-top: 10px;
+        font-size: 16px;
+        opacity: 0.8;
+    }
+
+    .ram {
+        margin-top: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: red;
+        text-shadow: 0 0 15px red, 0 0 30px yellow;
+        animation: glow 1s infinite alternate;
+    }
+
+    @keyframes glow {
+        from { text-shadow: 0 0 10px red; }
+        to { text-shadow: 0 0 25px yellow; }
+    }
+
+    /* Quality / Speed Menu */
+    .menu-box {
+        background: #111;
+        padding: 10px;
+        margin: 10px auto;
+        width: 90%;
+        border-radius: 10px;
+        color: #fff;
+        text-align: center;
+    }
+
+    .menu-box button {
+        margin: 5px;
+        padding: 8px 15px;
+        background: #333;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
     }
 </style>
 </head>
+
 <body>
 
-<div id="playerContainer">
-    <a class="telegram-join" href="https://t.me/DevCoderz" target="_blank">
-        👉 Click here to join Telegram Channel
-    </a>
-
+<div id="player-container">
     <video id="player" controls playsinline></video>
 </div>
 
-<!-- Plyr JS -->
-<script src="https://cdn.jsdelivr.net/npm/plyr@3"></script>
+<!-- Quality Menu -->
+<div class="menu-box">
+    <div><b>📺 Quality</b></div>
+    <button onclick="setQuality('auto')">Auto</button>
+    <button onclick="setQuality(1080)">1080p</button>
+    <button onclick="setQuality(720)">720p</button>
+    <button onclick="setQuality(480)">480p</button>
+    <button onclick="setQuality(360)">360p</button>
+    <button onclick="setQuality(240)">240p</button>
+</div>
 
-<!-- HLS Support -->
+<!-- Speed Menu -->
+<div class="menu-box">
+    <div><b>⚡ Speed</b></div>
+    <button onclick="setSpeed(0.5)">0.5x</button>
+    <button onclick="setSpeed(1)">1x</button>
+    <button onclick="setSpeed(1.5)">1.5x</button>
+    <button onclick="setSpeed(2)">2x</button>
+    <button onclick="setSpeed(2.25)">2.25x</button>
+    <button onclick="setSpeed(2.5)">2.5x</button>
+</div>
+
+<!-- Info section -->
+<div class="below-info">
+    <a class="telegram" href="https://t.me/DevCoderz" target="_blank">👉 Click here to Join Telegram Channel</a>
+
+    <div class="credit">Developer — PT. Devansh Sharma</div>
+
+    <div class="ram">🔥 जय श्री राम 🔥</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/plyr@3"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const videoURL = urlParams.get("Url");
+    const url = new URLSearchParams(location.search).get("Url");
+    const video = document.getElementById("player");
 
-    const video = document.getElementById('player');
+    let hls; // global
+
     const player = new Plyr(video, {
         controls: [
-            'play', 'progress', 'current-time', 'mute', 'volume',
-            'settings', 'fullscreen'
+            'play', 'progress', 'current-time',
+            'mute', 'volume', 'fullscreen'
         ],
-        settings: ['quality', 'speed'],
     });
 
-    if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(videoURL);
-        hls.attachMedia(video);
+    // Load HLS
+    function loadVideo(source) {
+        if (Hls.isSupported()) {
+            if (hls) hls.destroy();
+            hls = new Hls({ startLevel: -1 });
+            hls.loadSource(source);
+            hls.attachMedia(video);
+        } else {
+            video.src = source;
+        }
+    }
 
-        // Quality options
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            const levels = hls.levels.map((l, i) => ({ label: l.height + "p", value: i }));
-            player.config.quality = {
-                default: 0,
-                options: levels.map(l => l.value),
-                forced: true,
-                onChange: (q) => { hls.currentLevel = q; }
-            };
-        });
+    loadVideo(url);
 
-    } else {
-        video.src = videoURL;
+    // Quality Control
+    function setQuality(q) {
+        if (!hls) return;
+
+        if (q === "auto") {
+            hls.currentLevel = -1;
+            alert("Auto Quality Enabled");
+        } else {
+            // find level index
+            let levelIndex = hls.levels.findIndex(l => l.height === q);
+            if (levelIndex !== -1) {
+                hls.currentLevel = levelIndex;
+                alert(q + "p Selected");
+            } else {
+                alert("This quality not available for this video");
+            }
+        }
+    }
+
+    // Speed Control
+    function setSpeed(s) {
+        player.speed = s;
     }
 </script>
 
