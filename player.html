@@ -3,189 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <title>DevCoderz Player</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- HLS Support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-    body{
-        background:#000;
-        margin:0;
-        font-family: Arial, sans-serif;
-        color:white;
-        text-align:center;
+    body {
+        background: #000;
+        color: white;
+        font-family: Arial;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
     }
 
-    .neon-frame{
-        border:2px solid #8a2be2;
-        box-shadow:0 0 20px #8a2be2,0 0 40px #8a2be2;
-        padding:10px;
-        border-radius:12px;
-        width:95%;
-        margin:auto;
-        margin-top:20px;
+    .player-box {
+        width: 90%;
+        max-width: 900px;
+        margin: auto;
+        padding: 15px;
+        border-radius: 18px;
+        box-shadow: 0 0 25px #00f2ff;
+        background: #111;
     }
 
-    #videoPlayer{
-        width:100%;
-        height:260px;
-        background:#111;
-        border-radius:10px;
+    video {
+        width: 100%;
+        border-radius: 12px;
+        outline: none;
     }
 
-    .controls{
-        margin-top:10px;
-        display:flex;
-        justify-content:center;
-        gap:10px;
+    .control-row {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
     }
 
-    select, button{
-        padding:10px;
-        border-radius:8px;
-        border:none;
-        font-size:16px;
+    select, button {
+        padding: 10px 15px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
+        font-weight: bold;
     }
 
-    /* Popup */
-    #join-popup{
-        position:fixed;
-        inset:0;
-        background:rgba(0,0,0,0.85);
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        z-index:999;
+    #offlineStatus {
+        margin-top: 15px;
+        padding: 10px 15px;
+        border-radius: 12px;
+        display: inline-block;
+        font-size: 18px;
+        font-weight: bold;
+        background: #444;
+        color: #ccc;
     }
 
-    .popup-box{
-        background:#111;
-        padding:25px;
-        border-radius:20px;
-        width:85%;
-        border:1px solid #8a2be2;
-        box-shadow:0 0 20px #8a2be2,0 0 40px #8a2be2;
-    }
-
-    /* Jai Shree Ram Glow */
-    .ram-text{
-        color:red;
-        font-size:28px;
-        font-weight:bold;
-        text-shadow:0 0 10px red,0 0 20px red,0 0 30px #ff0000;
-        margin-top:25px;
+    .ram {
+        font-size: 32px;
+        margin-top: 25px;
+        color: red;
+        text-shadow: 0 0 20px red, 0 0 40px orange;
+        font-weight: bold;
     }
 </style>
-
 </head>
 <body>
 
-<!-- Popup -->
-<div id="join-popup">
-    <div class="popup-box">
-        <h2 style="color:#d09bff; font-size:24px;">Join Telegram</h2>
+<div class="player-box">
 
-        <p style="font-size:18px;">
-            Other lectures dekhne ke liye<br>
-            hamare Telegram channel ko join kare.
-        </p>
+    <h2 style="margin-bottom:10px;">🔥 DevCoderz Premium Player</h2>
 
-        <br><br>
-
-        <a href="https://t.me/+QVhljL_D32RlOTg1"
-           style="background:#8a2be2; padding:12px 20px; display:block; border-radius:10px; margin-bottom:20px; color:white; text-decoration:none;">
-            Join Telegram
-        </a>
-
-        <button onclick="closePopup()"
-            style="background:#333; color:white; padding:10px 20px; border-radius:10px;">
-            Skip
-        </button>
-    </div>
-</div>
-
-<div class="neon-frame">
-
-    <!-- Video Player -->
-    <video id="videoPlayer" controls></video>
+    <video id="video" controls></video>
 
     <!-- Controls -->
-    <div class="controls">
-
-        <!-- Speed -->
-        <select id="speedControl">
+    <div class="control-row">
+        <!-- SPEED MENU -->
+        <select id="speedMenu" onchange="setSpeed(this.value)">
+            <option value="0.25">0.25x</option>
             <option value="0.5">0.5x</option>
             <option value="0.75">0.75x</option>
-            <option value="1" selected>1x Normal</option>
+            <option value="1" selected>1x (Normal)</option>
             <option value="1.25">1.25x</option>
             <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
             <option value="2">2x</option>
-           <option value="2.25">2.25x</option>
-           <option value="2.5">2.5x</option>
+            <option value="2.25">2.25x</option>
+            <option value="2.5">2.5x</option>
             <option value="3">3x</option>
+            <option value="3.5">3.5x</option>
             <option value="4">4x</option>
         </select>
 
-        <!-- Quality -->
-        <select id="qualityControl">
-            <option value="auto">Auto</option>
-            <option value="1080">1080p</option>
-            <option value="720">720p</option>
-            <option value="480">480p</option>
-            <option value="360">360p</option>
-        </select>
-
-        <!-- Full Screen -->
-        <button onclick="openFullscreen()">Full Screen</button>
-
+        <!-- FULLSCREEN -->
+        <button onclick="fullscreen()">Fullscreen</button>
     </div>
 
-    <!-- Developer Name -->
-    <p style="margin-top:20px; font-size:18px;">Developer – PT. Devansh Sharma</p>
+    <!-- Offline Status -->
+    <div id="offlineStatus">Loading...</div>
+    <br>
+    <button onclick="toggleOffline()" 
+        style="margin-top:10px;background:#0a84ff;color:white;">Mark / Unmark Offline</button>
 
-    <!-- Telegram Link Below -->
-    <p style="color:#aaa; margin-top:5px;">
-        Join our Telegram :  
-        <a href="https://t.me/+QVhljL_D32RlOTg1" style="color:#8a2be2;">Click Here</a>
+    <!-- Developer Info -->
+    <p style="margin-top:18px;font-size:17px;">
+        Developer – <b>PT. Devansh Sharma</b>
     </p>
 
-    <div class="ram-text">जय श्री राम</div>
+    <p>
+        Join Telegram:  
+        <a href="https://t.me/+QVhljL_D32RlOTg1" style="color:#00eaff;">Click Here</a>
+    </p>
+
+    <!-- JAI SHREE RAM GLOW -->
+    <div class="ram">॥ जय श्री राम ॥</div>
 
 </div>
 
+<!-- SCRIPT LOGIC -->
 <script>
-let player = document.getElementById("videoPlayer");
+    const video = document.getElementById("video");
 
-// URL fetch
-const urlParams = new URLSearchParams(window.location.search);
-const videoURL = urlParams.get("Url");
+    // Load URL from parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileURL = urlParams.get("Url");
 
-// Load video
-player.src = videoURL;
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(fileURL);
+        hls.attachMedia(video);
+    } else {
+        video.src = fileURL;
+    }
 
-// Speed change
-document.getElementById("speedControl").onchange = function(){
-    player.playbackRate = this.value;
-};
+    // SPEED CHANGE
+    function setSpeed(v) {
+        video.playbackRate = parseFloat(v);
+    }
 
-// Popup Close
-function closePopup(){
-    document.getElementById("join-popup").style.display = "none";
-    player.play();
-}
+    // FULLSCREEN
+    function fullscreen() {
+        if (video.requestFullscreen) video.requestFullscreen();
+    }
 
-// Fullscreen
-function openFullscreen() {
-    if (player.requestFullscreen) player.requestFullscreen();
-}
-          "https://play.google.com/store/apps/details?id=idm.internet.download.manager";
-    }, 800);
-};
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js")
-    .then(() => console.log("Service Worker Registered"))
-    .catch(err => console.log("SW Error:", err));
-}
+    /* -------------------------
+       OFFLINE INDICATOR (UI ONLY)
+       ------------------------- */
+    const videoId = "offline_" + btoa(fileURL);
+
+    function loadStatus() {
+        const saved = localStorage.getItem(videoId);
+        const box = document.getElementById("offlineStatus");
+
+        if (saved === "true") {
+            box.textContent = "Available Offline";
+            box.style.background = "#1d9100";
+            box.style.color = "white";
+            box.style.boxShadow = "0 0 10px #4cff00";
+        } else {
+            box.textContent = "Not Available Offline";
+            box.style.background = "#444";
+            box.style.color = "#ccc";
+            box.style.boxShadow = "none";
+        }
+    }
+
+    function toggleOffline() {
+        const saved = localStorage.getItem(videoId);
+
+        if (saved === "true")
+            localStorage.setItem(videoId, "false");
+        else
+            localStorage.setItem(videoId, "true");
+
+        loadStatus();
+    }
+
+    loadStatus();
 </script>
 
 </body>
