@@ -106,7 +106,7 @@
 <div class="dev-anim">DevCoderz</div>
 
 <!-- POPUP -->
-<div id="join-popup">
+<div id="join-popup" style="display:flex;">
     <div class="popup-card">
         <h2 style="color:#93c5fd; font-size:26px;">Join Telegram</h2>
 
@@ -123,11 +123,30 @@
     </div>
 </div>
 
-<div class="container">
+<script>
+    const popup = document.getElementById("join-popup");
+    const skipBtn = document.getElementById("skip-btn");
+    const video = document.getElementById("video");
 
-    <div class="neon-frame">
-        <video id="video" controls playsinline></video>
-    </div>
+    // Popup show hote hi video pause
+    window.addEventListener("load", () => {
+        popup.style.display = "flex";
+        video.pause();
+    });
+
+    // SKIP button event
+    skipBtn.addEventListener("click", () => {
+        popup.style.display = "none";
+        setTimeout(() => {
+            video.play().catch(() => {});
+        }, 200);
+
+        // Viewer join count
+        if (typeof joinViewer === "function") {
+            joinViewer();
+        }
+    });
+</script>>
 
     <!-- LIVE VIEWERS -->
     <div id="viewerBox" style="margin-top:12px; text-align:center; font-size:22px; color:#3b82f6;">
