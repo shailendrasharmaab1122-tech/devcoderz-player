@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -18,10 +19,12 @@
         margin: auto;
         margin-top: 25px;
     }
-.neon-frame {
-    border: 2px solid #3b82f6;
-    box-shadow: 0 0 25px #3b82f6, 0 0 50px #1d4ed8;
-};
+
+    .neon-frame {
+        border: 2px solid #3b82f6;
+        padding: 10px;
+        border-radius: 16px;
+        box-shadow: 0 0 25px #2563eb, 0 0 55px #3b82f6;
     }
 
     video {
@@ -35,6 +38,245 @@
         top: 20px;
         left: 20px;
         font-size: 22px;
+        font-weight: bold;
+        color: #60a5fa;
+        animation: glow 1.5s infinite alternate;
+        z-index: 50;
+        pointer-events: none;
+    }
+
+    @keyframes glow {
+        from { text-shadow: 0 0 10px #3b82f6; }
+        to   { text-shadow: 0 0 25px #1d4ed8; }
+    }
+
+    .credit {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 20px;
+        color: #60a5fa;
+    }
+
+    #join-popup {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+    }
+
+    .popup-card {
+        background: #111;
+        padding: 30px;
+        border-radius: 20px;
+        width: 85%;
+        max-width: 380px;
+        text-align: center;
+        border: 1px solid #3b82f6;
+        box-shadow: 0 0 25px #2563eb, 0 0 50px #3b82f6;
+    }
+
+    .popup-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        background: #3b82f6;
+        border: none;
+        color: white;
+        font-size: 17px;
+        margin-top: 20px;
+    }
+
+    .skip-btn {
+        background: #444;
+        margin-top: 25px;
+    }
+
+    @keyframes ramglow {
+        from { text-shadow: 0 0 15px red; }
+        to   { text-shadow: 0 0 45px #ff2222; }
+    }
+</style>
+</head>
+<body>
+
+<div class="dev-anim">DevCoderz</div>
+
+<!-- POPUP -->
+<div id="join-popup">
+    <div class="popup-card">
+        <h2 style="color:#93c5fd; font-size:26px;">Join Telegram</h2>
+
+        <p style="font-size:17px;">
+            Other lectures dekhne ke liye<br>
+            hamare Telegram channel ko join kare.
+        </p>
+
+        <br><br>
+
+        <a href="https://t.me/+QVhljL_D32RlOTg1" class="popup-btn">Join Telegram</a>
+
+        <button id="skip-btn" class="popup-btn skip-btn">Skip</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="neon-frame">
+        <video id="video" controls playsinline></video>
+    </div>
+
+    <!-- LIVE VIEWERS -->
+    <div id="viewerBox" style="margin-top:12px; text-align:center; font-size:22px; color:#3b82f6;">
+        👁️ Watching: <span id="viewCount">0</span>
+    </div>
+
+    <div style="margin-top:25px; text-align:center;">
+
+        <!-- SPEED -->
+        <label style="font-size:20px; margin-right:10px; color:#60a5fa;">Speed:</label>
+        <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x (Normal)</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+            <option value="2.25">2.25x</option>
+            <option value="2.5">2.5x</option>
+            <option value="3">3x</option>
+            <option value="4">4x</option>
+        </select>
+
+        <!-- QUALITY -->
+        <label style="font-size:20px; margin-left:25px; color:#60a5fa;">Quality:</label>
+        <select id="qualityMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="auto" selected>Auto</option>
+            <option value="360">360p</option>
+            <option value="480">480p</option>
+            <option value="720">720p</option>
+            <option value="1080">1080p</option>
+        </select>
+
+    </div>
+
+    <!-- जय श्री राम -->
+    <div style="
+        text-align:center;
+        font-size:34px;
+        font-weight:bold;
+        color:red;
+        margin-top:25px;
+        animation: ramglow 1.4s infinite alternate;
+    ">
+        जय श्री राम 🚩
+    </div>
+
+    <!-- Developer Credit -->
+    <div class="credit">
+        Developer – PT. Devansh Sharma<br>
+        Admin – Anuj Yadav (Cyber Ethical Hacker)
+    </div>
+
+    <br><br>
+
+    <!-- Telegram Link -->
+    <div style="text-align:center; margin-top:15px;">
+        <a href="https://t.me/+QVhljL_D32RlOTg1"
+           style="color:#60a5fa; font-size:20px; text-decoration:none;">
+           👉 Join our Telegram Channel for more updates and notes
+        </a>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+    const video = document.getElementById("video");
+
+    // URL Fix (Encoded + Normal)
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoURL = decodeURIComponent(urlParams.get("Url"));
+
+    // HLS
+    let hls;
+    if (Hls.isSupported()) {
+        hls = new Hls({
+            maxMaxBufferLength: 60,
+            enableWorker: true
+        });
+        hls.loadSource(videoURL);
+        hls.attachMedia(video);
+    } else {
+        video.src = videoURL;
+    }
+
+    // POPUP
+    const popup = document.getElementById("join-popup");
+    const skipBtn = document.getElementById("skip-btn");
+
+    window.onload = () => {
+        popup.style.display = "flex";
+        video.pause();
+    };
+
+    skipBtn.onclick = () => {
+        popup.style.display = "none";
+        video.play();
+        joinViewer();
+    };
+
+    // SPEED
+    document.getElementById("speedMenu").addEventListener("change", function() {
+        video.playbackRate = Number(this.value);
+    });
+
+    // QUALITY
+    document.getElementById("qualityMenu").addEventListener("change", function () {
+        if (!hls) return;
+
+        let q = this.value;
+
+        if (q === "auto") {
+            hls.currentLevel = -1;
+        } else {
+            hls.levels.forEach((level, index) => {
+                if (level.height == q) {
+                    hls.currentLevel = index;
+                }
+            });
+        }
+    });
+
+    // -----------------------------
+    // LIVE VIEWER COUNTER SYSTEM
+    // -----------------------------
+
+    const API = "https://YOUR_DOMAIN_HERE/api/viewers";
+
+    async function joinViewer() {
+        await fetch(API + "?action=join", { method: "POST" });
+    }
+
+    async function leaveViewer() {
+        await fetch(API + "?action=leave", { method: "POST" });
+    }
+
+    async function updateViewerCount() {
+        const res = await fetch(API);
+        const data = await res.json();
+        document.getElementById("viewCount").innerText = data.viewers;
+    }
+
+    setInterval(updateViewerCount, 2500);
+
+    window.addEventListener("beforeunload", leaveViewer);
+</script>
+
+</body>
+</html>        font-size: 22px;
         font-weight: bold;
         color: #a855f7;
         animation: glow 1.5s infinite alternate;
