@@ -21,10 +21,10 @@
     }
 
     .neon-frame {
-        border: 2px solid #3b82f6;
+        border: 2px solid #a855f7;
         padding: 10px;
         border-radius: 16px;
-        box-shadow: 0 0 25px #2563eb, 0 0 55px #3b82f6;
+        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
     }
 
     video {
@@ -35,6 +35,128 @@
 
     .dev-anim {
         position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #a855f7;
+        animation: glow 1.5s infinite alternate;
+        z-index: 50;
+        pointer-events: none;
+    }
+
+    @keyframes glow {
+        from { text-shadow: 0 0 10px #a855f7; }
+        to   { text-shadow: 0 0 25px #9333ea; }
+    }
+
+    .credit {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 20px;
+        color: #a855f7;
+    }
+
+    /* POPUP */
+    #join-popup {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+    }
+
+    .popup-card {
+        background: #111;
+        padding: 30px;
+        border-radius: 20px;
+        width: 85%;
+        max-width: 380px;
+        text-align: center;
+        border: 1px solid #a855f7;
+        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
+    }
+
+    .popup-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        background: #9333ea;
+        border: none;
+        color: white;
+        font-size: 17px;
+        margin-top: 20px;
+    }
+
+    .skip-btn {
+        background: #444;
+        margin-top: 25px;
+    }
+
+    @keyframes ramglow {
+        from { text-shadow: 0 0 15px red; }
+        to   { text-shadow: 0 0 40px #ff2222; }
+    }
+</style>
+</head>
+<body>
+
+<div class="dev-anim">DevCoderz</div>
+
+<!-- POPUP -->
+<div id="join-popup">
+    <div class="popup-card">
+        <h2 style="color:#d8b4fe; font-size:26px; margin-bottom:15px;">Join Telegram</h2>
+
+        <p style="font-size:17px;">
+            Other lectures dekhne ke liye<br>
+            hamare Telegram channel ko join kare.
+
+
+            Use chrome browser for better experience 
+        </p>
+
+        <br><br>
+
+        <a href="https://t.me/+QVhljL_D32RlOTg1" class="popup-btn">Join Telegram</a>
+
+        <button id="skip-btn" class="popup-btn skip-btn">Skip</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="neon-frame">
+        <video id="video" controls playsinline></video>
+    </div>
+
+    <!-- Speed + Quality Menu -->
+    <div style="margin-top:25px; text-align:center;">
+
+        <!-- SPEED -->
+        <label style="font-size:20px; margin-right:10px; color:#c084fc;">Speed:</label>
+        <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x (Normal)</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+           <option value="2.25">2.25x</option>
+           <option value="2.5">2.5x</option>
+            <option value="3">3x</option>
+            <option value="4">4x</option>
+        </select>
+
+        <!-- QUALITY -->
+        <label style="font-size:20px; margin-left:25px; color:#c084fc;">Quality:</label>
+        <select id="qualityMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="auto" selected>Auto</option>
+            <option value="360">360p</option>
+            <option value="480">480p</option>
+            <option value="720">720p</option>
+            <option value="1080">1080p</option>
+        </select>        position: fixed;
         top: 20px;
         left: 20px;
         font-size: 22px;
