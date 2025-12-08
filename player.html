@@ -105,48 +105,134 @@
 
 <div class="dev-anim">DevCoderz</div>
 
-<!-- POPUP -->
-<div id="join-popup" style="display:flex;">
-    <div class="popup-card">
-        <h2 style="color:#93c5fd; font-size:26px;">Join Telegram</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevCoderz Player</title>
 
-        <p style="font-size:17px;">
-            Other lectures dekhne ke liye<br>
-            hamare Telegram channel ko join kare.
-        </p>
+<style>
+    body {
+        margin: 0;
+        background: #000;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
 
-        <br><br>
+    /* ===== POPUP BACKDROP ===== */
+    #popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        backdrop-filter: blur(10px);
+        background: rgba(0, 0, 255, 0.25); /* BLUE BLUR */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
 
-        <a href="https://t.me/+QVhljL_D32RlOTg1" class="popup-btn">Join Telegram</a>
+    /* ===== POPUP BOX ===== */
+    #popupBox {
+        background: white;
+        color: black;
+        padding: 25px;
+        border-radius: 15px;
+        width: 80%;
+        max-width: 350px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 600;
+    }
 
-        <button id="skip-btn" class="popup-btn skip-btn">Skip</button>
+    #skipBtn {
+        margin-top: 20px;
+        background: blue;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    /* ===== WATCHING COUNTER ===== */
+    #watchingCount {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 14px;
+        z-index: 50;
+    }
+
+    video {
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+        background: black;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- ===== POPUP ===== -->
+<div id="popup">
+    <div id="popupBox">
+        Welcome to DevCoderz Player 🎬<br><br>
+        <button id="skipBtn">Skip</button>
     </div>
 </div>
 
+<!-- ===== WATCHING COUNTER ===== -->
+<div id="watchingCount">Watching: 0</div>
+
+<!-- ===== VIDEO PLAYER ===== -->
+<video id="player" controls></video>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
-    const popup = document.getElementById("join-popup");
-    const skipBtn = document.getElementById("skip-btn");
-    const video = document.getElementById("video");
+/* ========== POPUP SKIP FIX ========== */
+document.getElementById("skipBtn").onclick = () => {
+    const popup = document.getElementById("popup");
+    popup.style.display = "none";
+};
 
-    // Popup show hote hi video pause
-    window.addEventListener("load", () => {
-        popup.style.display = "flex";
-        video.pause();
-    });
+/* ========== LOAD VIDEO ========== */
+const videoUrl = new URLSearchParams(window.location.search).get("Url");
+const video = document.getElementById("player");
 
-    // SKIP button event
-    skipBtn.addEventListener("click", () => {
-        popup.style.display = "none";
-        setTimeout(() => {
-            video.play().catch(() => {});
-        }, 200);
+if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(videoUrl);
+    hls.attachMedia(video);
+} else {
+    video.src = videoUrl;
+}
 
-        // Viewer join count
-        if (typeof joinViewer === "function") {
-            joinViewer();
-        }
-    });
-</script>>
+/* ========== LIVE WATCHING COUNTER ========== */
+function updateWatching() {
+    fetch("https://api.countapi.xyz/hit/devcoderz-player/watching")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("watchingCount").innerText =
+                "Watching: " + data.value;
+        });
+}
+
+setInterval(updateWatching, 3000);
+updateWatching();
+</script>
+
+</body>
+</html>
 
     <!-- LIVE VIEWERS -->
     <div id="viewerBox" style="margin-top:12px; text-align:center; font-size:22px; color:#3b82f6;">
