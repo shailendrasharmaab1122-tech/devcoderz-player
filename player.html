@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -15,16 +14,17 @@
 
     .container {
         width: 98%;
-        max-width: 900px;
+        max-width: 950px;
         margin: auto;
-        margin-top: 20px;
+        margin-top: 25px;
     }
 
     .neon-frame {
-        border: 2px solid #3b82f6;
+        border: 2px solid #a855f7;
         padding: 10px;
         border-radius: 16px;
-        box-shadow: 0 0 25px #3b82f6, 0 0 50px #3b82f6;
+        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
+        position: relative;
     }
 
     video {
@@ -35,6 +35,288 @@
 
     .dev-anim {
         position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #a855f7;
+        animation: glow 1.5s infinite alternate;
+        z-index: 50;
+        pointer-events: none;
+    }
+
+    @keyframes glow {
+        from { text-shadow: 0 0 10px #a855f7; }
+        to   { text-shadow: 0 0 25px #9333ea; }
+    }
+
+    .credit {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 20px;
+        color: #a855f7;
+    }
+
+    /* POPUP */
+    #join-popup {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+    }
+
+    .popup-card {
+        background: #111;
+        padding: 30px;
+        border-radius: 20px;
+        width: 85%;
+        max-width: 380px;
+        text-align: center;
+        border: 1px solid #a855f7;
+        box-shadow: 0 0 25px #a855f7, 0 0 50px #a855f7;
+    }
+
+    .popup-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        background: #9333ea;
+        border: none;
+        color: white;
+        font-size: 17px;
+        margin-top: 20px;
+    }
+
+    .skip-btn {
+        background: #444;
+        margin-top: 25px;
+    }
+
+    @keyframes ramglow {
+        from { text-shadow: 0 0 15px red; }
+        to   { text-shadow: 0 0 40px #ff2222; }
+    }
+
+    /* Viewer Counter */
+    #viewerBadge {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        z-index: 99999;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        display: flex;
+        gap:8px;
+        align-items:center;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+    #viewerBadge .dot {
+        width:10px;
+        height:10px;
+        border-radius:50%;
+        background:#00eaff;
+        box-shadow:0 0 8px #00eaff;
+    }
+</style>
+</head>
+<body>
+
+<div class="dev-anim">DevCoderz</div>
+
+<!-- POPUP -->
+<div id="join-popup">
+    <div class="popup-card">
+        <h2 style="color:#d8b4fe; font-size:26px; margin-bottom:15px;">Join Telegram</h2>
+
+        <p style="font-size:17px;">
+            Other lectures dekhne ke liye<br>
+            hamare Telegram channel ko join kare.<br><br>
+            Use chrome browser for better experience
+        </p>
+
+        <a href="https://t.me/+QVhljL_D32RlOTg1" class="popup-btn">Join Telegram</a>
+        <button id="skip-btn" class="popup-btn skip-btn">Skip</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="neon-frame">
+
+        <!-- viewer counter -->
+        <div id="viewerBadge">
+            <span class="dot"></span>
+            <span id="viewerCount">0</span>
+            <span style="font-size:13px;color:#cfeefc;">Watching</span>
+        </div>
+
+        <video id="video" controls playsinline></video>
+    </div>
+
+    <!-- Speed + Quality Menu -->
+    <div style="margin-top:25px; text-align:center;">
+
+        <!-- SPEED -->
+        <label style="font-size:20px; margin-right:10px; color:#c084fc;">Speed:</label>
+        <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x (Normal)</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+            <option value="2.25">2.25x</option>
+            <option value="2.5">2.5x</option>
+            <option value="3">3x</option>
+            <option value="4">4x</option>
+        </select>
+
+        <!-- QUALITY -->
+        <label style="font-size:20px; margin-left:25px; color:#c084fc;">Quality:</label>
+        <select id="qualityMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
+            <option value="auto" selected>Auto</option>
+            <option value="360">360p</option>
+            <option value="480">480p</option>
+            <option value="720">720p</option>
+            <option value="1080">1080p</option>
+        </select>
+
+    <!-- जय श्री राम -->
+    <div style="text-align:center; font-size:34px; font-weight:bold; color:red; animation: ramglow 1.4s infinite alternate;">
+        जय श्री राम 🚩
+    </div>
+
+    <!-- Developer Credit -->
+    <div class="credit">
+        Developer – PT. Devansh Sharma<br>
+        Admin – Anuj Yadav (Cyber Ethical Hacker)
+    </div>
+
+    <br><br>
+
+    </div>
+
+    <!-- Telegram Link -->
+    <div style="text-align:center; margin-top:15px;">
+        <a href="https://t.me/+QVhljL_D32RlOTg1"
+           style="color:#60a5fa; font-size:20px; text-decoration:none;">
+           👉 Join our Telegram Channel for more updates and notes
+        </a>
+    </div>
+
+</div>
+
+<!-- HLS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+    const video = document.getElementById("video");
+
+    // URL Fix — Normal + Encoded dono
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoURL = decodeURIComponent(urlParams.get("Url"));
+
+    // HLS Player
+    let hls;
+    if (Hls.isSupported()) {
+        hls = new Hls({
+            maxMaxBufferLength: 60,
+            enableWorker: true
+        });
+        hls.loadSource(videoURL);
+        hls.attachMedia(video);
+    } else {
+        video.src = videoURL;
+    }
+
+    // POPUP
+    const popup = document.getElementById("join-popup");
+    const skipBtn = document.getElementById("skip-btn");
+
+    window.onload = () => {
+        popup.style.display = "flex";
+        video.pause();
+    };
+
+    skipBtn.onclick = () => {
+        popup.style.display = "none";
+        video.play();
+    };
+
+    // SPEED CONTROL
+    document.getElementById("speedMenu").addEventListener("change", function() {
+        video.playbackRate = Number(this.value);
+    });
+
+    // QUALITY CONTROL
+    document.getElementById("qualityMenu").addEventListener("change", function () {
+        if (!hls) return;
+
+        let q = this.value;
+
+        if (q === "auto") {
+            hls.currentLevel = -1;
+        } else {
+            hls.levels.forEach((level, index) => {
+                if (level.height == q) {
+                    hls.currentLevel = index;
+                }
+            });
+        }
+    });
+</script>
+
+<!-- Firebase for viewer counter -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+(function(){
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+
+  if (!firebaseConfig || firebaseConfig.apiKey === "YOUR_API_KEY") return;
+
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const params = new URLSearchParams(location.search || "");
+  let rawUrl = params.get("Url") || "";
+  try { rawUrl = decodeURIComponent(rawUrl); } catch(e){}
+  const videoId = rawUrl ? btoa(rawUrl).replace(/=/g,"").slice(0,40) : "default_video";
+
+  const sessionId = "s_" + Math.random().toString(36).slice(2,10);
+
+  const presenceRef = db.ref("presence/" + videoId + "/" + sessionId);
+  const listRef = db.ref("presence/" + videoId);
+
+  presenceRef.set(true);
+  presenceRef.onDisconnect().remove();
+
+  listRef.on("value", snapshot => {
+    const val = snapshot.val() || {};
+    const count = Object.keys(val).length;
+    document.getElementById("viewerCount").innerText = count;
+  });
+
+})();
+</script>
+
+</body>
+</html>        position: fixed;
         top: 15px;
         left: 15px;
         font-size: 22px;
