@@ -33,7 +33,6 @@
         background: #000;
     }
 
-    /* DevCoderz animation top-left */
     .dev-anim {
         position: fixed;
         top: 20px;
@@ -90,7 +89,6 @@
         background: #555;
     }
 
-    /* Jai Shree Ram */
     @keyframes ramglow {
         from { text-shadow: 0 0 15px red; }
         to   { text-shadow: 0 0 40px #ff0000; }
@@ -101,7 +99,22 @@
 
 <div class="dev-anim">DevCoderz</div>
 
+<!-- POPUP -->
+<div id="join-popup">
+    <div class="popup-card">
+        <h2 style="color:#60a5fa;">Join Our Channel</h2>
+        <p style="color:#ccc;">Latest updates & premium content</p>
 
+        <button class="popup-btn"
+            onclick="window.open('https://t.me/+P-uSwcx9ajFkMjM1','_blank')">
+            Join Channel
+        </button>
+
+        <button class="popup-btn skip-btn"
+            onclick="document.getElementById('join-popup').style.display='none'">
+            Skip
+        </button>
+    </div>
 </div>
 
 <div class="container">
@@ -109,9 +122,7 @@
         <video id="video" controls playsinline></video>
     </div>
 
-    <!-- SPEED + QUALITY -->
     <div style="margin-top:25px; text-align:center;">
-
         <label style="font-size:20px; margin-right:10px; color:#60a5fa;">Speed:</label>
         <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
             <option value="0.5">0.5x</option>
@@ -130,75 +141,52 @@
             <option value="360">360p</option>
             <option value="480">480p</option>
             <option value="720">720p</option>
-            <option value="1080">1080p</
-option>
-            <option value="2160p">2160p<//option>
+            <option value="1080">1080p</option>
         </select>
     </div>
 
-    <!-- jai shree ram -->
     <div style="text-align:center; margin-top:25px; font-size:34px; font-weight:bold; color:red; animation: ramglow 1.4s infinite alternate;">
         जय श्री राम 🚩
     </div>
 
-    <!-- credit -->
+    <!-- CREDIT WITH LINK -->
     <div style="text-align:center; margin-top:15px; font-size:19px; color:#60a5fa;">
-        Developer – PT. Devansh Sharma <br>
-
-    </div>
-
-    <div style="text-align:center; margin-top:18px;">
-        
-
+        Developer –
+        <a href="https://t.me/+P-uSwcx9ajFkMjM1"
+           target="_blank"
+           style="color:#60a5fa; text-decoration:none;">
+           PT. Devansh Sharma
         </a>
     </div>
-
 </div>
 
-<!-- HLS -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
     const video = document.getElementById("video");
-
-    // URL decode
     const urlParams = new URLSearchParams(window.location.search);
     const videoURL = decodeURIComponent(urlParams.get("Url"));
 
-    // HLS player
     let hls;
-
     if (Hls.isSupported()) {
-        hls = new Hls({
-            maxMaxBufferLength: 60,
-            enableWorker: true
-        });
+        hls = new Hls({ maxMaxBufferLength: 60, enableWorker: true });
         hls.loadSource(videoURL);
         hls.attachMedia(video);
     } else {
         video.src = videoURL;
     }
 
-    
-
-    // SPEED control
     document.getElementById("speedMenu").addEventListener("change", function() {
         video.playbackRate = Number(this.value);
     });
 
-    // QUALITY control
     document.getElementById("qualityMenu").addEventListener("change", function () {
         if (!hls) return;
-
-        let q = this.value;
-
-        if (q === "auto") {
+        if (this.value === "auto") {
             hls.currentLevel = -1;
         } else {
-            hls.levels.forEach((level, index) => {
-                if (level.height == q) {
-                    hls.currentLevel = index;
-                }
+            hls.levels.forEach((l, i) => {
+                if (l.height == this.value) hls.currentLevel = i;
             });
         }
     });
