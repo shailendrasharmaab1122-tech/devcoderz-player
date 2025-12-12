@@ -101,19 +101,7 @@
 
 <div class="dev-anim">DevCoderz</div>
 
-<!-- POPUP -->
-<div id="join-popup">
-    <div class="popup-card">
-        <h2 style="color:#93c5fd; font-size:26px;">Join Telegram</h2>
 
-        <p style="font-size:18px;">
-            Other lectures ke liye hamare Telegram channel ko join kare.<br><br>
-            Best experience ke liye Chrome browser use kare.
-        </p>
-
-        <a href="https://t.me/+QVhljL_D32RlOTg1" class="popup-btn">Join Telegram</a>
-        <button id="skip-btn" class="popup-btn skip-btn">Skip</button>
-    </div>
 </div>
 
 <div class="container">
@@ -160,8 +148,7 @@ option>
     </div>
 
     <div style="text-align:center; margin-top:18px;">
-        <a href="https://t.me/+QVhljL_D32RlOTg1" style="color:#93c5fd; font-size:20px;">
-            👉 Join our Telegram Channel For more lectures and updates
+        
 
         </a>
     </div>
@@ -192,14 +179,7 @@ option>
         video.src = videoURL;
     }
 
-    // POPUP
-    const popup = document.getElementById("join-popup");
-    const skipBtn = document.getElementById("skip-btn");
-
-    skipBtn.onclick = () => {
-        popup.style.display = "none";
-        try { video.play(); } catch(e){}
-    };
+    
 
     // SPEED control
     document.getElementById("speedMenu").addEventListener("change", function() {
