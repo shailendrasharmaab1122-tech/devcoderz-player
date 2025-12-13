@@ -33,6 +33,7 @@
         background: #000;
     }
 
+    /* DevCoderz animation */
     .dev-anim {
         position: fixed;
         top: 20px;
@@ -89,9 +90,10 @@
         background: #555;
     }
 
+    /* Jai Shree Ram glow */
     @keyframes ramglow {
         from { text-shadow: 0 0 15px red; }
-        to   { text-shadow: 0 0 40px #ff0000; }
+        to   { text-shadow: 0 0 40px red; }
     }
 </style>
 </head>
@@ -102,13 +104,12 @@
 <!-- POPUP -->
 <div id="join-popup">
     <div class="popup-card">
-        <h2 style="color:#60a5fa;">Join Our Channel</h2>
+        <h2 style="color:#60a5fa;">Join Our Telegram</h2>
         <p style="color:#ccc;">Latest updates & premium content</p>
 
         <button class="popup-btn"
             onclick="window.open('https://t.me/+P-uSwcx9ajFkMjM1','_blank')">
-            Join New telegram Channel
-
+            Join Channel
         </button>
 
         <button class="popup-btn skip-btn"
@@ -123,6 +124,7 @@
         <video id="video" controls playsinline></video>
     </div>
 
+    <!-- SPEED & QUALITY -->
     <div style="margin-top:25px; text-align:center;">
         <label style="font-size:20px; margin-right:10px; color:#60a5fa;">Speed:</label>
         <select id="speedMenu" style="padding:8px; border-radius:10px; background:#222; color:white;">
@@ -146,28 +148,34 @@
         </select>
     </div>
 
+    <!-- Jai Shree Ram -->
     <div style="text-align:center; margin-top:25px; font-size:34px; font-weight:bold; color:red; animation: ramglow 1.4s infinite alternate;">
         जय श्री राम 🚩
     </div>
 
-    <!-- CREDIT WITH LINK -->
-    <div style="text-align:center; margin-top:15px; font-size:19px; color:#60a5fa;">
-        Developer – PT. Devansh Sharma 
+    <!-- CREDIT SECTION -->
+    <div style="text-align:center; margin-top:18px; font-size:20px;">
 
+        <div style="color:#60a5fa; font-weight:bold; animation: glow 1.5s infinite alternate;">
+            PT. Devansh Sharma
+        </div>
 
-                    PT. JAY SHARMA
+        <div style="margin-top:6px; color:#60a5fa; font-weight:bold; animation: glow 1.5s infinite alternate;">
+            PT. Jay Sharma
+        </div>
 
-</div>
+        <div style="margin-top:14px; font-size:17px;">
+            <a href="https://t.me/+P-uSwcx9ajFkMjM1"
+               target="_blank"
+               style="color:white; text-decoration:none;">
+               Click here to Join Telegram Channel
+            </a>
+        </div>
 
-Click here to new Join telegram Channel 
-        <a href="https://t.me/+P-uSwcx9ajFkMjM1"
-           target="_blank"
-           style="color:#60a5fa; text-decoration:none;">
-          
-        </a>
     </div>
 </div>
 
+<!-- HLS -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
