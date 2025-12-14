@@ -18,12 +18,16 @@ body{
     margin:25px auto;
 }
 
-/* FRAME */
+/* GROW STUDY STYLE FRAME */
 .neon-frame{
     border:3px solid #3b82f6;
     padding:12px;
     border-radius:18px;
-    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa inset;
+    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa,0 0 90px #3b82f6 inset;
+    transition:0.3s;
+}
+.neon-frame:hover{
+    box-shadow:0 0 50px #60a5fa,0 0 100px #3b82f6,0 0 120px #60a5fa inset;
 }
 
 video{
@@ -40,9 +44,13 @@ video{
     font-size:22px;
     font-weight:bold;
     color:#3b82f6;
-    text-shadow:0 0 15px #60a5fa;
+    animation:glow 1.5s infinite alternate;
     z-index:99;
     pointer-events:none;
+}
+@keyframes glow{
+    from{ text-shadow:0 0 10px #3b82f6; }
+    to{ text-shadow:0 0 30px #60a5fa; }
 }
 
 /* POPUP */
@@ -50,7 +58,7 @@ video{
     position:fixed;
     inset:0;
     background:rgba(0,0,0,.9);
-    display:none;
+    display:flex;
     align-items:center;
     justify-content:center;
     z-index:200;
@@ -77,6 +85,12 @@ video{
     color:#fff;
 }
 .skip-btn{ background:#555; }
+
+/* JAI SHREE RAM */
+@keyframes ramglow{
+    from{ text-shadow:0 0 15px red; }
+    to{ text-shadow:0 0 40px red; }
+}
 </style>
 </head>
 
@@ -84,7 +98,7 @@ video{
 
 <div class="dev-anim">DevCoderz</div>
 
-<!-- POPUP -->
+<!-- TELEGRAM POPUP -->
 <div id="join-popup">
   <div class="popup-card">
     <h2 style="color:#60a5fa;">Join Our Telegram</h2>
@@ -95,7 +109,8 @@ video{
       Join Telegram Channel
     </button>
 
-    <button class="popup-btn skip-btn" onclick="skipPopup()">
+    <button class="popup-btn skip-btn"
+      onclick="document.getElementById('join-popup').style.display='none'">
       Skip
     </button>
   </div>
@@ -106,16 +121,21 @@ video{
     <video id="video" controls playsinline></video>
   </div>
 
-  <!-- SPEED + QUALITY -->
-  <div style="margin-top:20px;text-align:center;">
-    <select id="speedMenu">
+  <!-- SPEED & QUALITY -->
+  <div style="margin-top:22px;text-align:center;">
+    <label style="font-size:18px;color:#60a5fa;">Speed:</label>
+    <select id="speedMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
       <option value="0.5">0.5x</option>
       <option value="1" selected>1x</option>
       <option value="1.5">1.5x</option>
       <option value="2">2x</option>
-    </select>
-
-    <select id="qualityMenu">
+      <option value="2.25">2.25x</option>
+      <option value="2.5">2.5x</option>
+      <option value="2.75">2.75x</option>
+      <option value="3">3x</option>
+ </select>
+    <label style="margin-left:20px;font-size:18px;color:#60a5fa;">Quality:</label>
+    <select id="qualityMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
       <option value="auto">Auto</option>
       <option value="360">360p</option>
       <option value="480">480p</option>
@@ -123,20 +143,39 @@ video{
       <option value="1080">1080p</option>
     </select>
   </div>
+
+  <!-- JAI SHREE RAM -->
+  <div style="text-align:center;margin-top:25px;
+      font-size:34px;font-weight:bold;color:red;
+      animation:ramglow 1.4s infinite alternate;">
+    जय श्री राम 🚩
+  </div>
+
+  <!-- CREDITS -->
+  <div style="text-align:center;margin-top:18px;font-size:20px;">
+    <div style="color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
+      Developer – PT. Devansh Sharma
+    </div>
+    <div style="margin-top:6px;color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
+      Admin – PT. Jay Sharma
+    </div>
+
+    <div style="margin-top:14px;font-size:17px;">
+      <a href="https://t.me/+P-uSwcx9ajFkMjM1" target="_blank"
+         style="color:#fff;text-decoration:none;">
+        Click here to Join new Telegram Channel
+      </a>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const video = document.getElementById("video");
-const popup = document.getElementById("join-popup");
-
 const params = new URLSearchParams(window.location.search);
-const videoURL = decodeURIComponent(params.get("Url") || params.get("url") || "");
+const videoURL = decodeURIComponent(params.get("Url") || "");
 
 let hls;
-let popupShown = false;
-
-/* LOAD VIDEO */
 if(Hls.isSupported()){
     hls = new Hls();
     hls.loadSource(videoURL);
@@ -145,12 +184,9 @@ if(Hls.isSupported()){
     video.src = videoURL;
 }
 
-/* SPEED */
 document.getElementById("speedMenu").onchange = e=>{
     video.playbackRate = Number(e.target.value);
 };
-
-/* QUALITY */
 document.getElementById("qualityMenu").onchange = e=>{
     if(!hls) return;
     if(e.target.value === "auto") hls.currentLevel = -1;
@@ -158,21 +194,6 @@ document.getElementById("qualityMenu").onchange = e=>{
         if(l.height == e.target.value) hls.currentLevel = i;
     });
 };
-
-/* POPUP ON FIRST PLAY */
-video.addEventListener("play", ()=>{
-    if(!popupShown){
-        popup.style.display = "flex";
-        popupShown = true;
-        video.pause();
-    }
-});
-
-/* SKIP */
-function skipPopup(){
-    popup.style.display = "none";
-    video.play();
-}
 </script>
 
 </body>
