@@ -25,6 +25,9 @@ body{
     border-radius:18px;
     box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa,0 0 90px #3b82f6 inset;
     transition:0.3s;
+    /* Added for Waveform positioning */
+    position: relative; 
+    overflow: hidden; 
 }
 .neon-frame:hover{
     box-shadow:0 0 50px #60a5fa,0 0 100px #3b82f6,0 0 120px #60a5fa inset;
@@ -35,6 +38,35 @@ video{
     border-radius:14px;
     background:#000;
 }
+
+/* --- ADDED: WAVEFORM VISUAL EFFECT --- */
+.audio-wave {
+    position: absolute;
+    bottom: 0; /* Controls par overlap karne ke liye */
+    left: 0;
+    width: 200%; 
+    height: 100px;
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 10; 
+    
+    /* Multiple Backgrounds: Wave Line (SVG) aur Fading Gradient */
+    background: 
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 25"><path fill="none" stroke="%233b82f6" stroke-width="0.7" stroke-linecap="round" d="M0 12.5 C 10 0, 20 25, 30 12.5, 40 0, 50 25, 60 12.5, 70 0, 80 25, 90 12.5, 100 12.5" /></svg>') repeat-x,
+      linear-gradient(to top, rgba(59, 130, 246, 0.4) 0%, rgba(0, 0, 0, 0) 60%);
+      
+    background-size: 70px 60px, 100% 100%;
+    background-position: 0 bottom, 0 0;
+    
+    animation: waveScroll 10s linear infinite; 
+}
+
+@keyframes waveScroll {
+    from { background-position-x: 0; }
+    to { background-position-x: -700px; } 
+}
+/* --- END: WAVEFORM VISUAL EFFECT --- */
+
 
 /* LOGO */
 .dev-anim{
@@ -98,7 +130,6 @@ video{
 
 <div class="dev-anim">DevCoderz</div>
 
-<!-- TELEGRAM POPUP -->
 <div id="join-popup">
   <div class="popup-card">
     <h2 style="color:#60a5fa;">Join Our Telegram</h2>
@@ -109,8 +140,7 @@ video{
       Join Telegram Channel
     </button>
 
-    <button class="popup-btn skip-btn"
-      onclick="document.getElementById('join-popup').style.display='none'">
+    <button class="popup-btn skip-btn">
       Skip
     </button>
   </div>
@@ -119,11 +149,13 @@ video{
 <div class="container">
   <div class="neon-frame">
     <video id="video" controls playsinline></video>
+    
+    <div class="audio-wave"></div> 
+    
   </div>
 
-  <!-- SPEED & QUALITY -->
   <div style="margin-top:22px;text-align:center;">
-    <label style="font-size:18px;color:#60a5fa;">Speed:</label>
+    <label for="speedMenu" style="font-size:18px;color:#60a5fa;">Speed:</label>
     <select id="speedMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
       <option value="0.5">0.5x</option>
       <option value="1" selected>1x</option>
@@ -134,7 +166,7 @@ video{
       <option value="2.75">2.75x</option>
       <option value="3">3x</option>
  </select>
-    <label style="margin-left:20px;font-size:18px;color:#60a5fa;">Quality:</label>
+    <label for="qualityMenu" style="margin-left:20px;font-size:18px;color:#60a5fa;">Quality:</label>
     <select id="qualityMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
       <option value="auto">Auto</option>
       <option value="360">360p</option>
@@ -144,14 +176,12 @@ video{
     </select>
   </div>
 
-  <!-- JAI SHREE RAM -->
   <div style="text-align:center;margin-top:25px;
       font-size:34px;font-weight:bold;color:red;
       animation:ramglow 1.4s infinite alternate;">
     जय श्री राम 🚩
   </div>
 
-  <!-- CREDITS -->
   <div style="text-align:center;margin-top:18px;font-size:20px;">
     <div style="color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
       Developer – PT. Devansh Sharma
@@ -170,29 +200,113 @@ video{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
 const video = document.getElementById("video");
 const params = new URLSearchParams(window.location.search);
-const videoURL = decodeURIComponent(params.get("Url") || "");
+const videoURL = decodeURIComponent(params.get("Url") || ""); // URL parameter se video source lena
 
 let hls;
-if(Hls.isSupported()){
-    hls = new Hls();
-    hls.loadSource(videoURL);
-    hls.attachMedia(video);
-}else{
-    video.src = videoURL;
+
+// --- 1. SMART POPUP CONTROL LOGIC (LocalStorage ka use) ---
+const popup = document.getElementById('join-popup');
+const popupKey = 'devcoderz_popup_skipped';
+
+// Agar user ne pehle skip kiya hai, toh pop-up hide kar do
+if (localStorage.getItem(popupKey) === 'true') {
+    popup.style.display = 'none';
 }
 
+// Skip button click hone par preference save karna
+document.querySelector('.skip-btn').onclick = () => {
+    localStorage.setItem(popupKey, 'true'); 
+    popup.style.display = 'none';
+};
+
+// --- 2. HLS INITIALIZATION AND ERROR HANDLING ---
+if(Hls.isSupported()){
+    hls = new Hls({
+        capLevelToPlayerSize: true 
+    });
+    
+    // Media attach hone ke baad source load karna
+    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+        hls.loadSource(videoURL);
+    });
+    
+    // Fatal Errors ko handle karna
+    hls.on(Hls.Events.ERROR, function (event, data) {
+        if (data.fatal) {
+            console.error('HLS Fatal Error:', data.type, data.details);
+            
+            // Error message banane ke liye
+            const errorMsg = `Video load nahi ho paya. Galti: ${data.details}. Kripya URL ya network check karein.`;
+            
+            // Video element ko chupa kar error message dikhana
+            video.style.display = 'none';
+            // Error message ko neon-frame ke andar dalna
+            video.parentElement.innerHTML += `<div style="padding:20px; color:red; text-align:center; margin-top:20px;">
+                <h2>⚠️ Loading Error</h2>
+                <p>${errorMsg}</p>
+            </div>`;
+            
+            // Recovery attempts
+            switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                    hls.startLoad();
+                    break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                    hls.recoverMediaError();
+                    break;
+                default:
+                    hls.destroy();
+                    break;
+            }
+        }
+    });
+
+    hls.attachMedia(video);
+} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // iOS/Safari Native HLS support
+    video.src = videoURL;
+} else {
+    // Agar HLS support bilkul nahi hai
+    video.parentElement.innerHTML = `<div style="padding:20px; color:red; text-align:center;">
+        <h2>⚠️ Browser Old Hai</h2>
+        <p>Aapka browser HLS video formats ko support nahi karta hai.</p>
+    </div>`;
+}
+
+// --- 3. SPEED CONTROL ---
 document.getElementById("speedMenu").onchange = e=>{
     video.playbackRate = Number(e.target.value);
 };
+
+// --- 4. QUALITY CONTROL (Improved Logic) ---
 document.getElementById("qualityMenu").onchange = e=>{
     if(!hls) return;
-    if(e.target.value === "auto") hls.currentLevel = -1;
-    else hls.levels.forEach((l,i)=>{
-        if(l.height == e.target.value) hls.currentLevel = i;
-    });
+    const targetHeight = e.target.value;
+
+    if (targetHeight === "auto") {
+        hls.currentLevel = -1; // Auto switch
+    } else {
+        const selectedHeight = Number(targetHeight);
+        let bestLevelIndex = -1;
+
+        // Find the level index matching the selected height
+        hls.levels.forEach((level, index) => {
+            if (level.height === selectedHeight) {
+                bestLevelIndex = index;
+            }
+        });
+
+        // Set the level if found
+        if (bestLevelIndex !== -1) {
+             hls.currentLevel = bestLevelIndex;
+        } else {
+            console.warn(`Quality level ${selectedHeight}p not found in manifest.`);
+        }
+    }
 };
 </script>
 
