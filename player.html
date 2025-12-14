@@ -5,90 +5,173 @@
 <title>DevCoderz Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <style>
 body{
     margin:0;
     background:#000;
-    font-family: Arial, sans-serif;
+    font-family:Arial, sans-serif;
     color:#fff;
 }
 .container{
-    max-width:900px;
-    margin:30px auto;
-    padding:10px;
+    width:98%;
+    max-width:950px;
+    margin:25px auto;
 }
+
+/* FRAME */
 .neon-frame{
-    border-radius:14px;
-    padding:8px;
-    background:linear-gradient(135deg,#00f6ff,#ff00ff);
-    box-shadow:0 0 25px rgba(0,255,255,0.6);
+    border:3px solid #3b82f6;
+    padding:12px;
+    border-radius:18px;
+    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa inset;
 }
+
 video{
     width:100%;
-    height:auto;
-    border-radius:10px;
+    border-radius:14px;
     background:#000;
 }
-.title{
-    text-align:center;
+
+/* LOGO */
+.dev-anim{
+    position:fixed;
+    top:18px;
+    left:18px;
     font-size:22px;
     font-weight:bold;
-    margin-bottom:15px;
-    color:#00f6ff;
-    text-shadow:0 0 8px #00f6ff;
+    color:#3b82f6;
+    text-shadow:0 0 15px #60a5fa;
+    z-index:99;
+    pointer-events:none;
 }
-.note{
+
+/* POPUP */
+#join-popup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.9);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+}
+.popup-card{
+    background:#111;
+    padding:30px;
+    border-radius:20px;
+    width:85%;
+    max-width:380px;
     text-align:center;
-    font-size:13px;
-    opacity:0.7;
-    margin-top:10px;
+    border:1px solid #3b82f6;
+    box-shadow:0 0 30px #3b82f6;
 }
+.popup-btn{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    font-size:17px;
+    cursor:pointer;
+    background:#3b82f6;
+    color:#fff;
+}
+.skip-btn{ background:#555; }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-    <div class="title">DevCoderz Premium Player</div>
+<div class="dev-anim">DevCoderz</div>
 
-    <div class="neon-frame">
-        <video id="video" controls playsinline></video>
-    </div>
+<!-- POPUP -->
+<div id="join-popup">
+  <div class="popup-card">
+    <h2 style="color:#60a5fa;">Join Our Telegram</h2>
+    <p style="color:#ccc;">Latest updates & premium content</p>
 
-    <div class="note">
-        If video doesn’t start, tap ▶️ once
-    </div>
+    <button class="popup-btn"
+      onclick="window.open('https://t.me/+P-uSwcx9ajFkMjM1','_blank')">
+      Join Telegram Channel
+    </button>
+
+    <button class="popup-btn skip-btn" onclick="skipPopup()">
+      Skip
+    </button>
+  </div>
 </div>
 
+<div class="container">
+  <div class="neon-frame">
+    <video id="video" controls playsinline></video>
+  </div>
+
+  <!-- SPEED + QUALITY -->
+  <div style="margin-top:20px;text-align:center;">
+    <select id="speedMenu">
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+    </select>
+
+    <select id="qualityMenu">
+      <option value="auto">Auto</option>
+      <option value="360">360p</option>
+      <option value="480">480p</option>
+      <option value="720">720p</option>
+      <option value="1080">1080p</option>
+    </select>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
+const video = document.getElementById("video");
+const popup = document.getElementById("join-popup");
+
 const params = new URLSearchParams(window.location.search);
-let videoUrl = params.get("url") || params.get("Url");
+const videoURL = decodeURIComponent(params.get("Url") || params.get("url") || "");
 
-if(videoUrl){
-    videoUrl = decodeURIComponent(videoUrl);
-    const video = document.getElementById("video");
+let hls;
+let popupShown = false;
 
-    if (Hls.isSupported()) {
-        const hls = new Hls({
-            maxBufferLength: 30,
-            enableWorker: true
-        });
-        hls.loadSource(videoUrl);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play().catch(()=>{});
-        });
-    }
-    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = videoUrl;
-        video.play().catch(()=>{});
-    }
+/* LOAD VIDEO */
+if(Hls.isSupported()){
+    hls = new Hls();
+    hls.loadSource(videoURL);
+    hls.attachMedia(video);
+}else{
+    video.src = videoURL;
 }
-else{
-    alert("No video URL found!");
+
+/* SPEED */
+document.getElementById("speedMenu").onchange = e=>{
+    video.playbackRate = Number(e.target.value);
+};
+
+/* QUALITY */
+document.getElementById("qualityMenu").onchange = e=>{
+    if(!hls) return;
+    if(e.target.value === "auto") hls.currentLevel = -1;
+    else hls.levels.forEach((l,i)=>{
+        if(l.height == e.target.value) hls.currentLevel = i;
+    });
+};
+
+/* POPUP ON FIRST PLAY */
+video.addEventListener("play", ()=>{
+    if(!popupShown){
+        popup.style.display = "flex";
+        popupShown = true;
+        video.pause();
+    }
+});
+
+/* SKIP */
+function skipPopup(){
+    popup.style.display = "none";
+    video.play();
 }
 </script>
 
