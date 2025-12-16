@@ -6,18 +6,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{margin:0;background:#000;font-family:Arial;color:#fff}
-.container{width:98%;max-width:950px;margin:25px auto}
+body{
+  margin:0;
+  background:#000;
+  font-family:Arial, sans-serif;
+  color:#fff;
+}
+.container{
+  width:98%;
+  max-width:950px;
+  margin:25px auto;
+}
 .neon-frame{
-  border:3px solid #3b82f6;padding:12px;border-radius:18px;
+  border:3px solid #3b82f6;
+  padding:12px;
+  border-radius:18px;
   box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa inset;
 }
-video{width:100%;border-radius:14px;background:#000}
-.dev-anim{
-  position:fixed;top:18px;left:18px;font-size:22px;
-  font-weight:bold;color:#3b82f6;animation:glow 1.5s infinite alternate
+video{
+  width:100%;
+  border-radius:14px;
+  background:#000;
 }
-@keyframes glow{from{text-shadow:0 0 10px #3b82f6}to{text-shadow:0 0 30px #60a5fa}}
+.dev-anim{
+  position:fixed;
+  top:18px;
+  left:18px;
+  font-size:22px;
+  font-weight:bold;
+  color:#3b82f6;
+  animation:glow 1.5s infinite alternate;
+  z-index:99;
+}
+@keyframes glow{
+  from{ text-shadow:0 0 10px #3b82f6; }
+  to{ text-shadow:0 0 30px #60a5fa; }
+}
+@keyframes ramglow{
+  from{ text-shadow:0 0 15px red; }
+  to{ text-shadow:0 0 40px red; }
+}
 </style>
 </head>
 
@@ -30,8 +58,9 @@ video{width:100%;border-radius:14px;background:#000}
     <video id="video" controls playsinline></video>
   </div>
 
-  <div style="margin-top:20px;text-align:center">
-    <label>Speed:</label>
+  <!-- SPEED & QUALITY -->
+  <div style="margin-top:22px;text-align:center;">
+    <label style="color:#60a5fa;">Speed:</label>
     <select id="speedMenu">
       <option value="0.5">0.5x</option>
       <option value="1" selected>1x</option>
@@ -43,7 +72,7 @@ video{width:100%;border-radius:14px;background:#000}
       <option value="3">3x</option>
     </select>
 
-    <label style="margin-left:15px">Quality:</label>
+    <label style="margin-left:20px;color:#60a5fa;">Quality:</label>
     <select id="qualityMenu">
       <option value="auto">Auto</option>
       <option value="280">280p</option>
@@ -52,6 +81,23 @@ video{width:100%;border-radius:14px;background:#000}
       <option value="720">720p</option>
       <option value="1080">1080p</option>
     </select>
+  </div>
+
+  <!-- JAI SHREE RAM -->
+  <div style="text-align:center;margin-top:25px;
+      font-size:34px;font-weight:bold;color:red;
+      animation:ramglow 1.4s infinite alternate;">
+    जय श्री राम 🚩
+  </div>
+
+  <!-- ✅ CREDITS (RESTORED) -->
+  <div style="text-align:center;margin-top:18px;font-size:20px;">
+    <div style="color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
+      Developer – PT. Devansh Sharma
+    </div>
+    <div style="margin-top:6px;color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
+      Admin – PT. Jay Sharma
+    </div>
   </div>
 </div>
 
@@ -63,32 +109,29 @@ const rawURL = params.get("url") || params.get("Url");
 const videoURL = rawURL ? decodeURIComponent(rawURL) : "";
 
 let hls;
-let errorShown = false;
+let popupShown = false;   // 🔒 HARD LOCK
 
 if (Hls.isSupported() && videoURL) {
   hls = new Hls({
-    enableWorker: true,
-    lowLatencyMode: false,
-    backBufferLength: 90
+    enableWorker:true,
+    backBufferLength:90
   });
 
   hls.loadSource(videoURL);
   hls.attachMedia(video);
 
-  /* 🔥 SEEK FIX */
-  video.addEventListener("seeking", () => {
-    errorShown = false; // seek par error ignore
-  });
+  hls.on(Hls.Events.ERROR, function (event, data) {
 
-  hls.on(Hls.Events.ERROR, (event, data) => {
-    if (errorShown) return;
-
-    // ❗ ignore non-fatal errors (seek / buffer)
+    /* ❌ ignore all non-fatal errors */
     if (!data.fatal) return;
 
-    errorShown = true;
+    /* 🔒 popup only ONCE */
+    if (popupShown) return;
+    popupShown = true;
+
     alert("❌ Video cannot be played (Protected / Expired)");
-    hls.destroy();
+
+    try{ hls.destroy(); }catch(e){}
   });
 
 } else if (videoURL) {
@@ -96,27 +139,22 @@ if (Hls.isSupported() && videoURL) {
 }
 
 /* SPEED */
-speedMenu.onchange = e => {
+speedMenu.onchange = e=>{
   video.playbackRate = Number(e.target.value);
 };
 
 /* QUALITY */
-qualityMenu.onchange = e => {
-  if (!hls) return;
+qualityMenu.onchange = e=>{
+  if(!hls) return;
 
-  if (e.target.value === "auto") {
+  if(e.target.value === "auto"){
     hls.currentLevel = -1;
     return;
   }
 
-  const target = Number(e.target.value);
-  const levelIndex = hls.levels.findIndex(l => l.height === target);
-
-  if (levelIndex !== -1) {
-    hls.currentLevel = levelIndex;
-  } else {
-    hls.currentLevel = -1; // fallback
-  }
+  const h = Number(e.target.value);
+  const idx = hls.levels.findIndex(l=>l.height===h);
+  hls.currentLevel = idx !== -1 ? idx : -1;
 };
 </script>
 
