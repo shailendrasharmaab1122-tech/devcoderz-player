@@ -18,23 +18,194 @@ body{
     margin:25px auto;
 }
 
-/* GROW STUDY STYLE FRAME */
+/* FRAME */
 .neon-frame{
     border:3px solid #3b82f6;
     padding:12px;
     border-radius:18px;
-    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa,0 0 90px #3b82f6 inset;
-    transition:0.3s;
+    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa inset;
 }
-.neon-frame:hover{
-    box-shadow:0 0 50px #60a5fa,0 0 100px #3b82f6,0 0 120px #60a5fa inset;
-}
-
 video{
     width:100%;
     border-radius:14px;
     background:#000;
 }
+
+/* LOGO */
+.dev-anim{
+    position:fixed;
+    top:18px;
+    left:18px;
+    font-size:22px;
+    font-weight:bold;
+    color:#3b82f6;
+    animation:glow 1.5s infinite alternate;
+    z-index:99;
+}
+@keyframes glow{
+    from{ text-shadow:0 0 10px #3b82f6; }
+    to{ text-shadow:0 0 30px #60a5fa; }
+}
+
+/* POPUP */
+#join-popup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.9);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+}
+.popup-card{
+    background:#111;
+    padding:30px;
+    border-radius:20px;
+    width:85%;
+    max-width:380px;
+    text-align:center;
+    border:1px solid #3b82f6;
+}
+.popup-btn{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    font-size:17px;
+    cursor:pointer;
+    background:#3b82f6;
+    color:#fff;
+}
+.skip-btn{ background:#555; }
+
+/* RAM */
+@keyframes ramglow{
+    from{ text-shadow:0 0 15px red; }
+    to{ text-shadow:0 0 40px red; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="dev-anim">DevCoderz</div>
+
+<!-- POPUP -->
+<div id="join-popup">
+  <div class="popup-card">
+    <h2 style="color:#60a5fa;">Join Our Telegram</h2>
+    <p style="color:#ccc;">Latest updates & premium content</p>
+
+    <button class="popup-btn"
+      onclick="window.open('https://t.me/+ZYuMt5Zz1BNhNDA1','_blank')">
+      Join Telegram Channel
+    </button>
+
+    <button class="popup-btn skip-btn"
+      onclick="document.getElementById('join-popup').style.display='none'">
+      Skip
+    </button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="neon-frame">
+    <video id="video" controls playsinline></video>
+  </div>
+
+  <!-- CONTROLS -->
+  <div style="margin-top:22px;text-align:center;">
+    <label style="color:#60a5fa;">Speed:</label>
+    <select id="speedMenu">
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+      <option value="3">3x</option>
+    </select>
+
+    <label style="margin-left:20px;color:#60a5fa;">Quality:</label>
+    <select id="qualityMenu">
+      <option value="auto">Auto</option>
+    </select>
+  </div>
+
+  <!-- RAM -->
+  <div style="text-align:center;margin-top:25px;
+      font-size:34px;font-weight:bold;color:red;
+      animation:ramglow 1.4s infinite alternate;">
+    जय श्री राम 🚩
+  </div>
+
+  <!-- CREDITS -->
+  <div style="text-align:center;margin-top:18px;">
+    <div style="color:#60a5fa;font-weight:bold;">Developer – PT. Devansh Sharma</div>
+    <div style="color:#60a5fa;font-weight:bold;">Admin – PT. Jay Sharma</div>
+
+    <div style="margin-top:14px;">
+      <a href="https://t.me/+P-uSwcx9ajFkMjM1" target="_blank"
+         style="color:#fff;text-decoration:none;">
+        Join Telegram Channel
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+const video = document.getElementById("video");
+const params = new URLSearchParams(window.location.search);
+
+/* ✅ FIXED: lowercase url */
+const rawURL = params.get("url") || params.get("Url");
+const videoURL = rawURL ? decodeURIComponent(rawURL) : "";
+
+if(!videoURL){
+  alert("❌ Video URL missing or invalid");
+}
+
+/* HLS */
+let hls;
+if (Hls.isSupported() && videoURL) {
+    hls = new Hls();
+    hls.loadSource(videoURL);
+    hls.attachMedia(video);
+
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        const qualityMenu = document.getElementById("qualityMenu");
+        hls.levels.forEach((l, i) => {
+            const opt = document.createElement("option");
+            opt.value = i;
+            opt.text = l.height + "p";
+            qualityMenu.appendChild(opt);
+        });
+    });
+
+    hls.on(Hls.Events.ERROR, function (event, data) {
+        console.log("HLS Error:", data);
+        alert("❌ Video cannot be played (Protected / Expired)");
+    });
+
+} else if (videoURL) {
+    video.src = videoURL;
+}
+
+/* SPEED */
+document.getElementById("speedMenu").onchange = e => {
+    video.playbackRate = Number(e.target.value);
+};
+
+/* QUALITY */
+document.getElementById("qualityMenu").onchange = e => {
+    if (!hls) return;
+    if (e.target.value === "auto") hls.currentLevel = -1;
+    else hls.currentLevel = Number(e.target.value);
+};
+</script>
+
+</body>
+</html>}
 
 /* LOGO */
 .dev-anim{
