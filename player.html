@@ -1,104 +1,96 @@
+Devansh Sharma:
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz Study Player</title>
+<title>DevCoderz Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* BACKGROUND – CLASSROOM BOARD */
 body{
     margin:0;
-    background:radial-gradient(circle at top,#111,#000 75%);
-    font-family:"Segoe UI", Arial, sans-serif;
+    background:#000;
+    font-family:Arial, sans-serif;
     color:#fff;
 }
-
-/* MAIN CONTAINER */
 .container{
-    width:96%;
-    max-width:1000px;
-    margin:30px auto;
+    width:98%;
+    max-width:950px;
+    margin:25px auto;
 }
 
-/* STUDY BOARD FRAME (PHOTO STYLE) */
-.study-frame{
-    background:#0b0b0b;
-    border-radius:22px;
-    padding:14px;
-    box-shadow:
-        0 0 0 2px #1f2937,
-        0 18px 45px rgba(0,0,0,.95);
+/* GROW STUDY STYLE FRAME */
+.neon-frame{
+    border:3px solid #3b82f6;
+    padding:12px;
+    border-radius:18px;
+    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa,0 0 90px #3b82f6 inset;
+    transition:0.3s;
+}
+.neon-frame:hover{
+    box-shadow:0 0 50px #60a5fa,0 0 100px #3b82f6,0 0 120px #60a5fa inset;
 }
 
-/* VIDEO */
 video{
     width:100%;
-    border-radius:16px;
+    border-radius:14px;
     background:#000;
 }
 
-/* DEV LOGO */
+/* LOGO */
 .dev-anim{
     position:fixed;
-    top:16px;
-    left:16px;
-    font-size:20px;
+    top:18px;
+    left:18px;
+    font-size:22px;
     font-weight:bold;
-    color:#60a5fa;
-    text-shadow:0 0 15px rgba(96,165,250,.7);
+    color:#3b82f6;
+    animation:glow 1.5s infinite alternate;
     z-index:99;
     pointer-events:none;
 }
+@keyframes glow{
+    from{ text-shadow:0 0 10px #3b82f6; }
+    to{ text-shadow:0 0 30px #60a5fa; }
+}
 
-/* CONTROL PANEL */
-.control-panel{
-    margin-top:20px;
+/* POPUP */
+#join-popup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.9);
     display:flex;
+    align-items:center;
     justify-content:center;
-    gap:18px;
-    flex-wrap:wrap;
+    z-index:200;
 }
-
-.control-panel label{
-    font-size:16px;
-    color:#93c5fd;
-}
-
-.control-panel select{
-    padding:8px 12px;
-    border-radius:10px;
+.popup-card{
     background:#111;
-    color:#fff;
-    border:1px solid #1f2937;
-    font-size:15px;
+    padding:30px;
+    border-radius:20px;
+    width:85%;
+    max-width:380px;
+    text-align:center;
+    border:1px solid #3b82f6;
+    box-shadow:0 0 30px #3b82f6;
 }
+.popup-btn{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    font-size:17px;
+    cursor:pointer;
+    background:#3b82f6;
+    color:#fff;
+}
+.skip-btn{ background:#555; }
 
 /* JAI SHREE RAM */
-@keyframes ram{
+@keyframes ramglow{
     from{ text-shadow:0 0 15px red; }
-    to{ text-shadow:0 0 35px red; }
-}
-
-/* FOOTER */
-.footer{
-    text-align:center;
-    margin-top:26px;
-}
-
-.footer .credit{
-    font-size:18px;
-    font-weight:bold;
-    color:#93c5fd;
-    text-shadow:0 0 15px rgba(147,197,253,.6);
-}
-
-.footer a{
-    display:inline-block;
-    margin-top:12px;
-    color:#fff;
-    text-decoration:none;
-    font-size:16px;
+    to{ text-shadow:0 0 40px red; }
 }
 </style>
 </head>
@@ -107,58 +99,77 @@ video{
 
 <div class="dev-anim">DevCoderz</div>
 
-<div class="container">
+<!-- TELEGRAM POPUP -->
+<div id="join-popup">
+  <div class="popup-card">
+    <h2 style="color:#60a5fa;">Join Our Telegram</h2>
+    <p style="color:#ccc;">Latest updates & premium content</p>
 
-    <!-- VIDEO FRAME -->
-    <div class="study-frame">
-        <video id="video" controls playsinline></video>
-    </div>
+    <button class="popup-btn"
+      onclick="window.open('https://t.me/+ZYuMt5Zz1BNhNDA1','_blank')">
+      Join Telegram Channel
+    </button>
 
-    <!-- SPEED & QUALITY -->
-    <div class="control-panel">
-        <label>
-            Speed:
-            <select id="speedMenu">
-                <option value="0.5">0.5x</option>
-                <option value="1" selected>1x</option>
-                <option value="1.25">1.25x</option>
-                <option value="1.5">1.5x</option>
-                <option value="2">2x</option>
-            </select>
-        </label>
-
-        <label>
-            Quality:
-            <select id="qualityMenu">
-                <option value="auto">Auto</option>
-                <option value="360">360p</option>
-                <option value="480">480p</option>
-                <option value="720">720p</option>
-                <option value="1080">1080p</option>
-            </select>
-        </label>
-    </div>
-
-    <!-- JAI SHREE RAM -->
-    <div style="text-align:center;margin-top:22px;
-        font-size:32px;font-weight:bold;color:red;
-        animation:ram 1.4s infinite alternate;">
-        जय श्री राम 🚩
-    </div>
-
-    <!-- CREDITS -->
-    <div class="footer">
-        <div class="credit">Developer – PT. Devansh Sharma</div>
-        <div class="credit" style="margin-top:6px;">Admin – PT. Jay Sharma</div>
-
-        <a href="https://t.me/+P-uSwcx9ajFkMjM1" target="_blank">
-            Join Our Telegram Channel
-        </a>
-    </div>
-
+    <button class="popup-btn skip-btn"
+      onclick="document.getElementById('join-popup').style.display='none'">
+      Skip
+    </button>
+  </div>
 </div>
 
-<!-- HLS -->
+<div class="container">
+  <div class="neon-frame">
+    <video id="video" controls playsinline></video>
+  </div>
+
+  <!-- SPEED & QUALITY -->
+  <div style="margin-top:22px;text-align:center;">
+    <label style="font-size:18px;color:#60a5fa;">Speed:</label>
+    <select id="speedMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+      <option value="2.25">2.25x</option>
+      <option value="2.5">2.5x</option>
+      <option value="2.75">2.75x</option>
+      <option value="3">3x</option>
+ </select>
+    <label style="margin-left:20px;font-size:18px;color:#60a5fa;">Quality:</label>
+    <select id="qualityMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
+      <option value="auto">Auto</option>
+      <option value="360">360p</option>
+      <option value="480">480p</option>
+      <option value="720">720p</option>
+      <option value="1080">1080p</option>
+    </select>
+  </div>
+
+  <!-- JAI SHREE RAM -->
+  <div style="text-align:center;margin-top:25px;
+      font-size:34px;font-weight:bold;color:red;
+      animation:ramglow 1.4s infinite alternate;">
+    जय श्री राम 🚩
+  </div>
+
+  <!-- CREDITS -->
+  <div style="text-align:center;margin-top:18px;font-size:20px;">
+    <div style="color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
+      Developer – PT. Devansh Sharma
+    </div>
+    <div style="margin-top:6px;color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
+      Admin – PT. Jay Sharma
+    </div>
+
+<div style="margin-top:14px;font-size:17px;">
+      <a href="https://t.me/+P-uSwcx9ajFkMjM1" target="_blank"
+         style="color:#fff;text-decoration:none;">
+        Click here to Join new Telegram Channel
+      </a>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const video = document.getElementById("video");
@@ -177,15 +188,12 @@ if(Hls.isSupported()){
 document.getElementById("speedMenu").onchange = e=>{
     video.playbackRate = Number(e.target.value);
 };
-
 document.getElementById("qualityMenu").onchange = e=>{
     if(!hls) return;
     if(e.target.value === "auto") hls.currentLevel = -1;
-    else{
-        hls.levels.forEach((l,i)=>{
-            if(l.height == e.target.value) hls.currentLevel = i;
-        });
-    }
+    else hls.levels.forEach((l,i)=>{
+        if(l.height == e.target.value) hls.currentLevel = i;
+    });
 };
 </script>
 
