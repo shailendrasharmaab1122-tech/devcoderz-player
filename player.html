@@ -18,6 +18,7 @@ body{
     margin:25px auto;
 }
 .neon-frame{
+    position:relative;
     border:3px solid #3b82f6;
     padding:12px;
     border-radius:18px;
@@ -28,6 +29,25 @@ video{
     border-radius:14px;
     background:#000;
 }
+
+/* FULLSCREEN BUTTON */
+.fullscreen-btn{
+    position:absolute;
+    bottom:18px;
+    right:18px;
+    background:rgba(0,0,0,.6);
+    border:1px solid #3b82f6;
+    color:#fff;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    z-index:10;
+}
+.fullscreen-btn:hover{
+    background:#3b82f6;
+}
+
 .dev-anim{
     position:fixed;
     top:18px;
@@ -43,6 +63,7 @@ video{
     from{ text-shadow:0 0 10px #3b82f6; }
     to{ text-shadow:0 0 30px #60a5fa; }
 }
+
 #join-popup{
     position:fixed;
     inset:0;
@@ -73,6 +94,7 @@ video{
     color:#fff;
 }
 .skip-btn{ background:#555; }
+
 @keyframes ramglow{
     from{ text-shadow:0 0 15px red; }
     to{ text-shadow:0 0 40px red; }
@@ -100,23 +122,23 @@ video{
 </div>
 
 <div class="container">
-  <div class="neon-frame">
+  <div class="neon-frame" id="playerFrame">
     <video id="video" controls playsinline></video>
+    <button class="fullscreen-btn" id="fsBtn">⛶</button>
   </div>
 
   <div style="margin-top:22px;text-align:center;">
     <label>Speed:</label>
     <select id="speedMenu">
-     <option value="0.5">0.5x</option>
-     <option value="1" selected>1x</option>
-     <option value="1.5">1.5x</option>
-     <option value="2">2x</option>
-     <option value="2.25">2.25x</option>
-     <option value="2.5">2.5x</option>
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+        <option value="2.25">2.25x</option>
+      <option value="2.5">2.5x</option>
      <option value="2.75">2.75x</option>
      <option value="3">3x</option>
-     </select>
-    
+    </select>
 
     <label style="margin-left:15px;">Quality:</label>
     <select id="qualityMenu">
@@ -143,17 +165,14 @@ video{
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const video = document.getElementById("video");
-const params = new URLSearchParams(window.location.search);
+const frame = document.getElementById("playerFrame");
+const fsBtn = document.getElementById("fsBtn");
 
-// 🔥 ACCEPTS url, Url, encoded & non-encoded
+const params = new URLSearchParams(window.location.search);
 let rawUrl = params.get("url") || params.get("Url") || "";
 
-// decode safely (even if already decoded)
-try {
-  rawUrl = decodeURIComponent(rawUrl);
-} catch(e){}
+try{ rawUrl = decodeURIComponent(rawUrl); }catch(e){}
 
-// ❌ block if empty
 if(!rawUrl){
   alert("Video URL missing!");
 }else{
@@ -176,7 +195,18 @@ if(!rawUrl){
 document.getElementById("speedMenu").onchange = e=>{
   video.playbackRate = Number(e.target.value);
 };
+
+/* FULLSCREEN LOGIC (ALL DEVICES) */
+fsBtn.onclick = ()=>{
+  if(document.fullscreenElement){
+    document.exitFullscreen();
+  }else if(frame.requestFullscreen){
+    frame.requestFullscreen();
+  }else if(video.webkitEnterFullscreen){
+    video.webkitEnterFullscreen(); // iOS
+  }
+};
 </script>
 
 </body>
-    </html>
+</html>
