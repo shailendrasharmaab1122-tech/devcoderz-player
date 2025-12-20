@@ -17,26 +17,17 @@ body{
     max-width:950px;
     margin:25px auto;
 }
-
-/* GROW STUDY STYLE FRAME */
 .neon-frame{
     border:3px solid #3b82f6;
     padding:12px;
     border-radius:18px;
-    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa,0 0 90px #3b82f6 inset;
-    transition:0.3s;
+    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa inset;
 }
-.neon-frame:hover{
-    box-shadow:0 0 50px #60a5fa,0 0 100px #3b82f6,0 0 120px #60a5fa inset;
-}
-
 video{
     width:100%;
     border-radius:14px;
     background:#000;
 }
-
-/* LOGO */
 .dev-anim{
     position:fixed;
     top:18px;
@@ -52,8 +43,6 @@ video{
     from{ text-shadow:0 0 10px #3b82f6; }
     to{ text-shadow:0 0 30px #60a5fa; }
 }
-
-/* POPUP */
 #join-popup{
     position:fixed;
     inset:0;
@@ -71,7 +60,6 @@ video{
     max-width:380px;
     text-align:center;
     border:1px solid #3b82f6;
-    box-shadow:0 0 30px #3b82f6;
 }
 .popup-btn{
     width:100%;
@@ -85,8 +73,6 @@ video{
     color:#fff;
 }
 .skip-btn{ background:#555; }
-
-/* JAI SHREE RAM */
 @keyframes ramglow{
     from{ text-shadow:0 0 15px red; }
     to{ text-shadow:0 0 40px red; }
@@ -98,17 +84,14 @@ video{
 
 <div class="dev-anim">DevCoderz</div>
 
-<!-- TELEGRAM POPUP -->
 <div id="join-popup">
   <div class="popup-card">
     <h2 style="color:#60a5fa;">Join Our Telegram</h2>
     <p style="color:#ccc;">Latest updates & premium content</p>
-
     <button class="popup-btn"
       onclick="window.open('https://t.me/+ZYuMt5Zz1BNhNDA1','_blank')">
       Join Telegram Channel
     </button>
-
     <button class="popup-btn skip-btn"
       onclick="document.getElementById('join-popup').style.display='none'">
       Skip
@@ -121,21 +104,18 @@ video{
     <video id="video" controls playsinline></video>
   </div>
 
-  <!-- SPEED & QUALITY -->
   <div style="margin-top:22px;text-align:center;">
-    <label style="font-size:18px;color:#60a5fa;">Speed:</label>
-    <select id="speedMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
+    <label>Speed:</label>
+    <select id="speedMenu">
       <option value="0.5">0.5x</option>
       <option value="1" selected>1x</option>
       <option value="1.5">1.5x</option>
       <option value="2">2x</option>
-      <option value="2.25">2.25x</option>
       <option value="2.5">2.5x</option>
-      <option value="2.75">2.75x</option>
-      <option value="3">3x</option>
- </select>
-    <label style="margin-left:20px;font-size:18px;color:#60a5fa;">Quality:</label>
-    <select id="qualityMenu" style="padding:8px;border-radius:10px;background:#222;color:#fff;">
+    </select>
+
+    <label style="margin-left:15px;">Quality:</label>
+    <select id="qualityMenu">
       <option value="auto">Auto</option>
       <option value="360">360p</option>
       <option value="480">480p</option>
@@ -144,28 +124,15 @@ video{
     </select>
   </div>
 
-  <!-- JAI SHREE RAM -->
   <div style="text-align:center;margin-top:25px;
       font-size:34px;font-weight:bold;color:red;
       animation:ramglow 1.4s infinite alternate;">
     जय श्री राम 🚩
   </div>
 
-  <!-- CREDITS -->
-  <div style="text-align:center;margin-top:18px;font-size:20px;">
-    <div style="color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
-      Developer – PT. Devansh Sharma
-    </div>
-    <div style="margin-top:6px;color:#60a5fa;font-weight:bold;animation:glow 1.5s infinite alternate;">
-      Admin – PT. Jay Sharma
-    </div>
-
-<div style="margin-top:14px;font-size:17px;">
-      <a href="https://t.me/+P-uSwcx9ajFkMjM1" target="_blank"
-         style="color:#fff;text-decoration:none;">
-        Click here to Join new Telegram Channel
-      </a>
-    </div>
+  <div style="text-align:center;margin-top:18px;">
+    <div style="color:#60a5fa;font-weight:bold;">Developer – PT. Devansh Sharma</div>
+    <div style="color:#60a5fa;font-weight:bold;">Admin – PT. Jay Sharma</div>
   </div>
 </div>
 
@@ -173,28 +140,39 @@ video{
 <script>
 const video = document.getElementById("video");
 const params = new URLSearchParams(window.location.search);
-const videoURL = decodeURIComponent(params.get("Url") || "");
 
-let hls;
-if(Hls.isSupported()){
-    hls = new Hls();
-    hls.loadSource(videoURL);
-    hls.attachMedia(video);
+// 🔥 ACCEPTS url, Url, encoded & non-encoded
+let rawUrl = params.get("url") || params.get("Url") || "";
+
+// decode safely (even if already decoded)
+try {
+  rawUrl = decodeURIComponent(rawUrl);
+} catch(e){}
+
+// ❌ block if empty
+if(!rawUrl){
+  alert("Video URL missing!");
 }else{
-    video.src = videoURL;
+  if(Hls.isSupported()){
+    const hls = new Hls();
+    hls.loadSource(rawUrl);
+    hls.attachMedia(video);
+
+    document.getElementById("qualityMenu").onchange = e=>{
+      if(e.target.value === "auto") hls.currentLevel = -1;
+      else hls.levels.forEach((l,i)=>{
+        if(l.height == e.target.value) hls.currentLevel = i;
+      });
+    };
+  }else{
+    video.src = rawUrl;
+  }
 }
 
 document.getElementById("speedMenu").onchange = e=>{
-    video.playbackRate = Number(e.target.value);
-};
-document.getElementById("qualityMenu").onchange = e=>{
-    if(!hls) return;
-    if(e.target.value === "auto") hls.currentLevel = -1;
-    else hls.levels.forEach((l,i)=>{
-        if(l.height == e.target.value) hls.currentLevel = i;
-    });
+  video.playbackRate = Number(e.target.value);
 };
 </script>
 
 </body>
-</html>
+    </html>
