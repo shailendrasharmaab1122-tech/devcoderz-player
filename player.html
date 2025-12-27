@@ -95,6 +95,18 @@ video{
 }
 .skip-btn{ background:#555; }
 
+#timeOverlay{
+    position:absolute;
+    top:10px;
+    right:15px;
+    color:#fff;
+    font-size:18px;
+    background:rgba(0,0,0,0.5);
+    padding:4px 8px;
+    border-radius:5px;
+    z-index:20;
+}
+
 @keyframes ramglow{
     from{ text-shadow:0 0 15px red; }
     to{ text-shadow:0 0 40px red; }
@@ -124,6 +136,7 @@ video{
 <div class="container">
   <div class="neon-frame" id="playerFrame">
     <video id="video" controls playsinline muted></video>
+    <div id="timeOverlay">00:00</div>
     <button class="fullscreen-btn" id="fsBtn">⛶</button>
   </div>
 
@@ -177,6 +190,7 @@ if(localStorage.getItem('skipPopup') !== 'true'){
 const video = document.getElementById("video");
 const frame = document.getElementById("playerFrame");
 const fsBtn = document.getElementById("fsBtn");
+const overlay = document.getElementById("timeOverlay");
 
 const params = new URLSearchParams(window.location.search);
 let rawUrl = params.get("url") || params.get("Url") || "";
@@ -198,7 +212,7 @@ if(!rawUrl){
       });
     };
   }else{
-    video.src = rawUrl; // fallback for MP4 or other supported format
+    video.src = rawUrl; // fallback for MP4 or other format
   }
 }
 
@@ -216,6 +230,13 @@ fsBtn.onclick = ()=>{
   }else if(video.webkitEnterFullscreen){
     video.webkitEnterFullscreen(); // iOS
   }
+};
+
+// ====== TIME OVERLAY ======
+video.ontimeupdate = ()=>{
+  let mins = Math.floor(video.currentTime / 60);
+  let secs = Math.floor(video.currentTime % 60);
+  overlay.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
 };
 </script>
 
