@@ -3,260 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DevCoderz Premium Live Player</title>
+<title>DevCoderz Live Player (Clean)</title>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-:root{
-  --neon:#00eaff;
-}
-*{margin:0;padding:0;box-sizing:border-box}
 body{
-  background:linear-gradient(180deg,#020205,#0b0c10);
+  margin:0;
+  background:#050507;
   font-family:Poppins,Arial,sans-serif;
   color:#eafcff;
 }
-#app{
-  display:flex;
-  height:100vh;
+#wrap{
+  max-width:1200px;
+  margin:auto;
   padding:20px;
-  gap:20px;
 }
-#brand{
-  width:220px;
-  background:rgba(255,255,255,.03);
-  border-radius:16px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-.logo{
-  width:90px;height:90px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#00eaff,#8b33ff);
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;font-weight:900;color:#001219;
-}
-#playerWrap{flex:1;display:flex;flex-direction:column;gap:12px}
-
 video{
   width:100%;
-  height:560px;
+  height:auto;
+  max-height:70vh;
   background:#000;
   border-radius:12px;
 }
-
-/* PROGRESS BAR */
-#progressContainer{
-  width:100%;
-  height:6px;
-  background:rgba(255,255,255,.2);
-  border-radius:6px;
-  cursor:pointer;
-  overflow:hidden;
-}
-#progressBar{
-  width:0%;
-  height:100%;
-  background:linear-gradient(90deg,#00eaff,#8b33ff);
-}
-
-/* CONTROLS */
 .controls{
   display:flex;
-  justify-content:space-between;
-  padding:12px;
-  background:rgba(255,255,255,.03);
-  border-radius:12px;
-}
-.controls-left,.controls-right{
-  display:flex;
-  align-items:center;
   gap:10px;
+  margin-top:10px;
 }
 button,select{
-  background:rgba(255,255,255,.06);
-  color:#eafcff;
-  border:1px solid rgba(255,255,255,.1);
+  background:#111;
+  color:#fff;
+  border:1px solid #333;
   padding:8px 12px;
   border-radius:8px;
   font-weight:600;
 }
-
-/* LIVE */
-#liveBadge{
+#live{
   color:#ff3b3b;
   font-weight:800;
-  animation:blink 1s infinite;
-}
-@keyframes blink{50%{opacity:.4}}
-
-#credit{text-align:center;color:#bfeeff}
-
-@media(max-width:900px){
-  #brand{display:none}
-  video{height:360px}
+  display:none;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TELEGRAM POPUP -->
-<div id="popup" style="
-position:fixed;inset:0;z-index:999;
-background:rgba(0,0,0,.95);
-display:flex;flex-direction:column;
-align-items:center;justify-content:center;">
-<h2 style="color:#00eaff">🔔 Join Telegram to Unlock</h2>
-<a href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank"
-style="margin-top:15px;padding:12px 20px;
-background:#00eaff;color:#001219;
-border-radius:10px;font-weight:800;text-decoration:none;">
-Join Telegram
-</a>
-<button onclick="unlock()" style="margin-top:15px;padding:10px 16px;font-weight:700;">
-I Have Joined
-</button>
-</div>
+<div id="wrap">
 
-<div id="app">
-
-<div id="brand">
-  <div class="logo">DC</div>
-  <h3>DevCoderz</h3>
-</div>
-
-<div id="playerWrap">
+<h2>DevCoderz Live Player</h2>
 
 <video id="player" controls playsinline></video>
 
-<div id="progressContainer">
-  <div id="progressBar"></div>
-</div>
-
 <div class="controls">
-  <div class="controls-left">
-    <select id="speed">
-      <option value="0.5">0.5x</option>
-      <option value="0.75">0.75x</option>
-      <option value="1" selected>1x</option>
-      <option value="1.25">1.25x</option>
-      <option value="1.5">1.5x</option>
-      <option value="1.75">1.75x</option>
-      <option value="2">2x</option>
-      <option value="2.25">2.25x</option>
-      <option value="2.5">2.5x</option>
-      <option value="2.75">2.75x</option>
-      <option value="3">3x</option>
-      <option value="3.5">3.5x</option>
-      <option value="4">4x</option>
-    </select>
+  <select id="speed">
+    <option value="0.5">0.5x</option>
+    <option value="0.75">0.75x</option>
+    <option value="1" selected>1x</option>
+    <option value="1.25">1.25x</option>
+    <option value="1.5">1.5x</option>
+    <option value="2">2x</option>
+    <option value="2.5">2.5x</option>
+    <option value="3">3x</option>
+    <option value="4">4x</option>
+  </select>
 
-    <span id="liveBadge" style="display:none;">🔴 LIVE</span>
-    <button id="goLive" style="display:none;">Go Live</button>
-  </div>
-
-  <div class="controls-right">
-    <button id="back">⏪ 10s</button>
-    <button id="forward">⏩ 10s</button>
-    <button id="mute">Mute</button>
-  </div>
+  <span id="live">🔴 LIVE</span>
 </div>
 
-<div id="credit">
-Developer – <b>PT. Devansh Sharma</b>
-</div>
-
-</div>
 </div>
 
 <script>
-const player=document.getElementById("player");
-const popup=document.getElementById("popup");
-const progressBar=document.getElementById("progressBar");
-const progressContainer=document.getElementById("progressContainer");
+const player = document.getElementById("player");
+const liveBadge = document.getElementById("live");
 
-const liveBadge=document.getElementById("liveBadge");
-const goLive=document.getElementById("goLive");
-
-/* REAL LIVE TEST STREAM */
+/* 👇 APNA CLOUD FRONT LIVE URL YAHA DO */
 const VIDEO_SRC =
 new URLSearchParams(location.search).get("Url") ||
 "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8";
 
-let hls=null;
-
-if(VIDEO_SRC.endsWith(".m3u8") && Hls.isSupported()){
-  hls=new Hls({
-    liveDurationInfinity:true,
-    lowLatencyMode:true,
-    backBufferLength:0
+if (VIDEO_SRC.endsWith(".m3u8") && Hls.isSupported()) {
+  const hls = new Hls({
+    liveDurationInfinity: true,
+    lowLatencyMode: true
   });
+
   hls.loadSource(VIDEO_SRC);
   hls.attachMedia(player);
 
-  hls.on(Hls.Events.LEVEL_LOADED,(e,d)=>{
-    if(d.details.live){
-      liveBadge.style.display="inline";
-      goLive.style.display="inline";
+  hls.on(Hls.Events.LEVEL_LOADED, (e, data) => {
+    if (data.details.live) {
+      liveBadge.style.display = "inline";
     }
   });
-}else{
-  player.src=VIDEO_SRC;
+
+} else {
+  player.src = VIDEO_SRC;
 }
 
-player.muted=true;
-
-function unlock(){
-  popup.style.display="none";
-  player.play().catch(()=>{});
-}
-
-/* PROGRESS BAR */
-player.addEventListener("timeupdate",()=>{
-  if(player.duration && player.duration!==Infinity){
-    progressBar.style.width=(player.currentTime/player.duration*100)+"%";
-  }
-});
-
-progressContainer.onclick=(e)=>{
-  if(!player.duration || player.duration===Infinity) return;
-  const rect=progressContainer.getBoundingClientRect();
-  const pos=(e.clientX-rect.left)/rect.width;
-  player.currentTime=pos*player.duration;
+speed.onchange = () => {
+  player.playbackRate = parseFloat(speed.value);
 };
 
-/* CONTROLS */
-speed.onchange=()=>player.playbackRate=parseFloat(speed.value);
-
-mute.onclick=()=>{
-  player.muted=!player.muted;
-  mute.textContent=player.muted?"Unmute":"Mute";
-};
-
-back.onclick=()=>player.currentTime=Math.max(0,player.currentTime-10);
-forward.onclick=()=>{
-  if(player.duration)
-    player.currentTime=Math.min(player.duration,player.currentTime+10);
-};
-
-goLive.onclick=()=>{
-  if(player.seekable.length)
-    player.currentTime=player.seekable.end(player.seekable.length-1);
-};
-
-/* KEYBOARD SHORTCUTS */
-document.addEventListener("keydown",e=>{
-  if(e.code==="ArrowLeft") back.click();
-  if(e.code==="ArrowRight") forward.click();
-  if(e.code==="Space"){
-    e.preventDefault();
-    player.paused?player.play():player.pause();
-  }
-});
+/* autoplay safe */
+player.muted = true;
+player.play().catch(()=>{});
 </script>
 
 </body>
