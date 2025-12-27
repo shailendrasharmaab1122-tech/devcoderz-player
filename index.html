@@ -3,109 +3,188 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DevCoderz Live Player (Clean)</title>
+<title>DevCoderz Premium Live Player</title>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
+:root{
+  --neon:#00eaff;
+  --neon2:#8b33ff;
+  --bg:#050507;
+}
 body{
   margin:0;
-  background:#050507;
   font-family:Poppins,Arial,sans-serif;
+  background:linear-gradient(180deg,#030306,#0b0c10);
   color:#eafcff;
 }
-#wrap{
-  max-width:1200px;
-  margin:auto;
+#appContainer{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
   padding:20px;
+}
+#playerWrap{
+  width:100%;
+  max-width:1100px;
+  position:relative;
+}
+.neon-frame{
+  padding:10px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  box-shadow: 0 0 40px rgba(0,234,255,0.08) inset;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.neon-frame::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:16px;
+  padding:2px;
+  background:conic-gradient(from 180deg at 50% 50%, var(--neon), var(--neon2));
+  -webkit-mask: linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  filter:blur(14px);
+  opacity:.85;
+  pointer-events:none;
 }
 video{
   width:100%;
-  height:auto;
-  max-height:70vh;
-  background:#000;
   border-radius:12px;
+  outline:none;
+  max-height:70vh;
 }
 .controls{
   display:flex;
-  gap:10px;
-  margin-top:10px;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:12px;
+  padding:12px;
+  background:rgba(255,255,255,0.03);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.03);
 }
-button,select{
-  background:#111;
-  color:#fff;
-  border:1px solid #333;
+.controls-left,.controls-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+select,button{
+  background:rgba(255,255,255,0.03);
+  color:#eafcff;
+  border:1px solid rgba(255,255,255,0.05);
   padding:8px 12px;
   border-radius:8px;
   font-weight:600;
+  cursor:pointer;
 }
-#live{
+#liveBadge{
   color:#ff3b3b;
   font-weight:800;
+  animation:blink 1s infinite;
   display:none;
+}
+@keyframes blink{50%{opacity:.4}}
+#credit{
+  text-align:center;
+  margin-top:14px;
+  font-size:14px;
+  color:#bfeeff;
+}
+#credit b{color:var(--neon);}
+@media(max-width:900px){
+  #player{max-height:50vh;}
 }
 </style>
 </head>
 
 <body>
 
-<div id="wrap">
+<div id="appContainer">
+  <div id="playerWrap" class="neon-frame">
+    <video id="player" controls autoplay muted playsinline></video>
+  </div>
 
-<h2>DevCoderz Live Player</h2>
+  <div class="controls">
+    <div class="controls-left">
+      <label for="speed">Speed:</label>
+      <select id="speed">
+        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="1.75">1.75x</option>
+        <option value="2">2x</option>
+        <option value="2.25">2.25x</option>
+        <option value="2.5">2.5x</option>
+        <option value="2.75">2.75x</option>
+        <option value="3">3x</option>
+        <option value="3.5">3.5x</option>
+        <option value="4">4x</option>
+      </select>
 
-<video id="player" controls playsinline></video>
+      <span id="liveBadge">🔴 LIVE</span>
+      <button id="goLive" style="display:none;">Go Live</button>
+    </div>
 
-<div class="controls">
-  <select id="speed">
-    <option value="0.5">0.5x</option>
-    <option value="0.75">0.75x</option>
-    <option value="1" selected>1x</option>
-    <option value="1.25">1.25x</option>
-    <option value="1.5">1.5x</option>
-    <option value="2">2x</option>
-    <option value="2.5">2.5x</option>
-    <option value="3">3x</option>
-    <option value="4">4x</option>
-  </select>
+    <div class="controls-right">
+      <button id="muteBtn">Mute</button>
+    </div>
+  </div>
 
-  <span id="live">🔴 LIVE</span>
-</div>
-
+  <div id="credit">
+    Developer – <b>PT. Devansh Sharma</b> • Telegram: <a href="https://t.me/+ZYuMt5Zz1BNhNDA1" target="_blank" style="color:var(--neon)">Join Channel</a>
+  </div>
 </div>
 
 <script>
 const player = document.getElementById("player");
-const liveBadge = document.getElementById("live");
+const speedSelect = document.getElementById("speed");
+const muteBtn = document.getElementById("muteBtn");
+const liveBadge = document.getElementById("liveBadge");
+const goLiveBtn = document.getElementById("goLive");
 
-/* 👇 APNA CLOUD FRONT LIVE URL YAHA DO */
-const VIDEO_SRC =
-new URLSearchParams(location.search).get("Url") ||
-"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8";
+/* LIVE HLS URL from query string */
+const VIDEO_SRC = new URLSearchParams(location.search).get("Url") || 
+"https://dga9kme080o0w.cloudfront.net/out/v1/5c7cfedca3df4fc99ea383b5f2e6a7a8/index.m3u8?start=1766835501";
 
-if (VIDEO_SRC.endsWith(".m3u8") && Hls.isSupported()) {
+if(Hls.isSupported() && VIDEO_SRC.endsWith(".m3u8")){
   const hls = new Hls({
-    liveDurationInfinity: true,
-    lowLatencyMode: true
+    liveDurationInfinity:true,
+    lowLatencyMode:true,
+    backBufferLength:0
   });
-
   hls.loadSource(VIDEO_SRC);
   hls.attachMedia(player);
 
-  hls.on(Hls.Events.LEVEL_LOADED, (e, data) => {
-    if (data.details.live) {
-      liveBadge.style.display = "inline";
+  hls.on(Hls.Events.LEVEL_LOADED,(evt,data)=>{
+    if(data.details.live){
+      liveBadge.style.display="inline";
+      goLiveBtn.style.display="inline";
     }
   });
 
-} else {
+}else{
   player.src = VIDEO_SRC;
 }
 
-speed.onchange = () => {
-  player.playbackRate = parseFloat(speed.value);
-};
+/* Controls */
+speedSelect.onchange = ()=>{ player.playbackRate = parseFloat(speedSelect.value); }
+muteBtn.onclick = ()=>{
+  player.muted = !player.muted;
+  muteBtn.textContent = player.muted?"Unmute":"Mute";
+}
+goLiveBtn.onclick = ()=>{
+  if(player.seekable.length)
+    player.currentTime = player.seekable.end(player.seekable.length-1);
+}
 
-/* autoplay safe */
+/* autoplay */
 player.muted = true;
 player.play().catch(()=>{});
 </script>
