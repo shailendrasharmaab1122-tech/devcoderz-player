@@ -1,69 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DevCoderz Premium Live Player</title>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-:root{--neon:#00eaff;}
+:root{
+  --neon:#00eaff;
+}
 *{margin:0;padding:0;box-sizing:border-box}
 body{
-  background:linear-gradient(180deg,#030306,#0b0c10);
-  color:#eafcff;
+  background:linear-gradient(180deg,#020205,#0b0c10);
   font-family:Poppins,Arial,sans-serif;
+  color:#eafcff;
 }
-#appContainer{display:flex;height:100vh;padding:25px;gap:20px}
-#leftBrand{
-  width:230px;
+#app{
+  display:flex;
+  height:100vh;
+  padding:20px;
+  gap:20px;
+}
+#brand{
+  width:220px;
   background:rgba(255,255,255,.03);
   border-radius:16px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  box-shadow:0 0 30px rgba(0,234,255,.1);
 }
 .logo{
-  width:100px;height:100px;border-radius:50%;
+  width:90px;height:90px;
+  border-radius:50%;
   background:linear-gradient(135deg,#00eaff,#8b33ff);
   display:flex;align-items:center;justify-content:center;
-  font-size:24px;font-weight:900;color:#001219;
+  font-size:22px;font-weight:900;color:#001219;
 }
-.player-wrap{flex:1;display:flex;flex-direction:column;gap:12px}
-.neon-frame{
-  padding:10px;border-radius:14px;
-  box-shadow:0 0 35px rgba(0,234,255,.15);
-}
+#playerWrap{flex:1;display:flex;flex-direction:column;gap:12px}
+
 video{
-  width:100%;height:560px;
-  background:#000;border-radius:10px;
+  width:100%;
+  height:560px;
+  background:#000;
+  border-radius:12px;
 }
-.controls-row{
-  display:flex;justify-content:space-between;
-  padding:12px;background:rgba(255,255,255,.03);
+
+/* PROGRESS BAR */
+#progressContainer{
+  width:100%;
+  height:6px;
+  background:rgba(255,255,255,.2);
+  border-radius:6px;
+  cursor:pointer;
+  overflow:hidden;
+}
+#progressBar{
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,#00eaff,#8b33ff);
+}
+
+/* CONTROLS */
+.controls{
+  display:flex;
+  justify-content:space-between;
+  padding:12px;
+  background:rgba(255,255,255,.03);
   border-radius:12px;
 }
 .controls-left,.controls-right{
-  display:flex;gap:10px;align-items:center;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 button,select{
   background:rgba(255,255,255,.06);
   color:#eafcff;
   border:1px solid rgba(255,255,255,.1);
-  padding:8px 12px;border-radius:8px;
+  padding:8px 12px;
+  border-radius:8px;
   font-weight:600;
 }
-#liveIndicator{
-  color:#ff3b3b;font-weight:800;
+
+/* LIVE */
+#liveBadge{
+  color:#ff3b3b;
+  font-weight:800;
   animation:blink 1s infinite;
 }
 @keyframes blink{50%{opacity:.4}}
-#creditBox{color:#bfeeff;text-align:center}
+
+#credit{text-align:center;color:#bfeeff}
+
 @media(max-width:900px){
-  #leftBrand{display:none}
+  #brand{display:none}
   video{height:360px}
 }
 </style>
@@ -71,69 +104,69 @@ button,select{
 
 <body>
 
-<div id="popupBlock" style="position:fixed;inset:0;z-index:999;
+<!-- TELEGRAM POPUP -->
+<div id="popup" style="
+position:fixed;inset:0;z-index:999;
 background:rgba(0,0,0,.95);
 display:flex;flex-direction:column;
 align-items:center;justify-content:center;">
-<h1 style="color:#00eaff">🔔 Telegram Join Required</h1>
+<h2 style="color:#00eaff">🔔 Join Telegram to Unlock</h2>
 <a href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank"
 style="margin-top:15px;padding:12px 20px;
 background:#00eaff;color:#001219;
 border-radius:10px;font-weight:800;text-decoration:none;">
 Join Telegram
 </a>
-<button onclick="unlock()"
-style="margin-top:15px;padding:10px 16px;font-weight:700;">
+<button onclick="unlock()" style="margin-top:15px;padding:10px 16px;font-weight:700;">
 I Have Joined
 </button>
 </div>
 
-<div id="appContainer">
+<div id="app">
 
-<div id="leftBrand">
+<div id="brand">
   <div class="logo">DC</div>
-  <h2>DevCoderz</h2>
+  <h3>DevCoderz</h3>
 </div>
 
-<div class="player-wrap">
+<div id="playerWrap">
 
-<div class="neon-frame">
-  <video id="player" controls playsinline></video>
+<video id="player" controls playsinline></video>
+
+<div id="progressContainer">
+  <div id="progressBar"></div>
 </div>
 
-<div class="controls-row">
-<div class="controls-left">
+<div class="controls">
+  <div class="controls-left">
+    <select id="speed">
+      <option value="0.5">0.5x</option>
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="1.75">1.75x</option>
+      <option value="2">2x</option>
+      <option value="2.25">2.25x</option>
+      <option value="2.5">2.5x</option>
+      <option value="2.75">2.75x</option>
+      <option value="3">3x</option>
+      <option value="3.5">3.5x</option>
+      <option value="4">4x</option>
+    </select>
 
-<select id="speedSelect">
-<option value="0.5">0.5x</option>
-<option value="0.75">0.75x</option>
-<option value="1" selected>1x</option>
-<option value="1.25">1.25x</option>
-<option value="1.5">1.5x</option>
-<option value="1.75">1.75x</option>
-<option value="2">2x</option>
-<option value="2.25">2.25x</option>
-<option value="2.5">2.5x</option>
-<option value="2.75">2.75x</option>
-<option value="3">3x</option>
-<option value="3.25">3.25x</option>
-<option value="3.5">3.5x</option>
-<option value="3.75">3.75x</option>
-<option value="4">4x</option>
-</select>
+    <span id="liveBadge" style="display:none;">🔴 LIVE</span>
+    <button id="goLive" style="display:none;">Go Live</button>
+  </div>
 
-<span id="liveIndicator" style="display:none;">🔴 LIVE</span>
-<button id="goLiveBtn" style="display:none;">Go Live</button>
+  <div class="controls-right">
+    <button id="back">⏪ 10s</button>
+    <button id="forward">⏩ 10s</button>
+    <button id="mute">Mute</button>
+  </div>
 </div>
 
-<div class="controls-right">
-<button id="backBtn">⏪ 10s</button>
-<button id="forwardBtn">⏩ 10s</button>
-<button id="muteBtn">Mute</button>
-</div>
-</div>
-
-<div id="creditBox">
+<div id="credit">
 Developer – <b>PT. Devansh Sharma</b>
 </div>
 
@@ -142,51 +175,83 @@ Developer – <b>PT. Devansh Sharma</b>
 
 <script>
 const player=document.getElementById("player");
-const VIDEO_SRC=new URLSearchParams(location.search).get("Url") ||
-"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+const popup=document.getElementById("popup");
+const progressBar=document.getElementById("progressBar");
+const progressContainer=document.getElementById("progressContainer");
+
+const liveBadge=document.getElementById("liveBadge");
+const goLive=document.getElementById("goLive");
+
+/* REAL LIVE TEST STREAM */
+const VIDEO_SRC =
+new URLSearchParams(location.search).get("Url") ||
+"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8";
+
+let hls=null;
 
 if(VIDEO_SRC.endsWith(".m3u8") && Hls.isSupported()){
-  const hls=new Hls();
+  hls=new Hls({
+    liveDurationInfinity:true,
+    lowLatencyMode:true,
+    backBufferLength:0
+  });
   hls.loadSource(VIDEO_SRC);
   hls.attachMedia(player);
+
+  hls.on(Hls.Events.LEVEL_LOADED,(e,d)=>{
+    if(d.details.live){
+      liveBadge.style.display="inline";
+      goLive.style.display="inline";
+    }
+  });
 }else{
   player.src=VIDEO_SRC;
 }
 
+player.muted=true;
+
 function unlock(){
-  popupBlock.style.display="none";
+  popup.style.display="none";
   player.play().catch(()=>{});
 }
 
-speedSelect.onchange=()=>player.playbackRate=parseFloat(speedSelect.value);
+/* PROGRESS BAR */
+player.addEventListener("timeupdate",()=>{
+  if(player.duration && player.duration!==Infinity){
+    progressBar.style.width=(player.currentTime/player.duration*100)+"%";
+  }
+});
 
-muteBtn.onclick=()=>{
-  player.muted=!player.muted;
-  muteBtn.textContent=player.muted?"Unmute":"Mute";
+progressContainer.onclick=(e)=>{
+  if(!player.duration || player.duration===Infinity) return;
+  const rect=progressContainer.getBoundingClientRect();
+  const pos=(e.clientX-rect.left)/rect.width;
+  player.currentTime=pos*player.duration;
 };
 
-backBtn.onclick=()=>player.currentTime=Math.max(0,player.currentTime-10);
-forwardBtn.onclick=()=>{
+/* CONTROLS */
+speed.onchange=()=>player.playbackRate=parseFloat(speed.value);
+
+mute.onclick=()=>{
+  player.muted=!player.muted;
+  mute.textContent=player.muted?"Unmute":"Mute";
+};
+
+back.onclick=()=>player.currentTime=Math.max(0,player.currentTime-10);
+forward.onclick=()=>{
   if(player.duration)
     player.currentTime=Math.min(player.duration,player.currentTime+10);
 };
 
-player.addEventListener("loadedmetadata",()=>{
-  if(!player.duration || player.duration===Infinity){
-    liveIndicator.style.display="inline";
-    goLiveBtn.style.display="inline";
-  }
-});
-
-goLiveBtn.onclick=()=>{
+goLive.onclick=()=>{
   if(player.seekable.length)
-    player.currentTime=player.seekable.end(0);
+    player.currentTime=player.seekable.end(player.seekable.length-1);
 };
 
-/* PREMIUM KEYBOARD SHORTCUTS */
+/* KEYBOARD SHORTCUTS */
 document.addEventListener("keydown",e=>{
-  if(e.code==="ArrowLeft") backBtn.click();
-  if(e.code==="ArrowRight") forwardBtn.click();
+  if(e.code==="ArrowLeft") back.click();
+  if(e.code==="ArrowRight") forward.click();
   if(e.code==="Space"){
     e.preventDefault();
     player.paused?player.play():player.pause();
