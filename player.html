@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,7 +106,7 @@ video{
 
 <div class="dev-anim">DevCoderz</div>
 
-<div id="join-popup">
+<div id="join-popup" style="display:none;">
   <div class="popup-card">
     <h2 style="color:#60a5fa;">Join Our Telegram</h2>
     <p style="color:#ccc;">Latest updates & premium content</p>
@@ -116,7 +115,7 @@ video{
       Join Telegram Channel
     </button>
     <button class="popup-btn skip-btn"
-      onclick="document.getElementById('join-popup').style.display='none'">
+      onclick="skipPopup()">
       Skip
     </button>
   </div>
@@ -124,7 +123,7 @@ video{
 
 <div class="container">
   <div class="neon-frame" id="playerFrame">
-    <video id="video" controls playsinline></video>
+    <video id="video" controls playsinline muted></video>
     <button class="fullscreen-btn" id="fsBtn">⛶</button>
   </div>
 
@@ -135,10 +134,10 @@ video{
       <option value="1" selected>1x</option>
       <option value="1.5">1.5x</option>
       <option value="2">2x</option>
-        <option value="2.25">2.25x</option>
+      <option value="2.25">2.25x</option>
       <option value="2.5">2.5x</option>
-     <option value="2.75">2.75x</option>
-     <option value="3">3x</option>
+      <option value="2.75">2.75x</option>
+      <option value="3">3x</option>
     </select>
 
     <label style="margin-left:15px;">Quality:</label>
@@ -165,19 +164,29 @@ video{
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
+// ====== POPUP LOGIC ======
+function skipPopup(){
+  document.getElementById('join-popup').style.display='none';
+  localStorage.setItem('skipPopup','true');
+}
+if(localStorage.getItem('skipPopup') !== 'true'){
+  document.getElementById('join-popup').style.display='flex';
+}
+
+// ====== VIDEO LOGIC ======
 const video = document.getElementById("video");
 const frame = document.getElementById("playerFrame");
 const fsBtn = document.getElementById("fsBtn");
 
 const params = new URLSearchParams(window.location.search);
-let rawUrl = params.get("url")  params.get("Url")  "";
+let rawUrl = params.get("url") || params.get("Url") || "";
 
 try{ rawUrl = decodeURIComponent(rawUrl); }catch(e){}
 
 if(!rawUrl){
   alert("Video URL missing!");
 }else{
-  if(Hls.isSupported()){
+  if(Hls.isSupported() && rawUrl.endsWith(".m3u8")){
     const hls = new Hls();
     hls.loadSource(rawUrl);
     hls.attachMedia(video);
@@ -185,19 +194,20 @@ if(!rawUrl){
     document.getElementById("qualityMenu").onchange = e=>{
       if(e.target.value === "auto") hls.currentLevel = -1;
       else hls.levels.forEach((l,i)=>{
-        if(l.height == e.target.value) hls.currentLevel = i;
+        if(l.height === Number(e.target.value)) hls.currentLevel = i;
       });
     };
   }else{
-    video.src = rawUrl;
+    video.src = rawUrl; // fallback for MP4 or other supported format
   }
 }
 
+// ====== SPEED CONTROL ======
 document.getElementById("speedMenu").onchange = e=>{
   video.playbackRate = Number(e.target.value);
 };
 
-/* FULLSCREEN LOGIC (ALL DEVICES) */
+// ====== FULLSCREEN ======
 fsBtn.onclick = ()=>{
   if(document.fullscreenElement){
     document.exitFullscreen();
