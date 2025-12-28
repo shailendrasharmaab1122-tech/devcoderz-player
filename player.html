@@ -2,91 +2,108 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz HLS Player</title>
+<title>DevCoderz NT Style Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
-    margin:0;
-    background:#000;
-    font-family:Arial, sans-serif;
-    color:#fff;
+  margin:0;
+  background:#000;
+  font-family:Arial, sans-serif;
+  color:#fff;
 }
 .container{
-    width:98%;
-    max-width:950px;
-    margin:25px auto;
+  max-width:950px;
+  margin:20px auto;
+  width:96%;
 }
 .neon-frame{
-    position:relative;
-    border:3px solid #3b82f6;
-    padding:12px;
-    border-radius:18px;
-    box-shadow:0 0 30px #3b82f6,0 0 60px #60a5fa inset;
+  position:relative;
+  padding:12px;
+  border-radius:18px;
+  border:3px solid #3b82f6;
+  box-shadow:0 0 25px #3b82f6, inset 0 0 40px #60a5fa;
 }
 video{
-    width:100%;
-    border-radius:14px;
-    background:#000;
+  width:100%;
+  border-radius:14px;
+  background:#000;
 }
+
+/* WATERMARK */
 .dev-anim{
-    position:fixed;
-    top:18px;
-    left:18px;
-    font-size:22px;
-    font-weight:bold;
-    color:#3b82f6;
-    animation:glow 1.5s infinite alternate;
-    z-index:99;
-    pointer-events:none;
+  position:fixed;
+  top:15px;
+  left:15px;
+  font-size:22px;
+  font-weight:bold;
+  color:#3b82f6;
+  text-shadow:0 0 15px #60a5fa;
+  z-index:99;
+  pointer-events:none;
 }
-@keyframes glow{
-    from{ text-shadow:0 0 10px #3b82f6; }
-    to{ text-shadow:0 0 30px #60a5fa; }
-}
+
+/* TIME OVERLAY */
 #timeOverlay{
-    position:absolute;
-    top:10px;
-    right:15px;
-    color:#fff;
-    font-size:16px;
-    background:rgba(0,0,0,0.6);
-    padding:4px 8px;
-    border-radius:6px;
-    z-index:20;
+  position:absolute;
+  top:10px;
+  right:14px;
+  background:rgba(0,0,0,.65);
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:14px;
+  z-index:10;
 }
-.controls-overlay{
-    position:absolute;
-    bottom:12px;
-    left:12px;
-    display:flex;
-    gap:10px;
-    z-index:20;
+
+/* CONTROLS */
+.controls{
+  position:absolute;
+  bottom:12px;
+  left:12px;
+  right:12px;
+  z-index:10;
+}
+
+/* NT STYLE BLUE PROGRESS */
+.progress-box{
+  width:100%;
+  height:6px;
+  background:#222;
+  border-radius:5px;
+  cursor:pointer;
+}
+.progress{
+  width:0%;
+  height:100%;
+  background:#3b82f6;
+  box-shadow:0 0 10px #3b82f6;
+  border-radius:5px;
+}
+
+/* BUTTON ROW */
+.btn-row{
+  margin-top:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.btns-left{
+  display:flex;
+  gap:10px;
 }
 .ctrl-btn{
-    background:rgba(0,0,0,0.6);
-    border:none;
-    color:#fff;
-    font-size:18px;
-    padding:6px 10px;
-    border-radius:6px;
-    cursor:pointer;
+  background:rgba(0,0,0,.6);
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:16px;
 }
-.fullscreen-btn{
-    position:absolute;
-    bottom:10px;
-    right:10px;
-    background:rgba(0,0,0,0.6);
-    border:none;
-    color:#fff;
-    font-size:20px;
-    padding:6px 10px;
-    border-radius:6px;
-    cursor:pointer;
-}
-@keyframes ramglow{
-    from{ text-shadow:0 0 15px red; }
-    to{ text-shadow:0 0 40px red; }
+
+/* RAM TEXT */
+@keyframes ram{
+  from{ text-shadow:0 0 10px red; }
+  to{ text-shadow:0 0 30px red; }
 }
 </style>
 </head>
@@ -96,49 +113,32 @@ video{
 <div class="dev-anim">DevCoderz</div>
 
 <div class="container">
-  <div class="neon-frame" id="playerFrame">
+  <div class="neon-frame">
 
-    <video id="video" controls playsinline muted></video>
+    <video id="video" playsinline></video>
 
-    <!-- TIME -->
     <div id="timeOverlay">00:00 / 00:00</div>
 
-    <!-- SEEK BUTTONS -->
-    <div class="controls-overlay">
-      <button class="ctrl-btn" id="back10">⏪ 10</button>
-      <button class="ctrl-btn" id="fwd10">10 ⏩</button>
+    <div class="controls">
+      <div class="progress-box" id="progressBox">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <div class="btn-row">
+        <div class="btns-left">
+          <button class="ctrl-btn" id="play">▶</button>
+          <button class="ctrl-btn" id="back">⏪10</button>
+          <button class="ctrl-btn" id="fwd">10⏩</button>
+        </div>
+        <button class="ctrl-btn" id="fs">⛶</button>
+      </div>
     </div>
 
-    <!-- FULLSCREEN -->
-    <button class="fullscreen-btn" id="fsBtn">⛶</button>
   </div>
 
-  <div style="margin-top:22px;text-align:center;">
-    <label>Speed:</label>
-    <select id="speedMenu">
-      <option value="0.5">0.5x</option>
-      <option value="1" selected>1x</option>
-      <option value="1.5">1.5x</option>
-      <option value="2">2x</option>
-      <option value="2.25">2.25x</option>
-      <option value="2.5">2.5x</option>
-      <option value="2.75">2.75x</option>
-      <option value="3">3x</option>
-    </select>
-
-    <label style="margin-left:15px;">Quality:</label>
-    <select id="qualityMenu">
-      <option value="auto">Auto</option>
-      <option value="360">360p</option>
-      <option value="480">480p</option>
-      <option value="720">720p</option>
-      <option value="1080">1080p</option>
-    </select>
-  </div>
-
-  <div style="text-align:center;margin-top:25px;
-      font-size:34px;font-weight:bold;color:red;
-      animation:ramglow 1.4s infinite alternate;">
+  <div style="text-align:center;margin-top:22px;
+    font-size:32px;font-weight:bold;color:red;
+    animation:ram 1.4s infinite alternate;">
     जय श्री राम 🚩
   </div>
 </div>
@@ -146,55 +146,67 @@ video{
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const video = document.getElementById("video");
-const frame = document.getElementById("playerFrame");
-const fsBtn = document.getElementById("fsBtn");
+const playBtn = document.getElementById("play");
+const progress = document.getElementById("progress");
+const progressBox = document.getElementById("progressBox");
 const overlay = document.getElementById("timeOverlay");
 
-const back10 = document.getElementById("back10");
-const fwd10  = document.getElementById("fwd10");
+/* PUT YOUR URL */
+let url = "YOUR_M3U8_OR_MP4_URL_HERE";
 
-let streamURL = "YOUR_M3U8_OR_MP4_URL_HERE";
-try{ streamURL = decodeURIComponent(streamURL); }catch(e){}
-
-if(Hls.isSupported() && streamURL.includes(".m3u8")){
+/* HLS */
+if(Hls.isSupported() && url.includes(".m3u8")){
   const hls = new Hls();
-  hls.loadSource(streamURL);
+  hls.loadSource(url);
   hls.attachMedia(video);
-
-  document.getElementById("qualityMenu").onchange = e=>{
-    if(e.target.value === "auto") hls.currentLevel = -1;
-    else hls.levels.forEach((l,i)=>{
-      if(l.height == e.target.value) hls.currentLevel = i;
-    });
-  };
 }else{
-  video.src = streamURL;
+  video.src = url;
 }
 
-document.getElementById("speedMenu").onchange = e=>{
-  video.playbackRate = Number(e.target.value);
-};
-
-fsBtn.onclick = ()=>{
-  if(document.fullscreenElement) document.exitFullscreen();
-  else frame.requestFullscreen();
-};
-
-back10.onclick = ()=> video.currentTime -= 10;
-fwd10.onclick  = ()=> video.currentTime += 10;
-
-function format(t){
+/* FORMAT TIME */
+function fmt(t){
   if(!isFinite(t)) return "00:00";
-  let h = Math.floor(t/3600);
-  let m = Math.floor((t%3600)/60);
-  let s = Math.floor(t%60);
+  let h=Math.floor(t/3600),
+      m=Math.floor(t%3600/60),
+      s=Math.floor(t%60);
   return h>0
     ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
     : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-video.ontimeupdate = ()=>{
-  overlay.textContent = `${format(video.currentTime)} / ${format(video.duration)}`;
+/* PLAY / PAUSE */
+playBtn.onclick = ()=>{
+  if(video.paused){
+    video.play();
+    playBtn.textContent = "⏸";
+  }else{
+    video.pause();
+    playBtn.textContent = "▶";
+  }
+};
+
+/* UPDATE PROGRESS */
+video.addEventListener("timeupdate",()=>{
+  let p = (video.currentTime / video.duration) * 100;
+  progress.style.width = p + "%";
+  overlay.textContent = `${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+});
+
+/* SEEK BAR CLICK */
+progressBox.onclick = e=>{
+  let rect = progressBox.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+  let percent = x / rect.width;
+  video.currentTime = percent * video.duration;
+};
+
+/* 10 SEC */
+document.getElementById("back").onclick=()=>video.currentTime-=10;
+document.getElementById("fwd").onclick=()=>video.currentTime+=10;
+
+/* FULLSCREEN */
+document.getElementById("fs").onclick=()=>{
+  if(video.requestFullscreen) video.requestFullscreen();
 };
 </script>
 
