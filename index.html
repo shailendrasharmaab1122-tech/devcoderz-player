@@ -112,19 +112,41 @@ initHLS();
 
 /* FORMAT TIME HH:MM:SS */
 function formatTimeHMS(s){
+    if(!s || isNaN(s)) return "00:00:00";
     const hours = Math.floor(s / 3600);
     const minutes = Math.floor((s % 3600) / 60);
     const seconds = Math.floor(s % 60);
     return `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
 }
 
-/* PROGRESS & TIMER */
-video.ontimeupdate=()=>{
-  const p=(video.currentTime/video.duration)*100;
-  progressBar.style.width=p+"%";
-  thumb.style.left=p+"%";
-  timer.textContent=`${formatTimeHMS(video.currentTime)} / ${formatTimeHMS(video.duration)}`;
-};
+/* TIMER UPDATE FUNCTION */
+function updateTimer(){
+    if(video.duration){
+        const p=(video.currentTime/video.duration)*100;
+        progressBar.style.width=p+"%";
+        thumb.style.left=p+"%";
+        timer.textContent=`${formatTimeHMS(video.currentTime)} / ${formatTimeHMS(video.duration)}`;
+    }
+}
+
+/* Attach events */
+video.addEventListener("loadedmetadata", updateTimer);
+video.addEventListener("timeupdate", updateTimer);
+
+/* HLS INIT */
+if(Hls.isSupported() && videoURL.endsWith(".m3u8")){
+    if(!hls){
+        hls=new Hls();
+        hls.loadSource(videoURL);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+            video.play();
+            updateTimer();
+        });
+    }
+}else{
+    video.src=videoURL;
+}
 
 /* BIG PLAY */
 bigPlay.onclick=()=>video.play();
