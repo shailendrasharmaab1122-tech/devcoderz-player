@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Fake Fullscreen HLS Player with Black Bars</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Rolex-style Fake Fullscreen Player</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
-body{background:#000;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;}
+body{background:#000;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;}
 .player{position:relative;width:100%;max-width:900px;background:#000;}
 .player.fake{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;background:#000;display:flex;justify-content:center;align-items:center;}
 video{width:100%;height:auto;display:block;background:#000;object-fit:contain;}
