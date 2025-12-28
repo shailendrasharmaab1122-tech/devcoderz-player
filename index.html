@@ -3,20 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Devansh Player</title>
+<title>Devansh HLS Player</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh}
-
 .player{position:relative;width:100%;max-width:900px;background:#000;overflow:hidden}
 video{width:100%;height:auto;background:#000;display:block;}
-
-/* FULLSCREEN VIDEO FIX */
-:fullscreen video, :-webkit-full-screen video, :-ms-fullscreen video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+:fullscreen video, :-webkit-full-screen video, :-ms-fullscreen video{width:100%;height:100%;object-fit:cover}
 
 /* TOP BRAND */
 .top-brand{position:absolute;top:8px;left:50%;transform:translateX(-50%);text-align:center;z-index:10;pointer-events:none}
@@ -74,7 +67,7 @@ select{background:#000;color:#fff;border:1px solid #777;border-radius:4px;}
         <option>2.5</option><option>2.75</option><option>3</option>
       </select>
       <div class="onoff" id="playPause">▶</div>
-      <select>
+      <select id="quality">
         <option selected>Auto</option>
         <option>144p</option><option>240p</option><option>360p</option>
         <option>480p</option><option>720p</option><option>1080p</option>
@@ -84,6 +77,8 @@ select{background:#000;color:#fff;border:1px solid #777;border-radius:4px;}
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const video=document.getElementById("video");
 const back10=document.getElementById("back10");
@@ -94,17 +89,34 @@ const progress=document.getElementById("progress");
 const progressBar=document.getElementById("progressBar");
 const thumb=document.getElementById("thumb");
 const speed=document.getElementById("speed");
-const player=document.getElementById("player");
 const playPause=document.getElementById("playPause");
 const fullScreenBtn=document.getElementById("fullScreenBtn");
 const timer=document.getElementById("timer");
 
-/* LOAD VIDEO */
-const url=new URLSearchParams(location.search).get("Url");
-if(url) video.src=decodeURIComponent(url);
+let hls=null;
+let videoURL=new URLSearchParams(location.search).get("Url");
+if(videoURL) videoURL=decodeURIComponent(videoURL);
 
-/* FORMAT TIME */
-function formatTime(s){const m=Math.floor(s/60);const sec=Math.floor(s%60);return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`}
+/* INIT HLS ONLY ONCE */
+function initHLS(){
+  if(Hls.isSupported() && videoURL.endsWith(".m3u8")){
+    if(!hls){ // attach only once
+      hls=new Hls();
+      hls.loadSource(videoURL);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED,()=>{video.play();});
+    }
+  }else video.src=videoURL;
+}
+initHLS();
+
+/* FORMAT TIME HH:MM */
+function formatTimeHM(s){
+    const totalMinutes=Math.floor(s/60);
+    const hours=Math.floor(totalMinutes/60);
+    const minutes=totalMinutes%60;
+    return `${hours>0?String(hours).padStart(2,'0'):'00'}:${String(minutes).padStart(2,'0')}`;
+}
 
 /* BIG PLAY */
 bigPlay.onclick=()=>video.play();
@@ -114,12 +126,12 @@ video.onpause=()=>{bigPlay.classList.remove("hide");playPause.textContent="▶";
 /* PLAY/PAUSE BUTTON */
 playPause.onclick=()=>video.paused?video.play():video.pause();
 
-/* PROGRESS & TIMER UPDATE */
+/* PROGRESS & TIMER */
 video.ontimeupdate=()=>{
   const p=(video.currentTime/video.duration)*100;
   progressBar.style.width=p+"%";
   thumb.style.left=p+"%";
-  timer.textContent=`${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+  timer.textContent=`${formatTimeHM(video.currentTime)} / ${formatTimeHM(video.duration)}`;
 };
 
 /* DRAG THUMB */
@@ -173,6 +185,9 @@ fullScreenBtn.onclick=()=>{if(!document.fullscreenElement) video.requestFullscre
 
 /* DOUBLE TAP VIDEO TO FULLSCREEN */
 video.ondblclick=fullScreenBtn.onclick;
+
+/* ROTATE / RESIZE FIX */
+window.addEventListener("resize",()=>{ /* video continues, no reload */ });
 </script>
 </body>
 </html>
