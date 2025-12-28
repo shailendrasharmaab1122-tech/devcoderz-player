@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Fake Fullscreen HLS Player</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
 body{background:#000;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;}
 .player{position:relative;width:100%;max-width:900px;background:#000;}
 .player.fake{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;}
@@ -71,6 +71,9 @@ const controls=document.getElementById("controls");
 const timer=document.getElementById("timer");
 const speed=document.getElementById("speed");
 const quality=document.getElementById("quality");
+
+/* PREVENT CONTEXT MENU / LONG PRESS */
+document.addEventListener('contextmenu', e => e.preventDefault());
 
 /* LOAD HLS */
 let url=new URLSearchParams(location.search).get("Url");
