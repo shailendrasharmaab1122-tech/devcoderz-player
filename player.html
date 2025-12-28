@@ -9,12 +9,13 @@ body{margin:0;background:#000;font-family:Arial,sans-serif;color:#fff;}
 .player{max-width:900px;margin:20px auto;padding:12px;border-radius:18px;border:3px solid #3b82f6;box-shadow:0 0 30px #3b82f6;position:relative;background:#000;transition:.3s;}
 video{width:100%;border-radius:14px;background:#000;}
 .time{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px;font-size:14px;z-index:10;}
-.controls{position:absolute;left:12px;right:12px;bottom:12px;}
-.progress-box{height:6px;background:#222;border-radius:5px;position:relative;cursor:pointer;}
+.controls{position:absolute;left:0;right:0;bottom:0;transition:transform .3s ease;pointer-events:auto;}
+.controls.hide{transform:translateY(100%);}
+.progress-box{height:6px;background:#222;border-radius:5px;position:relative;cursor:pointer;margin:12px;}
 .progress{height:100%;width:0%;background:#3b82f6;box-shadow:0 0 10px #3b82f6;border-radius:5px;position:relative;}
 .thumb{position:absolute;top:50%;left:0%;width:12px;height:12px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);transition:.1s;cursor:pointer;z-index:2;}
 .thumb.active{transform:translate(-50%,-50%) scale(1.5);}
-.button-row{display:flex;justify-content:center;gap:12px;margin-top:8px;}
+.button-row{display:flex;justify-content:center;gap:12px;margin-bottom:12px;}
 .btn{width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;font-size:18px;cursor:pointer;}
 .dev{text-align:center;margin-top:15px;font-size:18px;color:#3b82f6;}
 .glow-text{text-align:center;margin-top:20px;font-size:34px;font-weight:bold;color:red;animation:ramglow 1.4s infinite alternate;}
@@ -27,7 +28,7 @@ video{width:100%;border-radius:14px;background:#000;}
   <video id="video" playsinline></video>
   <div class="time" id="time">00:00 / 00:00</div>
 
-  <div class="controls">
+  <div class="controls" id="controls">
     <div class="progress-box" id="bar">
       <div class="progress" id="fill"></div>
       <div class="thumb" id="thumb"></div>
@@ -59,6 +60,7 @@ const forward10=document.getElementById("forward10");
 const stop=document.getElementById("stop");
 const fs=document.getElementById("fs");
 const playpause=document.getElementById("playpause");
+const controls=document.getElementById("controls");
 
 /* LOAD URL */
 let u=new URLSearchParams(location.search).get("Url");
@@ -111,6 +113,18 @@ playpause.onclick=()=>{
   if(v.paused){v.play(); playpause.textContent="⏸";}
   else{v.pause(); playpause.textContent="▶";}
 }
+
+/* AUTO-HIDE CONTROLS */
+let hideTimeout;
+function showControls(){
+  controls.classList.remove("hide");
+  clearTimeout(hideTimeout);
+  hideTimeout=setTimeout(()=>controls.classList.add("hide"),3500);
+}
+p.addEventListener("mousemove",showControls);
+p.addEventListener("click",showControls);
+p.addEventListener("touchstart",showControls);
+showControls(); // initial
 </script>
 </body>
 </html>
