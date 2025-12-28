@@ -9,7 +9,7 @@
 body{
   margin:0;
   background:#000;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   color:#fff;
 }
 .container{
@@ -43,7 +43,7 @@ video{
   pointer-events:none;
 }
 
-/* TIME OVERLAY */
+/* TIME */
 #timeOverlay{
   position:absolute;
   top:10px;
@@ -52,7 +52,6 @@ video{
   padding:4px 8px;
   border-radius:6px;
   font-size:14px;
-  z-index:10;
 }
 
 /* CONTROLS */
@@ -61,10 +60,7 @@ video{
   bottom:12px;
   left:12px;
   right:12px;
-  z-index:10;
 }
-
-/* NT STYLE BLUE PROGRESS */
 .progress-box{
   width:100%;
   height:6px;
@@ -79,17 +75,10 @@ video{
   box-shadow:0 0 10px #3b82f6;
   border-radius:5px;
 }
-
-/* BUTTON ROW */
 .btn-row{
   margin-top:8px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
-}
-.btns-left{
-  display:flex;
-  gap:10px;
 }
 .ctrl-btn{
   background:rgba(0,0,0,.6);
@@ -99,11 +88,9 @@ video{
   border-radius:6px;
   font-size:16px;
 }
-
-/* RAM TEXT */
 @keyframes ram{
-  from{ text-shadow:0 0 10px red; }
-  to{ text-shadow:0 0 30px red; }
+  from{text-shadow:0 0 10px red;}
+  to{text-shadow:0 0 30px red;}
 }
 </style>
 </head>
@@ -123,9 +110,8 @@ video{
       <div class="progress-box" id="progressBox">
         <div class="progress" id="progress"></div>
       </div>
-
       <div class="btn-row">
-        <div class="btns-left">
+        <div>
           <button class="ctrl-btn" id="play">▶</button>
           <button class="ctrl-btn" id="back">⏪10</button>
           <button class="ctrl-btn" id="fwd">10⏩</button>
@@ -136,9 +122,9 @@ video{
 
   </div>
 
-  <div style="text-align:center;margin-top:22px;
+  <div style="margin-top:22px;text-align:center;
     font-size:32px;font-weight:bold;color:red;
-    animation:ram 1.4s infinite alternate;">
+    animation:ram 1.4s infinite;">
     जय श्री राम 🚩
   </div>
 </div>
@@ -146,17 +132,27 @@ video{
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const video = document.getElementById("video");
-const playBtn = document.getElementById("play");
 const progress = document.getElementById("progress");
 const progressBox = document.getElementById("progressBox");
 const overlay = document.getElementById("timeOverlay");
+const playBtn = document.getElementById("play");
 
-/* PUT YOUR URL */
-let url = "YOUR_M3U8_OR_MP4_URL_HERE";
+/* ✅ READ URL PARAM */
+const params = new URLSearchParams(window.location.search);
+let url = params.get("Url");
 
-/* HLS */
+if(!url){
+  alert("Video URL missing");
+}else{
+  try{ url = decodeURIComponent(url); }catch(e){}
+}
+
+/* HLS INIT */
 if(Hls.isSupported() && url.includes(".m3u8")){
-  const hls = new Hls();
+  const hls = new Hls({
+    enableWorker:true,
+    lowLatencyMode:true
+  });
   hls.loadSource(url);
   hls.attachMedia(video);
 }else{
@@ -169,42 +165,36 @@ function fmt(t){
   let h=Math.floor(t/3600),
       m=Math.floor(t%3600/60),
       s=Math.floor(t%60);
-  return h>0
-    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-    : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return h>0?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+            :`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-/* PLAY / PAUSE */
-playBtn.onclick = ()=>{
+/* PLAY */
+playBtn.onclick=()=>{
   if(video.paused){
     video.play();
-    playBtn.textContent = "⏸";
+    playBtn.textContent="⏸";
   }else{
     video.pause();
-    playBtn.textContent = "▶";
+    playBtn.textContent="▶";
   }
 };
 
-/* UPDATE PROGRESS */
+/* UPDATE UI */
 video.addEventListener("timeupdate",()=>{
-  let p = (video.currentTime / video.duration) * 100;
-  progress.style.width = p + "%";
-  overlay.textContent = `${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+  let p=(video.currentTime/video.duration)*100;
+  progress.style.width=p+"%";
+  overlay.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
 });
 
-/* SEEK BAR CLICK */
-progressBox.onclick = e=>{
-  let rect = progressBox.getBoundingClientRect();
-  let x = e.clientX - rect.left;
-  let percent = x / rect.width;
-  video.currentTime = percent * video.duration;
+/* SEEK */
+progressBox.onclick=e=>{
+  let r=progressBox.getBoundingClientRect();
+  video.currentTime=((e.clientX-r.left)/r.width)*video.duration;
 };
 
-/* 10 SEC */
 document.getElementById("back").onclick=()=>video.currentTime-=10;
 document.getElementById("fwd").onclick=()=>video.currentTime+=10;
-
-/* FULLSCREEN */
 document.getElementById("fs").onclick=()=>{
   if(video.requestFullscreen) video.requestFullscreen();
 };
