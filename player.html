@@ -2,124 +2,50 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz Player</title>
+<title>DevCoderz Player with Thumb</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  margin:0;
-  background:#000;
-  font-family:Arial,sans-serif;
-  color:#fff;
-}
-
-/* PLAYER */
-.player{
-  max-width:900px;
-  margin:20px auto;
-  padding:12px;
-  border-radius:18px;
-  border:3px solid #3b82f6;
-  box-shadow:0 0 30px #3b82f6;
-  position:relative;
-  background:#000;
-}
-
-/* FAKE FULLSCREEN */
-.player.full{
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100vh;
-  z-index:9999;
-  border-radius:0;
-}
-
-/* VIDEO */
-video{
-  width:100%;
-  border-radius:14px;
-  background:#000;
-}
-
-/* OVERLAY */
-.time{
+body{margin:0;background:#000;font-family:Arial,sans-serif;color:#fff;}
+.player{max-width:900px;margin:20px auto;padding:12px;border-radius:18px;border:3px solid #3b82f6;box-shadow:0 0 30px #3b82f6;position:relative;background:#000;transition:.3s;}
+.player.full{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;border-radius:0;}
+video{width:100%;border-radius:14px;background:#000;}
+.time{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px;font-size:14px;z-index:10;}
+.controls{position:absolute;left:12px;right:12px;bottom:12px;}
+.progress-box{height:6px;background:#222;border-radius:5px;position:relative;cursor:pointer;}
+.progress{height:100%;width:0%;background:#3b82f6;box-shadow:0 0 10px #3b82f6;border-radius:5px;position:relative;}
+.thumb{
   position:absolute;
-  top:10px;
-  right:12px;
-  background:rgba(0,0,0,.6);
-  padding:4px 8px;
-  border-radius:6px;
-  font-size:14px;
+  top:50%;
+  left:0%;
+  width:12px;
+  height:12px;
+  background:#fff;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  transition:.1s;
+  cursor:pointer;
+  z-index:2;
 }
-
-/* CONTROLS */
-.controls{
-  position:absolute;
-  left:12px;
-  right:12px;
-  bottom:12px;
-}
-.progress-box{
-  height:6px;
-  background:#222;
-  border-radius:5px;
-}
-.progress{
-  height:100%;
-  width:0%;
-  background:#3b82f6;
-  box-shadow:0 0 10px #3b82f6;
-}
-.row{
-  margin-top:8px;
-  display:flex;
-  justify-content:space-between;
-}
-.btn{
-  background:rgba(0,0,0,.6);
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  font-size:16px;
-}
-
-/* DEV NAME */
-.dev{
-  text-align:center;
-  margin-top:15px;
-  font-size:18px;
-  color:#3b82f6;
-}
-
-/* TELEGRAM POP */
-.tg{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#0088cc;
-  color:#fff;
-  padding:10px 14px;
-  border-radius:30px;
-  font-weight:bold;
-  display:none;
-  z-index:99999;
-}
+.thumb.active{transform:translate(-50%,-50%) scale(1.5);}
+.row{margin-top:8px;display:flex;justify-content:space-between;}
+.btn{background:rgba(0,0,0,.6);color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:16px;}
+.dev{text-align:center;margin-top:15px;font-size:18px;color:#3b82f6;}
+.tg{position:fixed;bottom:20px;right:20px;background:#0088cc;color:#fff;padding:10px 14px;border-radius:30px;font-weight:bold;display:none;z-index:99999;}
 </style>
 </head>
-
 <body>
 
 <div class="player" id="player">
   <video id="video" playsinline></video>
-
   <div class="time" id="time">00:00 / 00:00</div>
 
   <div class="controls">
     <div class="progress-box" id="bar">
       <div class="progress" id="fill"></div>
+      <div class="thumb" id="thumb"></div>
     </div>
+
     <div class="row">
       <div>
         <button class="btn" id="play">▶</button>
@@ -143,7 +69,9 @@ const v=document.getElementById("video");
 const p=document.getElementById("player");
 const fill=document.getElementById("fill");
 const bar=document.getElementById("bar");
+const thumb=document.getElementById("thumb");
 const time=document.getElementById("time");
+const tg=document.getElementById("tg");
 
 /* LOAD URL */
 let u=new URLSearchParams(location.search).get("Url");
@@ -157,58 +85,55 @@ if(Hls.isSupported() && u && u.includes(".m3u8")){
   v.src=u;
 }
 
+/* FORMAT TIME */
+function f(t){if(!isFinite(t)) return "00:00"; let m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+
 /* PLAY */
 document.getElementById("play").onclick=()=>{
-  if(v.paused){
-    v.play();
-    tg.style.display="block";   // TELEGRAM POP
-    play.textContent="⏸";
-  }else{
-    v.pause();
-    play.textContent="▶";
-  }
+  if(v.paused){v.play();play.textContent="⏸";tg.style.display="block";}
+  else{v.pause();play.textContent="▶";}
 };
 
-/* TIME */
-function f(t){
-  if(!isFinite(t)) return "00:00";
-  let m=Math.floor(t/60),s=Math.floor(t%60);
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
+/* UPDATE PROGRESS */
 v.ontimeupdate=()=>{
   if(isFinite(v.duration)){
-    fill.style.width=(v.currentTime/v.duration*100)+"%";
+    let p=(v.currentTime/v.duration)*100;
+    fill.style.width=p+"%";
+    thumb.style.left=p+"%";
     time.textContent=`${f(v.currentTime)} / ${f(v.duration)}`;
   }
 };
 
-/* DRAG SEEK (FIXED) */
+/* SEEK WITH THUMB DRAG */
 let drag=false;
 function seek(x){
   let r=bar.getBoundingClientRect();
   x=Math.max(0,Math.min(x-r.left,r.width));
-  v.currentTime=(x/r.width)*v.duration;
+  let p=(x/r.width);
+  v.currentTime=p*v.duration;
+  fill.style.width=(p*100)+"%";
+  thumb.style.left=(p*100)+"%";
 }
-bar.addEventListener("mousedown",e=>{drag=true;seek(e.clientX)});
-document.addEventListener("mousemove",e=>{if(drag)seek(e.clientX)});
-document.addEventListener("mouseup",()=>drag=false);
 
-bar.addEventListener("touchstart",e=>{
-  drag=true;seek(e.touches[0].clientX);
-});
-bar.addEventListener("touchmove",e=>{
-  if(drag){seek(e.touches[0].clientX);e.preventDefault();}
-},{passive:false});
-bar.addEventListener("touchend",()=>drag=false);
+/* DESKTOP */
+thumb.addEventListener("mousedown",e=>{drag=true;thumb.classList.add("active");seek(e.clientX);});
+document.addEventListener("mousemove",e=>{if(drag)seek(e.clientX);});
+document.addEventListener("mouseup",()=>{drag=false;thumb.classList.remove("active");});
 
-/* 10s */
+/* MOBILE */
+thumb.addEventListener("touchstart",e=>{drag=true;thumb.classList.add("active");seek(e.touches[0].clientX);});
+document.addEventListener("touchmove",e=>{if(drag){seek(e.touches[0].clientX);e.preventDefault();}},{passive:false});
+document.addEventListener("touchend",()=>{drag=false;thumb.classList.remove("active");});
+
+/* CLICK BAR */
+bar.addEventListener("click",e=>{seek(e.clientX);});
+
+/* 10s buttons */
 b10.onclick=()=>v.currentTime-=10;
 f10.onclick=()=>v.currentTime+=10;
 
-/* FAKE FULLSCREEN ONLY */
-fs.onclick=()=>{
-  p.classList.toggle("full");
-};
+/* FAKE FULLSCREEN */
+fs.onclick=()=>p.classList.toggle("full");
 </script>
 
 </body>
