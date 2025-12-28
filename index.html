@@ -7,23 +7,36 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh}
+
 .player{position:relative;width:100%;max-width:900px;background:#000;overflow:hidden}
-video{width:100%;background:#000}
+video{width:100%;height:auto;background:#000;display:block;}
+
+/* FULLSCREEN VIDEO FIX */
+:fullscreen video, :-webkit-full-screen video, :-ms-fullscreen video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
 /* TOP BRAND */
 .top-brand{position:absolute;top:8px;left:50%;transform:translateX(-50%);text-align:center;z-index:10;pointer-events:none}
 .jsr{color:#ff9800;font-weight:700;text-shadow:0 0 8px #ff9800,0 0 16px #ff5722;}
 .dev{font-size:13px;color:#fff;text-shadow:0 0 6px #2196f3,0 0 12px #2196f3;}
+
 /* BIG PLAY */
 .big-play{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;z-index:9;cursor:pointer}
 .big-play.hide{display:none}
 .play-circle{width:90px;height:90px;border-radius:50%;background:#e53935;color:#fff;display:flex;justify-content:center;align-items:center;font-size:40px;box-shadow:0 0 30px #e53935}
+
 /* CONTROLS */
 .controls{position:absolute;bottom:0;width:100%;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.9));transition:.25s;}
 .controls.hide{opacity:0;pointer-events:none}
+
 /* PROGRESS BAR */
 .progress{position:relative;height:6px;background:#555;border-radius:10px;cursor:pointer;}
 .progress-fill{height:100%;width:0%;background:#2196f3;border-radius:10px;}
 .thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:#fff;border-radius:50%;box-shadow:0 0 10px #2196f3;cursor:pointer;}
+
 /* BUTTON ROW */
 .row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:#fff;gap:6px;}
 .circle{width:50px;height:50px;border:3px solid #fff;border-radius:50%;display:flex;justify-content:center;align-items:center;font-weight:bold;cursor:pointer;}
@@ -151,7 +164,7 @@ fullScreenBtn.onclick=()=>{
   else document.exitFullscreen();
 };
 
-/* DOUBLE TAP FULLSCREEN */
+/* DOUBLE TAP VIDEO TO FULLSCREEN */
 video.ondblclick=(e)=>{
   if(!document.fullscreenElement) player.requestFullscreen();
   else document.exitFullscreen();
