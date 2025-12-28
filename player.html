@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz NT Style Player</title>
+<title>DevCoderz Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -12,92 +12,71 @@ body{
   font-family:Arial,sans-serif;
   color:#fff;
 }
-.container{
-  max-width:950px;
+
+/* PLAYER */
+.player{
+  max-width:900px;
   margin:20px auto;
-  width:96%;
-}
-.neon-frame{
-  position:relative;
   padding:12px;
   border-radius:18px;
   border:3px solid #3b82f6;
-  box-shadow:0 0 25px #3b82f6, inset 0 0 40px #60a5fa;
+  box-shadow:0 0 30px #3b82f6;
+  position:relative;
   background:#000;
-  transition:.3s;
 }
 
-/* 🔥 FAKE FULLSCREEN */
-.neon-frame.fake-fs{
+/* FAKE FULLSCREEN */
+.player.full{
   position:fixed;
   inset:0;
   width:100vw;
   height:100vh;
-  margin:0;
   z-index:9999;
   border-radius:0;
-  padding:10px;
 }
 
+/* VIDEO */
 video{
   width:100%;
-  height:auto;
   border-radius:14px;
   background:#000;
 }
 
-/* WATERMARK */
-.dev-anim{
-  position:fixed;
-  top:15px;
-  left:15px;
-  font-size:22px;
-  font-weight:bold;
-  color:#3b82f6;
-  text-shadow:0 0 15px #60a5fa;
-  z-index:10000;
-  pointer-events:none;
-}
-
-/* TIME */
-#timeOverlay{
+/* OVERLAY */
+.time{
   position:absolute;
   top:10px;
-  right:14px;
+  right:12px;
   background:rgba(0,0,0,.6);
   padding:4px 8px;
   border-radius:6px;
   font-size:14px;
-  z-index:10;
 }
 
 /* CONTROLS */
 .controls{
   position:absolute;
-  bottom:12px;
   left:12px;
   right:12px;
-  z-index:10;
+  bottom:12px;
 }
 .progress-box{
-  width:100%;
   height:6px;
   background:#222;
   border-radius:5px;
 }
 .progress{
-  width:0%;
   height:100%;
+  width:0%;
   background:#3b82f6;
   box-shadow:0 0 10px #3b82f6;
-  border-radius:5px;
 }
-.btn-row{
+.row{
   margin-top:8px;
   display:flex;
   justify-content:space-between;
 }
-.ctrl-btn{
+.btn{
   background:rgba(0,0,0,.6);
   color:#fff;
   border:none;
@@ -106,124 +85,129 @@ video{
   font-size:16px;
 }
 
-/* RAM TEXT */
-@keyframes ram{
-  from{text-shadow:0 0 10px red;}
-  to{text-shadow:0 0 30px red;}
+/* DEV NAME */
+.dev{
+  text-align:center;
+  margin-top:15px;
+  font-size:18px;
+  color:#3b82f6;
+}
+
+/* TELEGRAM POP */
+.tg{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#0088cc;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:30px;
+  font-weight:bold;
+  display:none;
+  z-index:99999;
 }
 </style>
 </head>
 
 <body>
 
-<div class="dev-anim">DevCoderz</div>
+<div class="player" id="player">
+  <video id="video" playsinline></video>
 
-<div class="container">
-  <div class="neon-frame" id="playerBox">
+  <div class="time" id="time">00:00 / 00:00</div>
 
-    <video id="video" playsinline></video>
-
-    <div id="timeOverlay">00:00 / 00:00</div>
-
-    <div class="controls">
-      <div class="progress-box" id="progressBox">
-        <div class="progress" id="progress"></div>
-      </div>
-
-      <div class="btn-row">
-        <div>
-          <button class="ctrl-btn" id="play">▶</button>
-          <button class="ctrl-btn" id="back">⏪10</button>
-          <button class="ctrl-btn" id="fwd">10⏩</button>
-        </div>
-        <button class="ctrl-btn" id="fs">⛶</button>
-      </div>
+  <div class="controls">
+    <div class="progress-box" id="bar">
+      <div class="progress" id="fill"></div>
     </div>
-
-  </div>
-
-  <div style="margin-top:22px;text-align:center;
-    font-size:32px;font-weight:bold;color:red;
-    animation:ram 1.4s infinite;">
-    जय श्री राम 🚩
+    <div class="row">
+      <div>
+        <button class="btn" id="play">▶</button>
+        <button class="btn" id="b10">⏪10</button>
+        <button class="btn" id="f10">10⏩</button>
+      </div>
+      <button class="btn" id="fs">⛶</button>
+    </div>
   </div>
 </div>
 
+<div class="dev">Developed by DevCoderz</div>
+
+<a class="tg" id="tg" href="https://t.me/NT_lecture_bot" target="_blank">
+  Join Telegram
+</a>
+
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-const video=document.getElementById("video");
-const box=document.getElementById("playerBox");
-const progress=document.getElementById("progress");
-const progressBox=document.getElementById("progressBox");
-const overlay=document.getElementById("timeOverlay");
-const playBtn=document.getElementById("play");
+const v=document.getElementById("video");
+const p=document.getElementById("player");
+const fill=document.getElementById("fill");
+const bar=document.getElementById("bar");
+const time=document.getElementById("time");
 
-/* URL */
-const p=new URLSearchParams(location.search);
-let url=p.get("Url");
-if(url) try{url=decodeURIComponent(url);}catch(e){}
+/* LOAD URL */
+let u=new URLSearchParams(location.search).get("Url");
+if(u) try{u=decodeURIComponent(u)}catch(e){}
 
-/* LOAD */
-if(Hls.isSupported() && url && url.includes(".m3u8")){
-  const hls=new Hls({enableWorker:true});
-  hls.loadSource(url);
-  hls.attachMedia(video);
-}else if(url){
-  video.src=url;
-}
-
-/* TIME FORMAT */
-function fmt(t){
-  if(!isFinite(t)) return "00:00";
-  let m=Math.floor(t/60), s=Math.floor(t%60);
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+if(Hls.isSupported() && u && u.includes(".m3u8")){
+  const h=new Hls();
+  h.loadSource(u);
+  h.attachMedia(v);
+}else if(u){
+  v.src=u;
 }
 
 /* PLAY */
-playBtn.onclick=()=>{
-  if(video.paused){
-    video.play();
-    playBtn.textContent="⏸";
+document.getElementById("play").onclick=()=>{
+  if(v.paused){
+    v.play();
+    tg.style.display="block";   // TELEGRAM POP
+    play.textContent="⏸";
   }else{
-    video.pause();
-    playBtn.textContent="▶";
+    v.pause();
+    play.textContent="▶";
   }
 };
 
-/* UPDATE */
-video.addEventListener("timeupdate",()=>{
-  if(isFinite(video.duration)){
-    progress.style.width=(video.currentTime/video.duration*100)+"%";
-    overlay.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
-  }
-});
-
-/* SEEK (CLICK + SLIDE) */
-let seeking=false;
-function seek(x){
-  const r=progressBox.getBoundingClientRect();
-  x=Math.min(Math.max(x-r.left,0),r.width);
-  video.currentTime=(x/r.width)*video.duration;
+/* TIME */
+function f(t){
+  if(!isFinite(t)) return "00:00";
+  let m=Math.floor(t/60),s=Math.floor(t%60);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
-progressBox.addEventListener("mousedown",e=>{seeking=true;seek(e.clientX);});
-document.addEventListener("mousemove",e=>{if(seeking)seek(e.clientX);});
-document.addEventListener("mouseup",()=>seeking=false);
+v.ontimeupdate=()=>{
+  if(isFinite(v.duration)){
+    fill.style.width=(v.currentTime/v.duration*100)+"%";
+    time.textContent=`${f(v.currentTime)} / ${f(v.duration)}`;
+  }
+};
 
-progressBox.addEventListener("touchstart",e=>{
-  seeking=true;seek(e.touches[0].clientX);
+/* DRAG SEEK (FIXED) */
+let drag=false;
+function seek(x){
+  let r=bar.getBoundingClientRect();
+  x=Math.max(0,Math.min(x-r.left,r.width));
+  v.currentTime=(x/r.width)*v.duration;
+}
+bar.addEventListener("mousedown",e=>{drag=true;seek(e.clientX)});
+document.addEventListener("mousemove",e=>{if(drag)seek(e.clientX)});
+document.addEventListener("mouseup",()=>drag=false);
+
+bar.addEventListener("touchstart",e=>{
+  drag=true;seek(e.touches[0].clientX);
 });
-progressBox.addEventListener("touchmove",e=>{
-  if(seeking){seek(e.touches[0].clientX);e.preventDefault();}
+bar.addEventListener("touchmove",e=>{
+  if(drag){seek(e.touches[0].clientX);e.preventDefault();}
 },{passive:false});
-progressBox.addEventListener("touchend",()=>seeking=false);
+bar.addEventListener("touchend",()=>drag=false);
 
 /* 10s */
-document.getElementById("back").onclick=()=>video.currentTime-=10;
-document.getElementById("fwd").onclick=()=>video.currentTime+=10;
+b10.onclick=()=>v.currentTime-=10;
+f10.onclick=()=>v.currentTime+=10;
 
-/* 🔥 FAKE FULLSCREEN TOGGLE */
-document.getElementById("fs").onclick=()=>{
-  box.classList.toggle("fake-fs");
+/* FAKE FULLSCREEN ONLY */
+fs.onclick=()=>{
+  p.classList.toggle("full");
 };
 </script>
 
