@@ -3,13 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Devansh HLS Player</title>
+<title>Custom HLS Player</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh}
 .player{position:relative;width:100%;max-width:900px;background:#000;overflow:hidden}
 video{width:100%;height:auto;background:#000;display:block;}
-:fullscreen video, :-webkit-full-screen video, :-ms-fullscreen video{width:100%;height:100%;object-fit:cover}
+:fullscreen video,
+:-webkit-full-screen video,
+:-ms-fullscreen video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
 
 /* TOP BRAND */
 .top-brand{position:absolute;top:8px;left:50%;transform:translateX(-50%);text-align:center;z-index:10;pointer-events:none}
@@ -57,7 +63,7 @@ select{background:#000;color:#fff;border:1px solid #777;border-radius:4px;}
         <div class="progress-fill" id="progressBar"></div>
         <div class="thumb" id="thumb"></div>
       </div>
-      <div class="timer" id="timer">00:00 / 00:00</div>
+      <div class="timer" id="timer">00:00:00 / 00:00:00</div>
     </div>
     <div class="row">
       <div class="circle" id="back10">⟲10</div>
@@ -92,6 +98,7 @@ const speed=document.getElementById("speed");
 const playPause=document.getElementById("playPause");
 const fullScreenBtn=document.getElementById("fullScreenBtn");
 const timer=document.getElementById("timer");
+const player=document.getElementById("player");
 
 let hls=null;
 let videoURL=new URLSearchParams(location.search).get("Url");
@@ -104,7 +111,7 @@ function initHLS(){
       hls=new Hls();
       hls.loadSource(videoURL);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED,()=>{video.play();});
+      hls.on(Hls.Events.MANIFEST_PARSED,()=>{video.play(); updateTimer();});
     }
   }else video.src=videoURL;
 }
@@ -119,7 +126,7 @@ function formatTimeHMS(s){
     return `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
 }
 
-/* TIMER UPDATE FUNCTION */
+/* TIMER UPDATE */
 function updateTimer(){
     if(video.duration){
         const p=(video.currentTime/video.duration)*100;
@@ -128,41 +135,16 @@ function updateTimer(){
         timer.textContent=`${formatTimeHMS(video.currentTime)} / ${formatTimeHMS(video.duration)}`;
     }
 }
-
-/* Attach events */
 video.addEventListener("loadedmetadata", updateTimer);
 video.addEventListener("timeupdate", updateTimer);
-
-/* HLS INIT */
-if(Hls.isSupported() && videoURL.endsWith(".m3u8")){
-    if(!hls){
-        hls=new Hls();
-        hls.loadSource(videoURL);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-            video.play();
-            updateTimer();
-        });
-    }
-}else{
-    video.src=videoURL;
-}
 
 /* BIG PLAY */
 bigPlay.onclick=()=>video.play();
 video.onplay=()=>{bigPlay.classList.add("hide");playPause.textContent="⏸";}
 video.onpause=()=>{bigPlay.classList.remove("hide");playPause.textContent="▶";}
 
-/* PLAY/PAUSE BUTTON */
+/* PLAY/PAUSE */
 playPause.onclick=()=>video.paused?video.play():video.pause();
-
-/* PROGRESS & TIMER */
-video.ontimeupdate=()=>{
-  const p=(video.currentTime/video.duration)*100;
-  progressBar.style.width=p+"%";
-  thumb.style.left=p+"%";
-  timer.textContent=`${formatTimeHM(video.currentTime)} / ${formatTimeHM(video.duration)}`;
-};
 
 /* DRAG THUMB */
 let dragging=false;
@@ -217,7 +199,7 @@ fullScreenBtn.onclick=()=>{if(!document.fullscreenElement) video.requestFullscre
 video.ondblclick=fullScreenBtn.onclick;
 
 /* ROTATE / RESIZE FIX */
-window.addEventListener("resize",()=>{ /* video continues, no reload */ });
+window.addEventListener("resize",()=>{ /* do nothing, video continues */ });
 </script>
 </body>
 </html>
