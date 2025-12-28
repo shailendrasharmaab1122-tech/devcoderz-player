@@ -49,20 +49,37 @@ video{
     top:10px;
     right:15px;
     color:#fff;
-    font-size:18px;
-    background:rgba(0,0,0,0.5);
+    font-size:16px;
+    background:rgba(0,0,0,0.6);
     padding:4px 8px;
-    border-radius:5px;
+    border-radius:6px;
     z-index:20;
+}
+.controls-overlay{
+    position:absolute;
+    bottom:12px;
+    left:12px;
+    display:flex;
+    gap:10px;
+    z-index:20;
+}
+.ctrl-btn{
+    background:rgba(0,0,0,0.6);
+    border:none;
+    color:#fff;
+    font-size:18px;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
 }
 .fullscreen-btn{
     position:absolute;
     bottom:10px;
     right:10px;
-    background:rgba(0,0,0,0.5);
+    background:rgba(0,0,0,0.6);
     border:none;
     color:#fff;
-    font-size:22px;
+    font-size:20px;
     padding:6px 10px;
     border-radius:6px;
     cursor:pointer;
@@ -80,8 +97,19 @@ video{
 
 <div class="container">
   <div class="neon-frame" id="playerFrame">
+
     <video id="video" controls playsinline muted></video>
-    <div id="timeOverlay">00:00</div>
+
+    <!-- TIME -->
+    <div id="timeOverlay">00:00 / 00:00</div>
+
+    <!-- SEEK BUTTONS -->
+    <div class="controls-overlay">
+      <button class="ctrl-btn" id="back10">⏪ 10</button>
+      <button class="ctrl-btn" id="fwd10">10 ⏩</button>
+    </div>
+
+    <!-- FULLSCREEN -->
     <button class="fullscreen-btn" id="fsBtn">⛶</button>
   </div>
 
@@ -117,57 +145,56 @@ video{
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-// ====== VIDEO LOGIC ======
 const video = document.getElementById("video");
 const frame = document.getElementById("playerFrame");
 const fsBtn = document.getElementById("fsBtn");
 const overlay = document.getElementById("timeOverlay");
 
-// ====== STREAM URL ======
-// Tumhara decoded/encoded HLS URL yaha daalein
-let streamURL = "https://rolexcoderz.in/Live/player.php?t=KXcnqB+o3rtnTZVk6qTK4GZuWEdjZjNId2VVT05KazFKNG1vcWpFdjByRmFOb0U4MHBkY3ZZN1p5dEw5Q0oyZ2VjbDE0TExDV0UwcGthOHdxVHhkdnUvZUtEYnhla0U0V3VadUNaekptZEFqU3RWV1NHNmtDL1Y2SW02bEtXZ2ttMlRnK29LQkxhc2loZkQ5RFZxQ2pQQTdqZ3lPZFFKdWV3OC/wqfok01HpeJpreFRIXWYOEjh/sGDF4Rhd9M4mVY3Lmg+Nl8V1VFPH6gwY/Ha8t/S6HLR5LVYWyGRxj34JCAmMaXEUiRFcBMIiLoHpes h8xmfj o+1lfqWIO rZmQtdUB0xWTDSz61GW6OPuvt12kQZxoXXwC+/uNKvmgogtq82Se7XHkbL4QDfLyw9Id0Vu2l/xF/6vNSwIVxiMZssbpWy4=";
+const back10 = document.getElementById("back10");
+const fwd10  = document.getElementById("fwd10");
 
-// Decode in case it's URL-encoded
+let streamURL = "YOUR_M3U8_OR_MP4_URL_HERE";
 try{ streamURL = decodeURIComponent(streamURL); }catch(e){}
 
-// HLS Handling
-if(Hls.isSupported() && streamURL.endsWith(".m3u8")){
+if(Hls.isSupported() && streamURL.includes(".m3u8")){
   const hls = new Hls();
   hls.loadSource(streamURL);
   hls.attachMedia(video);
 
-  // Quality selection
   document.getElementById("qualityMenu").onchange = e=>{
     if(e.target.value === "auto") hls.currentLevel = -1;
     else hls.levels.forEach((l,i)=>{
-      if(l.height === Number(e.target.value)) hls.currentLevel = i;
+      if(l.height == e.target.value) hls.currentLevel = i;
     });
   };
 }else{
-  video.src = streamURL; // fallback for MP4 or other formats
+  video.src = streamURL;
 }
 
-// Speed control
 document.getElementById("speedMenu").onchange = e=>{
   video.playbackRate = Number(e.target.value);
 };
 
-// Fullscreen
 fsBtn.onclick = ()=>{
-  if(document.fullscreenElement){
-    document.exitFullscreen();
-  }else if(frame.requestFullscreen){
-    frame.requestFullscreen();
-  }else if(video.webkitEnterFullscreen){
-    video.webkitEnterFullscreen(); // iOS
-  }
+  if(document.fullscreenElement) document.exitFullscreen();
+  else frame.requestFullscreen();
 };
 
-// Time overlay
+back10.onclick = ()=> video.currentTime -= 10;
+fwd10.onclick  = ()=> video.currentTime += 10;
+
+function format(t){
+  if(!isFinite(t)) return "00:00";
+  let h = Math.floor(t/3600);
+  let m = Math.floor((t%3600)/60);
+  let s = Math.floor(t%60);
+  return h>0
+    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+    : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
 video.ontimeupdate = ()=>{
-  let mins = Math.floor(video.currentTime / 60);
-  let secs = Math.floor(video.currentTime % 60);
-  overlay.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  overlay.textContent = `${format(video.currentTime)} / ${format(video.duration)}`;
 };
 </script>
 
