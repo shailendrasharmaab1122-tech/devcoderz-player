@@ -23,9 +23,25 @@ body{
   border-radius:18px;
   border:3px solid #3b82f6;
   box-shadow:0 0 25px #3b82f6, inset 0 0 40px #60a5fa;
+  background:#000;
+  transition:.3s;
 }
+
+/* 🔥 FAKE FULLSCREEN */
+.neon-frame.fake-fs{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  margin:0;
+  z-index:9999;
+  border-radius:0;
+  padding:10px;
+}
+
 video{
   width:100%;
+  height:auto;
   border-radius:14px;
   background:#000;
 }
@@ -39,7 +55,7 @@ video{
   font-weight:bold;
   color:#3b82f6;
   text-shadow:0 0 15px #60a5fa;
-  z-index:99;
+  z-index:10000;
   pointer-events:none;
 }
 
@@ -48,7 +64,7 @@ video{
   position:absolute;
   top:10px;
   right:14px;
-  background:rgba(0,0,0,.65);
+  background:rgba(0,0,0,.6);
   padding:4px 8px;
   border-radius:6px;
   font-size:14px;
@@ -63,14 +79,11 @@ video{
   right:12px;
   z-index:10;
 }
-
-/* BLUE PROGRESS BAR */
 .progress-box{
   width:100%;
   height:6px;
   background:#222;
   border-radius:5px;
-  cursor:pointer;
 }
 .progress{
   width:0%;
@@ -79,13 +92,10 @@ video{
   box-shadow:0 0 10px #3b82f6;
   border-radius:5px;
 }
-
-/* BUTTONS */
 .btn-row{
   margin-top:8px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
 }
 .ctrl-btn{
   background:rgba(0,0,0,.6);
@@ -94,7 +104,6 @@ video{
   padding:6px 10px;
   border-radius:6px;
   font-size:16px;
-  cursor:pointer;
 }
 
 /* RAM TEXT */
@@ -110,7 +119,7 @@ video{
 <div class="dev-anim">DevCoderz</div>
 
 <div class="container">
-  <div class="neon-frame">
+  <div class="neon-frame" id="playerBox">
 
     <video id="video" playsinline></video>
 
@@ -142,42 +151,35 @@ video{
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-const video = document.getElementById("video");
-const progress = document.getElementById("progress");
-const progressBox = document.getElementById("progressBox");
-const overlay = document.getElementById("timeOverlay");
-const playBtn = document.getElementById("play");
+const video=document.getElementById("video");
+const box=document.getElementById("playerBox");
+const progress=document.getElementById("progress");
+const progressBox=document.getElementById("progressBox");
+const overlay=document.getElementById("timeOverlay");
+const playBtn=document.getElementById("play");
 
-/* READ URL PARAM */
-const params = new URLSearchParams(window.location.search);
-let url = params.get("Url");
-if(url){
-  try{ url = decodeURIComponent(url); }catch(e){}
-}else{
-  alert("Video URL missing");
-}
+/* URL */
+const p=new URLSearchParams(location.search);
+let url=p.get("Url");
+if(url) try{url=decodeURIComponent(url);}catch(e){}
 
-/* LOAD VIDEO */
+/* LOAD */
 if(Hls.isSupported() && url && url.includes(".m3u8")){
-  const hls = new Hls({ enableWorker:true });
+  const hls=new Hls({enableWorker:true});
   hls.loadSource(url);
   hls.attachMedia(video);
 }else if(url){
-  video.src = url;
+  video.src=url;
 }
 
-/* FORMAT TIME */
+/* TIME FORMAT */
 function fmt(t){
   if(!isFinite(t)) return "00:00";
-  let h=Math.floor(t/3600),
-      m=Math.floor((t%3600)/60),
-      s=Math.floor(t%60);
-  return h>0
-    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-    : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  let m=Math.floor(t/60), s=Math.floor(t%60);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-/* PLAY / PAUSE */
+/* PLAY */
 playBtn.onclick=()=>{
   if(video.paused){
     video.play();
@@ -188,57 +190,40 @@ playBtn.onclick=()=>{
   }
 };
 
-/* UPDATE PROGRESS */
+/* UPDATE */
 video.addEventListener("timeupdate",()=>{
   if(isFinite(video.duration)){
-    let p=(video.currentTime/video.duration)*100;
-    progress.style.width=p+"%";
+    progress.style.width=(video.currentTime/video.duration*100)+"%";
     overlay.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
   }
 });
 
-/* ===== SLIDE / DRAG SEEK (DESKTOP + MOBILE) ===== */
+/* SEEK (CLICK + SLIDE) */
 let seeking=false;
-
-function seekTo(clientX){
-  const rect=progressBox.getBoundingClientRect();
-  let x=Math.min(Math.max(clientX-rect.left,0),rect.width);
-  let percent=x/rect.width;
-  if(isFinite(video.duration)){
-    video.currentTime=percent*video.duration;
-  }
+function seek(x){
+  const r=progressBox.getBoundingClientRect();
+  x=Math.min(Math.max(x-r.left,0),r.width);
+  video.currentTime=(x/r.width)*video.duration;
 }
-
-/* DESKTOP */
-progressBox.addEventListener("mousedown",e=>{
-  seeking=true;
-  seekTo(e.clientX);
-});
-document.addEventListener("mousemove",e=>{
-  if(seeking) seekTo(e.clientX);
-});
+progressBox.addEventListener("mousedown",e=>{seeking=true;seek(e.clientX);});
+document.addEventListener("mousemove",e=>{if(seeking)seek(e.clientX);});
 document.addEventListener("mouseup",()=>seeking=false);
 
-/* MOBILE */
 progressBox.addEventListener("touchstart",e=>{
-  seeking=true;
-  seekTo(e.touches[0].clientX);
+  seeking=true;seek(e.touches[0].clientX);
 });
 progressBox.addEventListener("touchmove",e=>{
-  if(seeking){
-    seekTo(e.touches[0].clientX);
-    e.preventDefault();
-  }
+  if(seeking){seek(e.touches[0].clientX);e.preventDefault();}
 },{passive:false});
 progressBox.addEventListener("touchend",()=>seeking=false);
 
-/* 10 SEC */
+/* 10s */
 document.getElementById("back").onclick=()=>video.currentTime-=10;
 document.getElementById("fwd").onclick=()=>video.currentTime+=10;
 
-/* FULLSCREEN */
+/* 🔥 FAKE FULLSCREEN TOGGLE */
 document.getElementById("fs").onclick=()=>{
-  if(video.requestFullscreen) video.requestFullscreen();
+  box.classList.toggle("fake-fs");
 };
 </script>
 
