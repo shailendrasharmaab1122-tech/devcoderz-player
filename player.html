@@ -52,6 +52,7 @@ video{
   padding:4px 8px;
   border-radius:6px;
   font-size:14px;
+  z-index:10;
 }
 
 /* CONTROLS */
@@ -60,7 +61,10 @@ video{
   bottom:12px;
   left:12px;
   right:12px;
+  z-index:10;
 }
+
+/* BLUE PROGRESS BAR */
 .progress-box{
   width:100%;
   height:6px;
@@ -75,10 +79,13 @@ video{
   box-shadow:0 0 10px #3b82f6;
   border-radius:5px;
 }
+
+/* BUTTONS */
 .btn-row{
   margin-top:8px;
   display:flex;
   justify-content:space-between;
+  align-items:center;
 }
 .ctrl-btn{
   background:rgba(0,0,0,.6);
@@ -87,7 +94,10 @@ video{
   padding:6px 10px;
   border-radius:6px;
   font-size:16px;
+  cursor:pointer;
 }
+
+/* RAM TEXT */
 @keyframes ram{
   from{text-shadow:0 0 10px red;}
   to{text-shadow:0 0 30px red;}
@@ -110,6 +120,7 @@ video{
       <div class="progress-box" id="progressBox">
         <div class="progress" id="progress"></div>
       </div>
+
       <div class="btn-row">
         <div>
           <button class="ctrl-btn" id="play">▶</button>
@@ -137,25 +148,21 @@ const progressBox = document.getElementById("progressBox");
 const overlay = document.getElementById("timeOverlay");
 const playBtn = document.getElementById("play");
 
-/* ✅ READ URL PARAM */
+/* READ URL PARAM */
 const params = new URLSearchParams(window.location.search);
 let url = params.get("Url");
-
-if(!url){
-  alert("Video URL missing");
-}else{
+if(url){
   try{ url = decodeURIComponent(url); }catch(e){}
+}else{
+  alert("Video URL missing");
 }
 
-/* HLS INIT */
-if(Hls.isSupported() && url.includes(".m3u8")){
-  const hls = new Hls({
-    enableWorker:true,
-    lowLatencyMode:true
-  });
+/* LOAD VIDEO */
+if(Hls.isSupported() && url && url.includes(".m3u8")){
+  const hls = new Hls({ enableWorker:true });
   hls.loadSource(url);
   hls.attachMedia(video);
-}else{
+}else if(url){
   video.src = url;
 }
 
@@ -163,13 +170,14 @@ if(Hls.isSupported() && url.includes(".m3u8")){
 function fmt(t){
   if(!isFinite(t)) return "00:00";
   let h=Math.floor(t/3600),
-      m=Math.floor(t%3600/60),
+      m=Math.floor((t%3600)/60),
       s=Math.floor(t%60);
-  return h>0?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-            :`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return h>0
+    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+    : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-/* PLAY */
+/* PLAY / PAUSE */
 playBtn.onclick=()=>{
   if(video.paused){
     video.play();
@@ -180,21 +188,55 @@ playBtn.onclick=()=>{
   }
 };
 
-/* UPDATE UI */
+/* UPDATE PROGRESS */
 video.addEventListener("timeupdate",()=>{
-  let p=(video.currentTime/video.duration)*100;
-  progress.style.width=p+"%";
-  overlay.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+  if(isFinite(video.duration)){
+    let p=(video.currentTime/video.duration)*100;
+    progress.style.width=p+"%";
+    overlay.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+  }
 });
 
-/* SEEK */
-progressBox.onclick=e=>{
-  let r=progressBox.getBoundingClientRect();
-  video.currentTime=((e.clientX-r.left)/r.width)*video.duration;
-};
+/* ===== SLIDE / DRAG SEEK (DESKTOP + MOBILE) ===== */
+let seeking=false;
 
+function seekTo(clientX){
+  const rect=progressBox.getBoundingClientRect();
+  let x=Math.min(Math.max(clientX-rect.left,0),rect.width);
+  let percent=x/rect.width;
+  if(isFinite(video.duration)){
+    video.currentTime=percent*video.duration;
+  }
+}
+
+/* DESKTOP */
+progressBox.addEventListener("mousedown",e=>{
+  seeking=true;
+  seekTo(e.clientX);
+});
+document.addEventListener("mousemove",e=>{
+  if(seeking) seekTo(e.clientX);
+});
+document.addEventListener("mouseup",()=>seeking=false);
+
+/* MOBILE */
+progressBox.addEventListener("touchstart",e=>{
+  seeking=true;
+  seekTo(e.touches[0].clientX);
+});
+progressBox.addEventListener("touchmove",e=>{
+  if(seeking){
+    seekTo(e.touches[0].clientX);
+    e.preventDefault();
+  }
+},{passive:false});
+progressBox.addEventListener("touchend",()=>seeking=false);
+
+/* 10 SEC */
 document.getElementById("back").onclick=()=>video.currentTime-=10;
 document.getElementById("fwd").onclick=()=>video.currentTime+=10;
+
+/* FULLSCREEN */
 document.getElementById("fs").onclick=()=>{
   if(video.requestFullscreen) video.requestFullscreen();
 };
