@@ -23,8 +23,9 @@ video{width:100%;border-radius:14px;background:#000;}
 .dev{text-align:center;margin-top:15px;font-size:18px;color:#3b82f6;}
 .glow-text{text-align:center;margin-top:20px;font-size:34px;font-weight:bold;color:red;animation:ramglow 1.4s infinite alternate;}
 @keyframes ramglow{from{text-shadow:0 0 15px red;} to{text-shadow:0 0 40px red;}}
+/* Circular 10s buttons */
 .overlay-btn{
-  position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;padding:12px 14px;border-radius:50%;font-size:20px;cursor:pointer;opacity:0;transition:.3s;z-index:5;
+  position:absolute;top:50%;transform:translateY(-50%);width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;font-size:18px;color:#fff;cursor:pointer;opacity:0;transition:.3s;z-index:5;
 }
 .overlay-btn.show{opacity:1;}
 .overlay-play{
@@ -39,9 +40,9 @@ video{width:100%;border-radius:14px;background:#000;}
   <video id="video" playsinline></video>
   <div class="time" id="time">00:00 / 00:00</div>
 
-  <!-- Overlay 10s Buttons -->
-  <div class="overlay-btn" id="back10" style="left:20px;">⏪10</div>
-  <div class="overlay-btn" id="forward10" style="right:20px;">10⏩</div>
+  <!-- Circular Overlay 10s Buttons -->
+  <div class="overlay-btn" id="back10" style="left:20px;">10⏪</div>
+  <div class="overlay-btn" id="forward10" style="right:20px;">⏩10</div>
 
   <!-- Overlay Play/Pause -->
   <div class="overlay-play" id="overlayPlay">▶</div>
@@ -117,7 +118,7 @@ bar.addEventListener("click",e=>{seek(e.clientX);});
 /* FAKE FULLSCREEN */
 document.getElementById("fs").onclick=()=>p.classList.toggle("full");
 
-/* 10s Overlay Buttons */
+/* Circular 10s Overlay Buttons */
 function showOverlay(btn){btn.classList.add("show");setTimeout(()=>btn.classList.remove("show"),800);}
 back10.onclick=()=>{v.currentTime=Math.max(0,v.currentTime-10);showOverlay(back10);overlayPlay.textContent="⏪10";overlayPlay.classList.add("show");setTimeout(()=>overlayPlay.classList.remove("show"),600);}
 forward10.onclick=()=>{v.currentTime=Math.min(v.duration,v.currentTime+10);showOverlay(forward10);overlayPlay.textContent="10⏩";overlayPlay.classList.add("show");setTimeout(()=>overlayPlay.classList.remove("show"),600);}
