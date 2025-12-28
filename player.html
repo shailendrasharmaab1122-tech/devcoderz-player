@@ -2,18 +2,66 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz Player with Thumb</title>
+<title>DevCoderz Player Thumb + Fake Fullscreen</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{margin:0;background:#000;font-family:Arial,sans-serif;color:#fff;}
-.player{max-width:900px;margin:20px auto;padding:12px;border-radius:18px;border:3px solid #3b82f6;box-shadow:0 0 30px #3b82f6;position:relative;background:#000;transition:.3s;}
-.player.full{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;border-radius:0;}
-video{width:100%;border-radius:14px;background:#000;}
-.time{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px;font-size:14px;z-index:10;}
-.controls{position:absolute;left:12px;right:12px;bottom:12px;}
-.progress-box{height:6px;background:#222;border-radius:5px;position:relative;cursor:pointer;}
-.progress{height:100%;width:0%;background:#3b82f6;box-shadow:0 0 10px #3b82f6;border-radius:5px;position:relative;}
+.player{
+  max-width:900px;
+  margin:20px auto;
+  padding:12px;
+  border-radius:18px;
+  border:3px solid #3b82f6;
+  box-shadow:0 0 30px #3b82f6;
+  position:relative;
+  background:#000;
+  transition:.3s;
+}
+.player.full{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  z-index:9999;
+  border-radius:0;
+}
+video{
+  width:100%;
+  border-radius:14px;
+  background:#000;
+}
+.time{
+  position:absolute;
+  top:10px;
+  right:12px;
+  background:rgba(0,0,0,.6);
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:14px;
+  z-index:10;
+}
+.controls{
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:12px;
+}
+.progress-box{
+  height:6px;
+  background:#222;
+  border-radius:5px;
+  position:relative;
+  cursor:pointer;
+}
+.progress{
+  height:100%;
+  width:0%;
+  background:#3b82f6;
+  box-shadow:0 0 10px #3b82f6;
+  border-radius:5px;
+  position:relative;
+}
 .thumb{
   position:absolute;
   top:50%;
@@ -31,7 +79,18 @@ video{width:100%;border-radius:14px;background:#000;}
 .row{margin-top:8px;display:flex;justify-content:space-between;}
 .btn{background:rgba(0,0,0,.6);color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:16px;}
 .dev{text-align:center;margin-top:15px;font-size:18px;color:#3b82f6;}
-.tg{position:fixed;bottom:20px;right:20px;background:#0088cc;color:#fff;padding:10px 14px;border-radius:30px;font-weight:bold;display:none;z-index:99999;}
+.tg{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#0088cc;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:30px;
+  font-weight:bold;
+  display:none;
+  z-index:99999;
+}
 </style>
 </head>
 <body>
@@ -45,7 +104,6 @@ video{width:100%;border-radius:14px;background:#000;}
       <div class="progress" id="fill"></div>
       <div class="thumb" id="thumb"></div>
     </div>
-
     <div class="row">
       <div>
         <button class="btn" id="play">▶</button>
@@ -94,7 +152,7 @@ document.getElementById("play").onclick=()=>{
   else{v.pause();play.textContent="▶";}
 };
 
-/* UPDATE PROGRESS */
+/* UPDATE PROGRESS + THUMB */
 v.ontimeupdate=()=>{
   if(isFinite(v.duration)){
     let p=(v.currentTime/v.duration)*100;
@@ -104,8 +162,7 @@ v.ontimeupdate=()=>{
   }
 };
 
-/* SEEK WITH THUMB DRAG */
-let drag=false;
+/* SEEK FUNCTION */
 function seek(x){
   let r=bar.getBoundingClientRect();
   x=Math.max(0,Math.min(x-r.left,r.width));
@@ -115,12 +172,13 @@ function seek(x){
   thumb.style.left=(p*100)+"%";
 }
 
-/* DESKTOP */
+/* DRAG THUMB - DESKTOP */
+let drag=false;
 thumb.addEventListener("mousedown",e=>{drag=true;thumb.classList.add("active");seek(e.clientX);});
 document.addEventListener("mousemove",e=>{if(drag)seek(e.clientX);});
 document.addEventListener("mouseup",()=>{drag=false;thumb.classList.remove("active");});
 
-/* MOBILE */
+/* DRAG THUMB - MOBILE */
 thumb.addEventListener("touchstart",e=>{drag=true;thumb.classList.add("active");seek(e.touches[0].clientX);});
 document.addEventListener("touchmove",e=>{if(drag){seek(e.touches[0].clientX);e.preventDefault();}},{passive:false});
 document.addEventListener("touchend",()=>{drag=false;thumb.classList.remove("active");});
