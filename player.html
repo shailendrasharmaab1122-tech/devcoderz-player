@@ -2,95 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz Player Thumb + Fake Fullscreen</title>
+<title>DevCoderz Premium Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{margin:0;background:#000;font-family:Arial,sans-serif;color:#fff;}
 .player{
-  max-width:900px;
-  margin:20px auto;
-  padding:12px;
-  border-radius:18px;
-  border:3px solid #3b82f6;
-  box-shadow:0 0 30px #3b82f6;
-  position:relative;
-  background:#000;
-  transition:.3s;
+  max-width:900px;margin:20px auto;padding:12px;border-radius:18px;border:3px solid #3b82f6;box-shadow:0 0 30px #3b82f6;position:relative;background:#000;transition:.3s;
 }
-.player.full{
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100vh;
-  z-index:9999;
-  border-radius:0;
-}
-video{
-  width:100%;
-  border-radius:14px;
-  background:#000;
-}
-.time{
-  position:absolute;
-  top:10px;
-  right:12px;
-  background:rgba(0,0,0,.6);
-  padding:4px 8px;
-  border-radius:6px;
-  font-size:14px;
-  z-index:10;
-}
-.controls{
-  position:absolute;
-  left:12px;
-  right:12px;
-  bottom:12px;
-}
-.progress-box{
-  height:6px;
-  background:#222;
-  border-radius:5px;
-  position:relative;
-  cursor:pointer;
-}
-.progress{
-  height:100%;
-  width:0%;
-  background:#3b82f6;
-  box-shadow:0 0 10px #3b82f6;
-  border-radius:5px;
-  position:relative;
-}
-.thumb{
-  position:absolute;
-  top:50%;
-  left:0%;
-  width:12px;
-  height:12px;
-  background:#fff;
-  border-radius:50%;
-  transform:translate(-50%,-50%);
-  transition:.1s;
-  cursor:pointer;
-  z-index:2;
-}
+.player.full{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;border-radius:0;}
+video{width:100%;border-radius:14px;background:#000;}
+.time{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px;font-size:14px;z-index:10;}
+.controls{position:absolute;left:12px;right:12px;bottom:12px;}
+.progress-box{height:6px;background:#222;border-radius:5px;position:relative;cursor:pointer;}
+.progress{height:100%;width:0%;background:#3b82f6;box-shadow:0 0 10px #3b82f6;border-radius:5px;position:relative;}
+.thumb{position:absolute;top:50%;left:0%;width:12px;height:12px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);transition:.1s;cursor:pointer;z-index:2;}
 .thumb.active{transform:translate(-50%,-50%) scale(1.5);}
 .row{margin-top:8px;display:flex;justify-content:space-between;}
 .btn{background:rgba(0,0,0,.6);color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:16px;}
 .dev{text-align:center;margin-top:15px;font-size:18px;color:#3b82f6;}
-.tg{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#0088cc;
-  color:#fff;
-  padding:10px 14px;
-  border-radius:30px;
-  font-weight:bold;
-  display:none;
-  z-index:99999;
+.glow-text{text-align:center;margin-top:20px;font-size:34px;font-weight:bold;color:red;animation:ramglow 1.4s infinite alternate;}
+@keyframes ramglow{from{text-shadow:0 0 15px red;} to{text-shadow:0 0 40px red;}}
+.overlay-btn{
+  position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;padding:12px 14px;border-radius:50%;font-size:20px;cursor:pointer;opacity:0;transition:.3s;z-index:5;
 }
+.overlay-btn.show{opacity:1;}
+.overlay-play{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:50px;color:#fff;opacity:0;transition:.3s;pointer-events:none;
+}
+.overlay-play.show{opacity:1;}
 </style>
 </head>
 <body>
@@ -99,27 +39,26 @@ video{
   <video id="video" playsinline></video>
   <div class="time" id="time">00:00 / 00:00</div>
 
+  <!-- Overlay 10s Buttons -->
+  <div class="overlay-btn" id="back10" style="left:20px;">⏪10</div>
+  <div class="overlay-btn" id="forward10" style="right:20px;">10⏩</div>
+
+  <!-- Overlay Play/Pause -->
+  <div class="overlay-play" id="overlayPlay">▶</div>
+
   <div class="controls">
     <div class="progress-box" id="bar">
       <div class="progress" id="fill"></div>
       <div class="thumb" id="thumb"></div>
     </div>
     <div class="row">
-      <div>
-        <button class="btn" id="play">▶</button>
-        <button class="btn" id="b10">⏪10</button>
-        <button class="btn" id="f10">10⏩</button>
-      </div>
       <button class="btn" id="fs">⛶</button>
     </div>
   </div>
 </div>
 
-<div class="dev">Developed by DevCoderz</div>
-
-<a class="tg" id="tg" href="https://t.me/NT_lecture_bot" target="_blank">
-  Join Telegram
-</a>
+<div class="glow-text">जय श्री राम 🚩</div>
+<div class="dev">PT. Devansh Sharma</div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
@@ -129,30 +68,21 @@ const fill=document.getElementById("fill");
 const bar=document.getElementById("bar");
 const thumb=document.getElementById("thumb");
 const time=document.getElementById("time");
-const tg=document.getElementById("tg");
+const back10=document.getElementById("back10");
+const forward10=document.getElementById("forward10");
+const overlayPlay=document.getElementById("overlayPlay");
 
 /* LOAD URL */
 let u=new URLSearchParams(location.search).get("Url");
 if(u) try{u=decodeURIComponent(u)}catch(e){}
-
 if(Hls.isSupported() && u && u.includes(".m3u8")){
-  const h=new Hls();
-  h.loadSource(u);
-  h.attachMedia(v);
-}else if(u){
-  v.src=u;
-}
+  const h=new Hls(); h.loadSource(u); h.attachMedia(v);
+}else if(u){v.src=u;}
 
 /* FORMAT TIME */
 function f(t){if(!isFinite(t)) return "00:00"; let m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 
-/* PLAY */
-document.getElementById("play").onclick=()=>{
-  if(v.paused){v.play();play.textContent="⏸";tg.style.display="block";}
-  else{v.pause();play.textContent="▶";}
-};
-
-/* UPDATE PROGRESS + THUMB */
+/* UPDATE PROGRESS */
 v.ontimeupdate=()=>{
   if(isFinite(v.duration)){
     let p=(v.currentTime/v.duration)*100;
@@ -172,27 +102,33 @@ function seek(x){
   thumb.style.left=(p*100)+"%";
 }
 
-/* DRAG THUMB - DESKTOP */
-let drag=false;
-thumb.addEventListener("mousedown",e=>{drag=true;thumb.classList.add("active");seek(e.clientX);});
+/* DRAG + LONG PRESS */
+let drag=false, interval;
+thumb.addEventListener("mousedown",e=>{drag=true;thumb.classList.add("active");seek(e.clientX);interval=setInterval(()=>{seek(e.clientX)},50);});
 document.addEventListener("mousemove",e=>{if(drag)seek(e.clientX);});
-document.addEventListener("mouseup",()=>{drag=false;thumb.classList.remove("active");});
-
-/* DRAG THUMB - MOBILE */
-thumb.addEventListener("touchstart",e=>{drag=true;thumb.classList.add("active");seek(e.touches[0].clientX);});
+document.addEventListener("mouseup",()=>{drag=false;thumb.classList.remove("active");clearInterval(interval);});
+thumb.addEventListener("touchstart",e=>{drag=true;thumb.classList.add("active");seek(e.touches[0].clientX);interval=setInterval(()=>{seek(e.touches[0].clientX)},50);});
 document.addEventListener("touchmove",e=>{if(drag){seek(e.touches[0].clientX);e.preventDefault();}},{passive:false});
-document.addEventListener("touchend",()=>{drag=false;thumb.classList.remove("active");});
+document.addEventListener("touchend",()=>{drag=false;thumb.classList.remove("active");clearInterval(interval);});
 
 /* CLICK BAR */
 bar.addEventListener("click",e=>{seek(e.clientX);});
 
-/* 10s buttons */
-b10.onclick=()=>v.currentTime-=10;
-f10.onclick=()=>v.currentTime+=10;
-
 /* FAKE FULLSCREEN */
-fs.onclick=()=>p.classList.toggle("full");
-</script>
+document.getElementById("fs").onclick=()=>p.classList.toggle("full");
 
+/* 10s Overlay Buttons */
+function showOverlay(btn){btn.classList.add("show");setTimeout(()=>btn.classList.remove("show"),800);}
+back10.onclick=()=>{v.currentTime=Math.max(0,v.currentTime-10);showOverlay(back10);overlayPlay.textContent="⏪10";overlayPlay.classList.add("show");setTimeout(()=>overlayPlay.classList.remove("show"),600);}
+forward10.onclick=()=>{v.currentTime=Math.min(v.duration,v.currentTime+10);showOverlay(forward10);overlayPlay.textContent="10⏩";overlayPlay.classList.add("show");setTimeout(()=>overlayPlay.classList.remove("show"),600);}
+
+/* CLICK VIDEO TO PLAY/PAUSE */
+v.onclick=()=>{
+  if(v.paused){v.play();overlayPlay.textContent="▶";}
+  else{v.pause();overlayPlay.textContent="⏸";}
+  overlayPlay.classList.add("show");
+  setTimeout(()=>overlayPlay.classList.remove("show"),600);
+};
+</script>
 </body>
 </html>
