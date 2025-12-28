@@ -2,14 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz Premium Player</title>
+<title>DevCoderz Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 body{margin:0;background:#000;font-family:Arial,sans-serif;color:#fff;}
-.player{
-  max-width:900px;margin:20px auto;padding:12px;border-radius:18px;border:3px solid #3b82f6;box-shadow:0 0 30px #3b82f6;position:relative;background:#000;transition:.3s;
-}
+.player{max-width:900px;margin:20px auto;padding:12px;border-radius:18px;border:3px solid #3b82f6;box-shadow:0 0 30px #3b82f6;position:relative;background:#000;transition:.3s;}
 video{width:100%;border-radius:14px;background:#000;}
 .time{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px;font-size:14px;z-index:10;}
 .controls{position:absolute;left:12px;right:12px;bottom:12px;}
@@ -23,13 +20,8 @@ video{width:100%;border-radius:14px;background:#000;}
 .glow-text{text-align:center;margin-top:20px;font-size:34px;font-weight:bold;color:red;animation:ramglow 1.4s infinite alternate;}
 @keyframes ramglow{from{text-shadow:0 0 15px red;} to{text-shadow:0 0 40px red;}}
 .overlay-btn{
-  position:absolute;top:50%;transform:translateY(-50%);width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;font-size:18px;color:#fff;cursor:pointer;opacity:0;transition:.3s;z-index:5;
+  position:absolute;top:50%;transform:translateY(-50%);width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;font-size:18px;color:#fff;cursor:pointer;opacity:1;z-index:5;
 }
-.overlay-btn.show{opacity:1;}
-.overlay-play{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:50px;color:#fff;opacity:0;transition:.3s;pointer-events:none;
-}
-.overlay-play.show{opacity:1;}
 </style>
 </head>
 <body>
@@ -41,9 +33,6 @@ video{width:100%;border-radius:14px;background:#000;}
   <!-- Circular 10s Buttons -->
   <div class="overlay-btn" id="back10" style="left:20px;">10⏪</div>
   <div class="overlay-btn" id="forward10" style="right:20px;">⏩10</div>
-
-  <!-- Play/Pause Overlay -->
-  <div class="overlay-play" id="overlayPlay">▶</div>
 
   <div class="controls">
     <div class="progress-box" id="bar">
@@ -69,7 +58,6 @@ const thumb=document.getElementById("thumb");
 const time=document.getElementById("time");
 const back10=document.getElementById("back10");
 const forward10=document.getElementById("forward10");
-const overlayPlay=document.getElementById("overlayPlay");
 
 /* LOAD URL */
 let u=new URLSearchParams(location.search).get("Url");
@@ -119,18 +107,9 @@ document.getElementById("fs").onclick = ()=>{
   else{p.requestFullscreen();}
 };
 
-/* Circular 10s Overlay Buttons */
-function showOverlay(btn){btn.classList.add("show");setTimeout(()=>btn.classList.remove("show"),800);}
-back10.onclick=()=>{v.currentTime=Math.max(0,v.currentTime-10);showOverlay(back10);overlayPlay.textContent="⏪10";overlayPlay.classList.add("show");setTimeout(()=>overlayPlay.classList.remove("show"),600);}
-forward10.onclick=()=>{v.currentTime=Math.min(v.duration,v.currentTime+10);showOverlay(forward10);overlayPlay.textContent="10⏩";overlayPlay.classList.add("show");setTimeout(()=>overlayPlay.classList.remove("show"),600);}
-
-/* CLICK VIDEO TO PLAY/PAUSE */
-v.onclick=()=>{
-  if(v.paused){v.play();overlayPlay.textContent="▶";}
-  else{v.pause();overlayPlay.textContent="⏸";}
-  overlayPlay.classList.add("show");
-  setTimeout(()=>overlayPlay.classList.remove("show"),600);
-};
+/* Circular 10s Buttons */
+back10.onclick=()=>{v.currentTime=Math.max(0,v.currentTime-10);}
+forward10.onclick=()=>{v.currentTime=Math.min(v.duration,v.currentTime+10);}
 </script>
 </body>
 </html>
