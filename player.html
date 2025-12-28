@@ -10,7 +10,6 @@ body{margin:0;background:#000;font-family:Arial,sans-serif;color:#fff;}
 .player{
   max-width:900px;margin:20px auto;padding:12px;border-radius:18px;border:3px solid #3b82f6;box-shadow:0 0 30px #3b82f6;position:relative;background:#000;transition:.3s;
 }
-.player.full{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;border-radius:0;}
 video{width:100%;border-radius:14px;background:#000;}
 .time{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px;font-size:14px;z-index:10;}
 .controls{position:absolute;left:12px;right:12px;bottom:12px;}
@@ -18,12 +17,11 @@ video{width:100%;border-radius:14px;background:#000;}
 .progress{height:100%;width:0%;background:#3b82f6;box-shadow:0 0 10px #3b82f6;border-radius:5px;position:relative;}
 .thumb{position:absolute;top:50%;left:0%;width:12px;height:12px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);transition:.1s;cursor:pointer;z-index:2;}
 .thumb.active{transform:translate(-50%,-50%) scale(1.5);}
-.row{margin-top:8px;display:flex;justify-content:space-between;}
+.row{margin-top:8px;display:flex;justify-content:flex-end;}
 .btn{background:rgba(0,0,0,.6);color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:16px;}
 .dev{text-align:center;margin-top:15px;font-size:18px;color:#3b82f6;}
 .glow-text{text-align:center;margin-top:20px;font-size:34px;font-weight:bold;color:red;animation:ramglow 1.4s infinite alternate;}
 @keyframes ramglow{from{text-shadow:0 0 15px red;} to{text-shadow:0 0 40px red;}}
-/* Circular 10s buttons */
 .overlay-btn{
   position:absolute;top:50%;transform:translateY(-50%);width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;font-size:18px;color:#fff;cursor:pointer;opacity:0;transition:.3s;z-index:5;
 }
@@ -40,11 +38,11 @@ video{width:100%;border-radius:14px;background:#000;}
   <video id="video" playsinline></video>
   <div class="time" id="time">00:00 / 00:00</div>
 
-  <!-- Circular Overlay 10s Buttons -->
+  <!-- Circular 10s Buttons -->
   <div class="overlay-btn" id="back10" style="left:20px;">10⏪</div>
   <div class="overlay-btn" id="forward10" style="right:20px;">⏩10</div>
 
-  <!-- Overlay Play/Pause -->
+  <!-- Play/Pause Overlay -->
   <div class="overlay-play" id="overlayPlay">▶</div>
 
   <div class="controls">
@@ -115,8 +113,11 @@ document.addEventListener("touchend",()=>{drag=false;thumb.classList.remove("act
 /* CLICK BAR */
 bar.addEventListener("click",e=>{seek(e.clientX);});
 
-/* FAKE FULLSCREEN */
-document.getElementById("fs").onclick=()=>p.classList.toggle("full");
+/* REAL FULLSCREEN */
+document.getElementById("fs").onclick = ()=>{
+  if(document.fullscreenElement){document.exitFullscreen();}
+  else{p.requestFullscreen();}
+};
 
 /* Circular 10s Overlay Buttons */
 function showOverlay(btn){btn.classList.add("show");setTimeout(()=>btn.classList.remove("show"),800);}
