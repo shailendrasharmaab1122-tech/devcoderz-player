@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DevCoderz Ultra Smooth Player</title>
+<title>Ultra Smooth Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{margin:0;background:#000;font-family:Arial,sans-serif;color:#fff;}
@@ -21,32 +21,27 @@ video{width:100%;border-radius:14px;background:#000;display:block;}
 .selects{display:flex;gap:10px;align-items:center;}
 select{padding:6px 10px;font-size:14px;border-radius:6px;border:none;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;transition:all .2s ease;}
 select:hover{box-shadow:0 0 15px #3b82f6;}
-.dev{text-align:center;margin-top:15px;font-size:18px;color:#3b82f6;}
 .glow-text{text-align:center;margin-top:20px;font-size:34px;font-weight:bold;color:red;animation:ramglow 1.4s infinite alternate;}
 @keyframes ramglow{from{text-shadow:0 0 15px red;} to{text-shadow:0 0 40px red;}
 .video-overlay{position:absolute;top:10px;left:10px;font-size:16px;color:#3b82f6;text-shadow:0 0 8px #3b82f6;z-index:50;pointer-events:none;}
 </style>
 </head>
 <body>
-
 <div class="player" id="player">
   <video id="video" playsinline></video>
   <div class="time" id="time">00:00 / 00:00</div>
   <div class="video-overlay">Developed by PT. Devansh Sharma</div>
-
   <div class="controls" id="controls">
     <div class="progress-box" id="bar">
       <div class="progress" id="fill"></div>
       <div class="thumb" id="thumb"></div>
     </div>
-
     <div class="button-row">
       <button class="btn" id="back10">⏪10</button>
       <button class="btn" id="playpause">▶</button>
       <button class="btn" id="stop">⏹</button>
       <button class="btn" id="forward10">10⏩</button>
       <button class="btn" id="fs">⛶</button>
-
       <div class="selects">
         <label>Speed:
           <select id="speedMenu">
@@ -60,7 +55,6 @@ select:hover{box-shadow:0 0 15px #3b82f6;}
             <option value="3">3x</option>
           </select>
         </label>
-
         <label>Quality:
           <select id="qualityMenu">
             <option value="auto">Auto</option>
@@ -74,7 +68,6 @@ select:hover{box-shadow:0 0 15px #3b82f6;}
     </div>
   </div>
 </div>
-
 <div class="glow-text">जय श्री राम 🚩</div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -94,7 +87,6 @@ const controls=document.getElementById("controls");
 const speedMenu=document.getElementById("speedMenu");
 const qualityMenu=document.getElementById("qualityMenu");
 
-/* LOAD URL */
 let u=new URLSearchParams(location.search).get("Url");
 if(u) try{u=decodeURIComponent(u)}catch(e){}
 let hls;
@@ -104,10 +96,7 @@ if(Hls.isSupported() && u && u.includes(".m3u8")){
   hls.attachMedia(v);
 }else if(u){v.src=u;}
 
-/* FORMAT TIME */
 function f(t){if(!isFinite(t)) return "00:00"; let m=Math.floor(t/60), s=Math.floor(t%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
-
-/* UPDATE PROGRESS */
 v.ontimeupdate=()=>{
   if(isFinite(v.duration)){
     let p=(v.currentTime/v.duration)*100;
@@ -117,7 +106,6 @@ v.ontimeupdate=()=>{
   }
 };
 
-/* SEEK FUNCTION */
 function seek(x){
   let r=bar.getBoundingClientRect();
   x=Math.max(0,Math.min(x-r.left,r.width));
@@ -127,7 +115,6 @@ function seek(x){
   thumb.style.left=(p*100)+"%";
 }
 
-/* DRAG */
 let drag=false, interval;
 thumb.addEventListener("mousedown",e=>{drag=true;thumb.classList.add("active");seek(e.clientX);interval=setInterval(()=>{seek(e.clientX)},50);});
 document.addEventListener("mousemove",e=>{if(drag)seek(e.clientX);});
@@ -137,7 +124,6 @@ document.addEventListener("touchmove",e=>{if(drag){seek(e.touches[0].clientX);e.
 document.addEventListener("touchend",()=>{drag=false;thumb.classList.remove("active");clearInterval(interval);});
 bar.addEventListener("click",e=>{seek(e.clientX);});
 
-/* BUTTON ACTIONS */
 back10.onclick=()=>{v.currentTime=Math.max(0,v.currentTime-10);}
 forward10.onclick=()=>{v.currentTime=Math.min(v.duration,v.currentTime+10);}
 stop.onclick=()=>{v.pause(); v.currentTime=0;}
@@ -147,18 +133,14 @@ playpause.onclick=()=>{
   else{v.pause(); playpause.textContent="▶";}
 }
 
-/* SPEED & QUALITY */
 speedMenu.onchange=e=>{v.playbackRate=Number(e.target.value);}
 qualityMenu.onchange=e=>{
   if(hls){
     if(e.target.value==="auto") hls.currentLevel=-1;
-    else{
-      hls.levels.forEach((l,i)=>{if(l.height==Number(e.target.value))hls.currentLevel=i;});
-    }
+    else{hls.levels.forEach((l,i)=>{if(l.height==Number(e.target.value))hls.currentLevel=i;});}
   }
 }
 
-/* AUTO-HIDE CONTROLS WITH TOGGLE */
 let hideTimeout;
 function showControls(){
   controls.classList.remove("hide");
