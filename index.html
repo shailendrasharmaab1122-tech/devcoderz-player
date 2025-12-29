@@ -115,7 +115,7 @@ select{
 <body>
 
 <div class="player" id="player">
-  <video id="video" playsinline webkit-playsinline muted></video>
+  <video id="video" playsinline webkit-playsinline></video>
 
   <div class="top-brand">
     <div class="jsr">🚩 Jai Shree Ram 🚩</div>
@@ -174,8 +174,14 @@ if(Hls.isSupported()){
   video.src=decodeURIComponent(url);
 }
 
+/* AUTOPLAY SAFE */
 video.muted=true;
 video.play().catch(()=>{});
+
+/* UNMUTE ON USER PLAY */
+video.addEventListener("play",()=>{
+  video.muted=false;
+});
 
 const bigPlay=document.getElementById("bigPlay");
 const playPause=document.getElementById("playPause");
