@@ -10,8 +10,9 @@
 html,body{width:100%;height:100%;background:#000;overflow:hidden}
 
 .player{position:fixed;inset:0;background:#000}
-video{width:100%;height:100%;object-fit:contain}
+video{width:100%;height:100%;object-fit:contain;background:#000}
 
+/* TOP BRAND */
 .top-brand{
  position:absolute;top:6px;left:50%;
  transform:translateX(-50%);
@@ -20,6 +21,17 @@ video{width:100%;height:100%;object-fit:contain}
 .jsr{color:#ff9800;font-weight:700;font-size:14px}
 .dev{font-size:11px;color:#fff}
 
+/* UNMUTE OVERLAY */
+.unmute{
+ position:absolute;inset:0;
+ display:flex;align-items:center;justify-content:center;
+ background:rgba(0,0,0,.45);
+ color:#fff;font-size:16px;
+ z-index:20;cursor:pointer
+}
+.unmute.hide{display:none}
+
+/* CONTROLS */
 .controls{
  position:absolute;bottom:0;width:100%;
  padding:8px 10px;
@@ -32,11 +44,12 @@ video{width:100%;height:100%;object-fit:contain}
  height:6px;background:#444;border-radius:10px;
  position:relative;cursor:pointer
 }
-.progress-fill{height:100%;width:0;background:#2196f3}
+.progress-fill{height:100%;width:0;background:#2196f3;border-radius:10px}
 .thumb{
  position:absolute;top:50%;left:0;
  transform:translate(-50%,-50%);
- width:14px;height:14px;border-radius:50%;background:#fff
+ width:16px;height:16px;
+ background:#fff;border-radius:50%
 }
 
 .time{color:#fff;font-size:11px;text-align:right;margin:4px 0}
@@ -69,78 +82,82 @@ select{padding:2px}
 <body>
 
 <div class="player" id="player">
- <video id="video" muted autoplay playsinline></video>
 
- <div class="top-brand">
-  <div class="jsr">🚩 Jai Shree Ram 🚩</div>
-  <div class="dev">Developed by Devansh Sharma</div>
- </div>
+  <video id="video" autoplay muted playsinline></video>
 
- <div class="controls hide" id="controls">
-  <div class="progress" id="progress">
-   <div class="progress-fill" id="bar"></div>
-   <div class="thumb" id="thumb"></div>
+  <div class="unmute" id="unmute">🔊 Tap to Unmute</div>
+
+  <div class="top-brand">
+    <div class="jsr">🚩 Jai Shree Ram 🚩</div>
+    <div class="dev">Developed by Devansh Sharma</div>
   </div>
 
-  <div class="time" id="time">00:00 / 00:00</div>
+  <div class="controls hide" id="controls">
+    <div class="progress" id="progress">
+      <div class="progress-fill" id="bar"></div>
+      <div class="thumb" id="thumb"></div>
+    </div>
 
-  <div class="row">
-   <div class="btn" id="back">⟲10</div>
-   <div class="btn" id="play">▶</div>
-   <div class="btn" id="fwd">10⟳</div>
+    <div class="time" id="time">00:00 / 00:00</div>
 
-   <input type="range" min="0" max="1" step="0.05" value="1"
-    id="volume" class="range">
+    <div class="row">
+      <div class="btn" id="back">⟲10</div>
+      <div class="btn" id="play">▶</div>
+      <div class="btn" id="fwd">10⟳</div>
 
-   <select id="speed">
-    <option>0.5</option><option>0.75</option>
-    <option selected>1</option>
-    <option>1.25</option><option>1.5</option>
-    <option>1.75</option><option>2</option>
-    <option>2.25</option><option>2.5</option>
-    <option>2.75</option><option>3</option>
-   </select>
+      <input type="range" min="0" max="1" step="0.05" value="1"
+       id="volume" class="range">
 
-   <select id="quality">
-    <option value="-1">AUTO</option>
-   </select>
+      <select id="speed">
+        <option>0.5</option><option>0.75</option>
+        <option selected>1</option>
+        <option>1.25</option><option>1.5</option>
+        <option>1.75</option><option>2</option>
+        <option>2.25</option><option>2.5</option>
+        <option>2.75</option><option>3</option>
+      </select>
 
-   <div class="btn" id="fs">⛶</div>
+      <select id="quality">
+        <option value="-1">AUTO</option>
+      </select>
+
+      <div class="btn" id="fs">⛶</div>
+    </div>
   </div>
- </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-const v=document.getElementById("video"),
- bar=document.getElementById("bar"),
- thumb=document.getElementById("thumb"),
- progress=document.getElementById("progress"),
- timeEl=document.getElementById("time"),
- play=document.getElementById("play"),
- back=document.getElementById("back"),
- fwd=document.getElementById("fwd"),
- volume=document.getElementById("volume"),
- speed=document.getElementById("speed"),
- quality=document.getElementById("quality"),
- controls=document.getElementById("controls"),
- player=document.getElementById("player"),
- fs=document.getElementById("fs");
+const v = document.getElementById("video"),
+player = document.getElementById("player"),
+controls = document.getElementById("controls"),
+unmute = document.getElementById("unmute"),
+bar = document.getElementById("bar"),
+thumb = document.getElementById("thumb"),
+progress = document.getElementById("progress"),
+timeEl = document.getElementById("time"),
+play = document.getElementById("play"),
+back = document.getElementById("back"),
+fwd = document.getElementById("fwd"),
+volume = document.getElementById("volume"),
+speed = document.getElementById("speed"),
+quality = document.getElementById("quality"),
+fs = document.getElementById("fs");
 
-const url=new URLSearchParams(location.search).get("Url");
-let hls,isLive=false,drag=false;
+const url = new URLSearchParams(location.search).get("Url");
+let hls,isLive=false,dragging=false,seekPercent=0;
 
 /* FORMAT */
-const fmt=t=>{
+function fmt(t){
  let h=Math.floor(t/3600),
  m=Math.floor((t%3600)/60),
  s=Math.floor(t%60);
  return h?`${h}:${m.toString().padStart(2,0)}:${s.toString().padStart(2,0)}`
-        :`${m}:${s.toString().padStart(2,0)}`;
-};
+         :`${m}:${s.toString().padStart(2,0)}`;
+}
 
-/* LOAD */
+/* LOAD VIDEO */
 if(Hls.isSupported() && url){
  hls=new Hls({lowLatencyMode:true});
  hls.loadSource(decodeURIComponent(url));
@@ -171,16 +188,26 @@ if(Hls.isSupported() && url){
  v.onloadedmetadata=()=>v.play().catch(()=>{});
 }
 
-/* PLAY + SOUND FIX */
-play.onclick=()=>{
+/* REAL AUDIO UNLOCK */
+unmute.onclick=()=>{
  v.muted=false;
  v.volume=volume.value;
+ v.play();
+ unmute.classList.add("hide");
+};
+
+/* PLAY */
+play.onclick=()=>{
+ if(v.muted){
+  unmute.classList.remove("hide");
+  return;
+ }
  v.paused?v.play():v.pause();
 };
 v.onplay=()=>play.textContent="⏸";
 v.onpause=()=>play.textContent="▶";
 
-/* VOLUME FIX */
+/* VOLUME */
 volume.oninput=e=>{
  v.volume=e.target.value;
  v.muted=(v.volume==0);
@@ -188,38 +215,50 @@ volume.oninput=e=>{
 
 /* TIME UPDATE */
 v.ontimeupdate=()=>{
- if(isLive||!v.duration||drag) return;
+ if(isLive||!v.duration||dragging) return;
  let p=(v.currentTime/v.duration)*100;
  bar.style.width=p+"%";
  thumb.style.left=p+"%";
  timeEl.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
 };
 
-/* SEEK FIX (MOUSE + TOUCH) */
-function seek(clientX){
- if(isLive||!v.duration) return;
+/* SMOOTH DRAG SEEK */
+function percentFromX(x){
  const r=progress.getBoundingClientRect();
- const p=Math.min(Math.max((clientX-r.left)/r.width,0),1);
- v.currentTime=p*v.duration;
+ return Math.min(Math.max((x-r.left)/r.width,0),1)*100;
+}
+function startDrag(x){
+ if(isLive||!v.duration) return;
+ dragging=true;
+ v.pause();
+ seekPercent=percentFromX(x);
+ bar.style.width=seekPercent+"%";
+ thumb.style.left=seekPercent+"%";
+}
+function moveDrag(x){
+ if(!dragging) return;
+ seekPercent=percentFromX(x);
+ bar.style.width=seekPercent+"%";
+ thumb.style.left=seekPercent+"%";
+}
+function endDrag(){
+ if(!dragging) return;
+ dragging=false;
+ v.currentTime=(seekPercent/100)*v.duration;
+ v.play();
 }
 
-progress.addEventListener("mousedown",e=>{
- drag=true; seek(e.clientX);
-});
-window.addEventListener("mousemove",e=>{
- if(drag) seek(e.clientX);
-});
-window.addEventListener("mouseup",()=>drag=false);
+/* mouse */
+progress.addEventListener("mousedown",e=>startDrag(e.clientX));
+window.addEventListener("mousemove",e=>moveDrag(e.clientX));
+window.addEventListener("mouseup",endDrag);
 
-progress.addEventListener("touchstart",e=>{
- drag=true; seek(e.touches[0].clientX);
-});
-window.addEventListener("touchmove",e=>{
- if(drag) seek(e.touches[0].clientX);
-});
-window.addEventListener("touchend",()=>drag=false);
+/* touch */
+progress.addEventListener("touchstart",e=>startDrag(e.touches[0].clientX));
+window.addEventListener("touchmove",e=>moveDrag(e.touches[0].clientX));
+window.addEventListener("touchend",endDrag);
 
-/* +/- 10 sec */
+/* +/- 10s */
 back.onclick=()=>!isLive&&(v.currentTime-=10);
 fwd.onclick=()=>!isLive&&(v.currentTime+=10);
 
@@ -233,12 +272,10 @@ quality.onchange=e=>{
 
 /* FULLSCREEN */
 fs.onclick=()=>{
- !document.fullscreenElement
- ? player.requestFullscreen()
- : document.exitFullscreen();
+ !document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
 };
 
-/* CONTROLS TOGGLE */
+/* SHOW CONTROLS */
 let show=false;
 player.onclick=()=>{
  show=!show;
