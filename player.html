@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Devansh Player</title>
+<title>DevCoderz Ultra smooth URL Player</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
@@ -13,21 +13,25 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden}
 video{width:100%;height:100%;object-fit:contain}
 
 .top-brand{
- position:absolute;top:8px;left:50%;
+ position:absolute;top:6px;left:50%;
  transform:translateX(-50%);
  z-index:10;pointer-events:none;text-align:center
 }
-.jsr{color:#ff9800;font-weight:700}
-.dev{font-size:12px;color:#fff}
+.jsr{color:#ff9800;font-weight:700;font-size:14px}
+.dev{font-size:11px;color:#fff}
 
 .controls{
  position:absolute;bottom:0;width:100%;
- padding:10px;
+ padding:8px 10px;
  background:linear-gradient(transparent,rgba(0,0,0,.9));
+ transition:.25s
 }
 .controls.hide{opacity:0;pointer-events:none}
 
-.progress{height:6px;background:#444;border-radius:10px;cursor:pointer;position:relative}
+.progress{
+ height:6px;background:#444;border-radius:10px;
+ position:relative;cursor:pointer
+}
 .progress-fill{height:100%;width:0;background:#2196f3}
 .thumb{
  position:absolute;top:50%;left:0;
@@ -35,19 +39,30 @@ video{width:100%;height:100%;object-fit:contain}
  width:14px;height:14px;border-radius:50%;background:#fff
 }
 
-.time{color:#fff;font-size:12px;text-align:right;margin-top:6px}
+.time{color:#fff;font-size:11px;text-align:right;margin:4px 0}
 
-.row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;color:#fff}
-.btn{
- width:44px;height:44px;border:2px solid #fff;border-radius:50%;
- display:flex;align-items:center;justify-content:center;font-size:16px
+.row{
+ display:flex;align-items:center;gap:6px;
+ justify-content:space-between;color:#fff
 }
+
+.btn{
+ width:36px;height:36px;
+ border:1.5px solid #fff;
+ border-radius:50%;
+ display:flex;align-items:center;
+ justify-content:center;font-size:14px
+}
+.btn.disabled{opacity:.35}
 
 select,input[type=range]{
- background:#000;color:#fff;border:1px solid #555;
- border-radius:6px;padding:4px;font-size:12px
+ background:#000;color:#fff;
+ border:1px solid #555;
+ border-radius:4px;
+ font-size:11px;height:26px
 }
-.range{width:90px}
+.range{width:70px}
+select{padding:2px}
 </style>
 </head>
 
@@ -66,30 +81,26 @@ select,input[type=range]{
    <div class="progress-fill" id="bar"></div>
    <div class="thumb" id="thumb"></div>
   </div>
+
   <div class="time" id="time">00:00 / 00:00</div>
 
   <div class="row">
+   <div class="btn" id="back">⟲10</div>
    <div class="btn" id="play">▶</div>
+   <div class="btn" id="fwd">10⟳</div>
 
-   <!-- 🔊 Volume -->
-   <input type="range" min="0" max="1" step="0.05" value="1" id="volume" class="range">
+   <input type="range" min="0" max="1" step="0.05" value="1"
+    id="volume" class="range">
 
-   <!-- ⚡ Speed -->
    <select id="speed">
-    <option>0.5</option>
-    <option>0.75</option>
+    <option>0.5</option><option>0.75</option>
     <option selected>1</option>
-    <option>1.25</option>
-    <option>1.5</option>
-    <option>1.75</option>
-    <option>2</option>
-    <option>2.25</option>
-    <option>2.5</option>
-    <option>2.75</option>
-    <option>3</option>
+    <option>1.25</option><option>1.5</option>
+    <option>1.75</option><option>2</option>
+    <option>2.25</option><option>2.5</option>
+    <option>2.75</option><option>3</option>
    </select>
 
-   <!-- 🎚️ Quality -->
    <select id="quality">
     <option value="-1">AUTO</option>
    </select>
@@ -103,24 +114,30 @@ select,input[type=range]{
 
 <script>
 const v=document.getElementById("video"),
- play=document.getElementById("play"),
  bar=document.getElementById("bar"),
  thumb=document.getElementById("thumb"),
- timeEl=document.getElementById("time"),
  progress=document.getElementById("progress"),
+ timeEl=document.getElementById("time"),
+ play=document.getElementById("play"),
+ back=document.getElementById("back"),
+ fwd=document.getElementById("fwd"),
  volume=document.getElementById("volume"),
  speed=document.getElementById("speed"),
  quality=document.getElementById("quality"),
  controls=document.getElementById("controls"),
- player=document.getElementById("player");
+ player=document.getElementById("player"),
+ fs=document.getElementById("fs");
 
 const url=new URLSearchParams(location.search).get("Url");
 let hls,isLive=false,drag=false;
 
 /* FORMAT */
 const fmt=t=>{
- let m=Math.floor(t/60),s=Math.floor(t%60);
- return m.toString().padStart(2,"0")+":"+s.toString().padStart(2,"0");
+ let h=Math.floor(t/3600),
+ m=Math.floor((t%3600)/60),
+ s=Math.floor(t%60);
+ return h?`${h}:${m.toString().padStart(2,0)}:${s.toString().padStart(2,0)}`
+        :`${m}:${s.toString().padStart(2,0)}`;
 };
 
 /* LOAD */
@@ -135,6 +152,8 @@ if(Hls.isSupported() && url){
   isLive=d.details.live;
   if(isLive){
    timeEl.textContent="🔴 LIVE";
+   back.classList.add("disabled");
+   fwd.classList.add("disabled");
    speed.disabled=true;
   }
  });
@@ -143,8 +162,7 @@ if(Hls.isSupported() && url){
   quality.innerHTML='<option value="-1">AUTO</option>';
   hls.levels.forEach((l,i)=>{
    let o=document.createElement("option");
-   o.value=i;
-   o.text=l.height+"p";
+   o.value=i;o.text=l.height+"p";
    quality.appendChild(o);
   });
  });
@@ -153,15 +171,22 @@ if(Hls.isSupported() && url){
  v.onloadedmetadata=()=>v.play().catch(()=>{});
 }
 
-/* PLAY */
+/* PLAY + SOUND FIX */
 play.onclick=()=>{
  v.muted=false;
+ v.volume=volume.value;
  v.paused?v.play():v.pause();
 };
 v.onplay=()=>play.textContent="⏸";
 v.onpause=()=>play.textContent="▶";
 
-/* TIME */
+/* VOLUME FIX */
+volume.oninput=e=>{
+ v.volume=e.target.value;
+ v.muted=(v.volume==0);
+};
+
+/* TIME UPDATE */
 v.ontimeupdate=()=>{
  if(isLive||!v.duration||drag) return;
  let p=(v.currentTime/v.duration)*100;
@@ -170,16 +195,33 @@ v.ontimeupdate=()=>{
  timeEl.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
 };
 
-/* SEEK */
-progress.onmousedown=e=>{
- drag=true;
- let r=progress.getBoundingClientRect();
- v.currentTime=((e.clientX-r.left)/r.width)*v.duration;
-};
-window.onmouseup=()=>drag=false;
+/* SEEK FIX (MOUSE + TOUCH) */
+function seek(clientX){
+ if(isLive||!v.duration) return;
+ const r=progress.getBoundingClientRect();
+ const p=Math.min(Math.max((clientX-r.left)/r.width,0),1);
+ v.currentTime=p*v.duration;
+}
 
-/* VOLUME */
-volume.oninput=e=>v.volume=e.target.value;
+progress.addEventListener("mousedown",e=>{
+ drag=true; seek(e.clientX);
+});
+window.addEventListener("mousemove",e=>{
+ if(drag) seek(e.clientX);
+});
+window.addEventListener("mouseup",()=>drag=false);
+
+progress.addEventListener("touchstart",e=>{
+ drag=true; seek(e.touches[0].clientX);
+});
+window.addEventListener("touchmove",e=>{
+ if(drag) seek(e.touches[0].clientX);
+});
+window.addEventListener("touchend",()=>drag=false);
+
+/* +/- 10 sec */
+back.onclick=()=>!isLive&&(v.currentTime-=10);
+fwd.onclick=()=>!isLive&&(v.currentTime+=10);
 
 /* SPEED */
 speed.onchange=e=>v.playbackRate=parseFloat(e.target.value);
@@ -190,8 +232,10 @@ quality.onchange=e=>{
 };
 
 /* FULLSCREEN */
-document.getElementById("fs").onclick=()=>{
- !document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
+fs.onclick=()=>{
+ !document.fullscreenElement
+ ? player.requestFullscreen()
+ : document.exitFullscreen();
 };
 
 /* CONTROLS TOGGLE */
