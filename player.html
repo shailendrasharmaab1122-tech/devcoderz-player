@@ -2,190 +2,203 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>DevCoderz Ultra smooth Player</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Devansh Player</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 html,body{width:100%;height:100%;background:#000;overflow:hidden}
 
 .player{position:fixed;inset:0;background:#000}
-video{width:100%;height:100%;object-fit:contain;background:#000}
+video{width:100%;height:100%;object-fit:contain}
 
-/* TOP */
 .top-brand{
  position:absolute;top:8px;left:50%;
  transform:translateX(-50%);
  z-index:10;pointer-events:none;text-align:center
 }
-.jsr{color:#ff9800;font-weight:700;text-shadow:0 0 10px #ff9800}
+.jsr{color:#ff9800;font-weight:700}
 .dev{font-size:12px;color:#fff}
 
-/* CONTROLS */
 .controls{
  position:absolute;bottom:0;width:100%;
- padding:12px;
- background:linear-gradient(transparent,rgba(0,0,0,.85));
- transition:.25s
+ padding:10px;
+ background:linear-gradient(transparent,rgba(0,0,0,.9));
 }
 .controls.hide{opacity:0;pointer-events:none}
 
-.progress{
- height:6px;background:#444;border-radius:10px;
- position:relative;cursor:pointer
-}
-.progress-fill{
- height:100%;width:0%;
- background:#2196f3;border-radius:10px
-}
+.progress{height:6px;background:#444;border-radius:10px;cursor:pointer;position:relative}
+.progress-fill{height:100%;width:0;background:#2196f3}
 .thumb{
- position:absolute;top:50%;
+ position:absolute;top:50%;left:0;
  transform:translate(-50%,-50%);
- width:14px;height:14px;
- background:#fff;border-radius:50%;
- left:0%
+ width:14px;height:14px;border-radius:50%;background:#fff
 }
 
-.time{color:#fff;font-size:12px;margin-top:6px;text-align:right}
+.time{color:#fff;font-size:12px;text-align:right;margin-top:6px}
 
-.row{
- display:flex;justify-content:space-between;
- align-items:center;margin-top:8px;color:#fff
-}
+.row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;color:#fff}
 .btn{
- width:46px;height:46px;border:2px solid #fff;
- border-radius:50%;display:flex;
- justify-content:center;align-items:center;font-size:18px
+ width:44px;height:44px;border:2px solid #fff;border-radius:50%;
+ display:flex;align-items:center;justify-content:center;font-size:16px
 }
-.btn.disabled{opacity:.3}
+
+select,input[type=range]{
+ background:#000;color:#fff;border:1px solid #555;
+ border-radius:6px;padding:4px;font-size:12px
+}
+.range{width:90px}
 </style>
 </head>
 
 <body>
 
 <div class="player" id="player">
-  <!-- 🔑 muted + autoplay -->
-  <video id="video" playsinline webkit-playsinline muted autoplay></video>
+ <video id="video" muted autoplay playsinline></video>
 
-  <div class="top-brand">
-    <div class="jsr">🚩 Jai Shree Ram 🚩</div>
-    <div class="dev">Developed by Devansh Sharma</div>
+ <div class="top-brand">
+  <div class="jsr">🚩 Jai Shree Ram 🚩</div>
+  <div class="dev">Developed by Devansh Sharma</div>
+ </div>
+
+ <div class="controls hide" id="controls">
+  <div class="progress" id="progress">
+   <div class="progress-fill" id="bar"></div>
+   <div class="thumb" id="thumb"></div>
   </div>
+  <div class="time" id="time">00:00 / 00:00</div>
 
-  <div class="controls hide" id="controls">
-    <div class="progress" id="progress">
-      <div class="progress-fill" id="bar"></div>
-      <div class="thumb" id="thumb"></div>
-    </div>
-    <div class="time" id="time">00:00 / 00:00</div>
+  <div class="row">
+   <div class="btn" id="play">▶</div>
 
-    <div class="row">
-      <div class="btn" id="back">⟲10</div>
-      <div class="btn" id="play">▶</div>
-      <div class="btn" id="fwd">10⟳</div>
-      <div class="btn" id="fs">⛶</div>
-    </div>
+   <!-- 🔊 Volume -->
+   <input type="range" min="0" max="1" step="0.05" value="1" id="volume" class="range">
+
+   <!-- ⚡ Speed -->
+   <select id="speed">
+    <option>0.5</option>
+    <option>0.75</option>
+    <option selected>1</option>
+    <option>1.25</option>
+    <option>1.5</option>
+    <option>1.75</option>
+    <option>2</option>
+    <option>2.25</option>
+    <option>2.5</option>
+    <option>2.75</option>
+    <option>3</option>
+   </select>
+
+   <!-- 🎚️ Quality -->
+   <select id="quality">
+    <option value="-1">AUTO</option>
+   </select>
+
+   <div class="btn" id="fs">⛶</div>
   </div>
+ </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-const video=document.getElementById("video");
-const player=document.getElementById("player");
-const controls=document.getElementById("controls");
-const play=document.getElementById("play");
-const back=document.getElementById("back");
-const fwd=document.getElementById("fwd");
-const fs=document.getElementById("fs");
-const bar=document.getElementById("bar");
-const thumb=document.getElementById("thumb");
-const timeEl=document.getElementById("time");
-const progress=document.getElementById("progress");
+const v=document.getElementById("video"),
+ play=document.getElementById("play"),
+ bar=document.getElementById("bar"),
+ thumb=document.getElementById("thumb"),
+ timeEl=document.getElementById("time"),
+ progress=document.getElementById("progress"),
+ volume=document.getElementById("volume"),
+ speed=document.getElementById("speed"),
+ quality=document.getElementById("quality"),
+ controls=document.getElementById("controls"),
+ player=document.getElementById("player");
 
 const url=new URLSearchParams(location.search).get("Url");
-let isLive=false,drag=false;
+let hls,isLive=false,drag=false;
 
 /* FORMAT */
-function fmt(t){
- let h=Math.floor(t/3600),
-     m=Math.floor((t%3600)/60),
-     s=Math.floor(t%60);
- return h>0
-  ? [h,m,s].map(x=>x.toString().padStart(2,"0")).join(":")
-  : [m,s].map(x=>x.toString().padStart(2,"0")).join(":");
-}
+const fmt=t=>{
+ let m=Math.floor(t/60),s=Math.floor(t%60);
+ return m.toString().padStart(2,"0")+":"+s.toString().padStart(2,"0");
+};
 
 /* LOAD */
 if(Hls.isSupported() && url){
- const hls=new Hls({lowLatencyMode:true});
+ hls=new Hls({lowLatencyMode:true});
  hls.loadSource(decodeURIComponent(url));
- hls.attachMedia(video);
+ hls.attachMedia(v);
 
- hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-  video.play().catch(()=>{});
- });
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
 
  hls.on(Hls.Events.LEVEL_LOADED,(_,d)=>{
   isLive=d.details.live;
   if(isLive){
    timeEl.textContent="🔴 LIVE";
-   back.classList.add("disabled");
-   fwd.classList.add("disabled");
+   speed.disabled=true;
   }
  });
-}else if(url){
- video.src=decodeURIComponent(url);
- video.addEventListener("loadedmetadata",()=>{
-  video.play().catch(()=>{});
+
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+  quality.innerHTML='<option value="-1">AUTO</option>';
+  hls.levels.forEach((l,i)=>{
+   let o=document.createElement("option");
+   o.value=i;
+   o.text=l.height+"p";
+   quality.appendChild(o);
+  });
  });
+}else if(url){
+ v.src=decodeURIComponent(url);
+ v.onloadedmetadata=()=>v.play().catch(()=>{});
 }
 
-/* PLAY / UNMUTE */
+/* PLAY */
 play.onclick=()=>{
- video.muted=false;
- video.paused?video.play():video.pause();
+ v.muted=false;
+ v.paused?v.play():v.pause();
 };
-video.onplay=()=>play.textContent="⏸";
-video.onpause=()=>play.textContent="▶";
+v.onplay=()=>play.textContent="⏸";
+v.onpause=()=>play.textContent="▶";
 
-/* TIME UPDATE */
-video.ontimeupdate=()=>{
- if(isLive||!video.duration||drag) return;
- let p=(video.currentTime/video.duration)*100;
+/* TIME */
+v.ontimeupdate=()=>{
+ if(isLive||!v.duration||drag) return;
+ let p=(v.currentTime/v.duration)*100;
  bar.style.width=p+"%";
  thumb.style.left=p+"%";
- timeEl.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+ timeEl.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
 };
 
 /* SEEK */
-function seek(e){
- if(isLive||!video.duration) return;
- const r=progress.getBoundingClientRect();
- const p=Math.min(Math.max((e.clientX-r.left)/r.width,0),1);
- video.currentTime=p*video.duration;
-}
-
-progress.onmousedown=e=>{drag=true;seek(e);}
-window.onmousemove=e=>drag&&seek(e);
+progress.onmousedown=e=>{
+ drag=true;
+ let r=progress.getBoundingClientRect();
+ v.currentTime=((e.clientX-r.left)/r.width)*v.duration;
+};
 window.onmouseup=()=>drag=false;
 
-/* +/- 10 SEC */
-back.onclick=()=>!isLive&&(video.currentTime-=10);
-fwd.onclick=()=>!isLive&&(video.currentTime+=10);
+/* VOLUME */
+volume.oninput=e=>v.volume=e.target.value;
 
-/* SHOW CONTROLS */
+/* SPEED */
+speed.onchange=e=>v.playbackRate=parseFloat(e.target.value);
+
+/* QUALITY */
+quality.onchange=e=>{
+ if(hls) hls.currentLevel=parseInt(e.target.value);
+};
+
+/* FULLSCREEN */
+document.getElementById("fs").onclick=()=>{
+ !document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
+};
+
+/* CONTROLS TOGGLE */
 let show=false;
 player.onclick=()=>{
  show=!show;
  controls.classList.toggle("hide",!show);
-};
-
-/* FULLSCREEN */
-fs.onclick=()=>{
- !document.fullscreenElement
- ? player.requestFullscreen()
- : document.exitFullscreen();
 };
 </script>
 
