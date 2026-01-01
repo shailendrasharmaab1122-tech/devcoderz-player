@@ -8,46 +8,56 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 html,body{width:100%;height:100%;background:#000;overflow:hidden}
+
 .player{position:fixed;inset:0;background:#000}
 video{width:100%;height:100%;object-fit:contain;background:#000}
 
-/* TOP TEXT */
+/* TOP */
 .top-brand{
   position:absolute;top:8px;left:50%;
   transform:translateX(-50%);
-  text-align:center;z-index:10;pointer-events:none;
+  z-index:10;pointer-events:none;text-align:center
 }
 .jsr{color:#ff9800;font-weight:700;text-shadow:0 0 10px #ff9800}
-.dev{font-size:13px;color:#fff;text-shadow:0 0 6px #2196f3}
+.dev{font-size:12px;color:#fff}
 
 /* CONTROLS */
 .controls{
   position:absolute;bottom:0;width:100%;
   padding:12px;
   background:linear-gradient(transparent,rgba(0,0,0,.85));
-  transition:.25s;
+  transition:.25s
 }
 .controls.hide{opacity:0;pointer-events:none}
 
-.progress{height:6px;background:#444;border-radius:10px;position:relative}
-.progress-fill{height:100%;width:0%;background:#2196f3}
+.progress{
+  height:6px;background:#444;border-radius:10px;
+  position:relative;cursor:pointer
+}
+.progress-fill{
+  height:100%;width:0%;
+  background:#2196f3;border-radius:10px
+}
 .thumb{
   position:absolute;top:50%;
   transform:translate(-50%,-50%);
-  width:16px;height:16px;background:#fff;border-radius:50%;
+  width:14px;height:14px;
+  background:#fff;border-radius:50%;
+  left:0%
 }
 
-.time{color:#fff;font-size:12px;margin-top:4px;text-align:right}
+.time{color:#fff;font-size:12px;margin-top:6px;text-align:right}
 
 .row{
   display:flex;justify-content:space-between;
-  align-items:center;margin-top:8px;color:#fff;
+  align-items:center;margin-top:8px;color:#fff
 }
 .btn{
-  width:48px;height:48px;border:2px solid #fff;
+  width:46px;height:46px;border:2px solid #fff;
   border-radius:50%;display:flex;
-  justify-content:center;align-items:center;font-size:18px;
+  justify-content:center;align-items:center;font-size:18px
 }
+.btn.disabled{opacity:.3}
 </style>
 </head>
 
@@ -62,11 +72,11 @@ video{width:100%;height:100%;object-fit:contain;background:#000}
   </div>
 
   <div class="controls hide" id="controls">
-    <div class="progress">
+    <div class="progress" id="progress">
       <div class="progress-fill" id="bar"></div>
       <div class="thumb" id="thumb"></div>
     </div>
-    <div class="time" id="time">LIVE</div>
+    <div class="time" id="time">00:00 / 00:00</div>
 
     <div class="row">
       <div class="btn" id="back">⟲10</div>
@@ -77,7 +87,6 @@ video{width:100%;height:100%;object-fit:contain;background:#000}
   </div>
 </div>
 
-<!-- HLS -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
@@ -89,54 +98,78 @@ const back = document.getElementById("back");
 const fwd = document.getElementById("fwd");
 const fs = document.getElementById("fs");
 const bar = document.getElementById("bar");
+const thumb = document.getElementById("thumb");
 const timeEl = document.getElementById("time");
+const progress = document.getElementById("progress");
 
 const url = new URLSearchParams(location.search).get("Url");
 let isLive = false;
+let dragging = false;
 
-/* LOAD */
-if (Hls.isSupported() && url) {
-  const hls = new Hls({ lowLatencyMode:true });
-  hls.loadSource(decodeURIComponent(url));
-  hls.attachMedia(video);
-
-  hls.on(Hls.Events.LEVEL_LOADED, (_,data)=>{
-    isLive = data.details.live;
-    if(isLive){
-      timeEl.textContent = "LIVE";
-      back.style.opacity = fwd.style.opacity = "0.3";
-    }
-  });
-} else if (url) {
-  video.src = decodeURIComponent(url);
-}
-
-/* PLAY */
-play.onclick = ()=> video.paused ? video.play() : video.pause();
-video.onplay = ()=> play.textContent="⏸";
-video.onpause = ()=> play.textContent="▶";
-
-/* TIME */
+/* FORMAT */
 function fmt(t){
  let h=Math.floor(t/3600),
      m=Math.floor((t%3600)/60),
      s=Math.floor(t%60);
- return [h,m,s].map(x=>x.toString().padStart(2,"0")).join(":");
+ return h>0
+  ? [h,m,s].map(x=>x.toString().padStart(2,"0")).join(":")
+  : [m,s].map(x=>x.toString().padStart(2,"0")).join(":");
 }
 
-video.ontimeupdate = ()=>{
-  if(!isLive && video.duration){
-    let p=(video.currentTime/video.duration)*100;
-    bar.style.width=p+"%";
-    timeEl.textContent=fmt(video.currentTime);
+/* LOAD VIDEO */
+if(Hls.isSupported() && url){
+ const hls=new Hls({lowLatencyMode:true});
+ hls.loadSource(decodeURIComponent(url));
+ hls.attachMedia(video);
+
+ hls.on(Hls.Events.LEVEL_LOADED,(_,data)=>{
+  isLive=data.details.live;
+  if(isLive){
+    timeEl.textContent="🔴 LIVE";
+    back.classList.add("disabled");
+    fwd.classList.add("disabled");
   }
+ });
+}else if(url){
+ video.src=decodeURIComponent(url);
+}
+
+/* PLAY */
+play.onclick=()=>video.paused?video.play():video.pause();
+video.onplay=()=>play.textContent="⏸";
+video.onpause=()=>play.textContent="▶";
+
+/* TIME UPDATE */
+video.ontimeupdate=()=>{
+ if(isLive||!video.duration||dragging) return;
+ let p=(video.currentTime/video.duration)*100;
+ bar.style.width=p+"%";
+ thumb.style.left=p+"%";
+ timeEl.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
 };
 
-/* 10 SEC (ONLY RECORDED) */
-back.onclick = ()=>{ if(!isLive) video.currentTime-=10; }
-fwd.onclick = ()=>{ if(!isLive) video.currentTime+=10; }
+/* SEEK */
+function seek(e){
+ if(isLive||!video.duration) return;
+ const r=progress.getBoundingClientRect();
+ const p=Math.min(Math.max((e.clientX-r.left)/r.width,0),1);
+ video.currentTime=p*video.duration;
+}
 
-/* CONTROLS */
+progress.addEventListener("mousedown",e=>{
+ dragging=true;
+ seek(e);
+});
+window.addEventListener("mousemove",e=>{
+ if(dragging) seek(e);
+});
+window.addEventListener("mouseup",()=>dragging=false);
+
+/* 10 SEC */
+back.onclick=()=>!isLive&&(video.currentTime-=10);
+fwd.onclick=()=>!isLive&&(video.currentTime+=10);
+
+/* CONTROLS SHOW */
 let show=false;
 player.onclick=()=>{
  show=!show;
