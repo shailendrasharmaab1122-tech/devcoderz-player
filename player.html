@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DevCoderz Ultra Smooth Player</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+html,body{width:100%;height:100%;background:#000;overflow:hidden}
+
+.player{position:fixed;inset:0;background:#000}
+video{width:100%;height:100%;object-fit:contain;background:#000}
+
+/* TOP BRAND */
+.top-brand{
+ position:absolute;top:6px;left:50%;
+ transform:translateX(-50%);
+ z-index:10;text-align:center;pointer-events:none
+}
+.jsr{color:#ff9800;font-weight:700;font-size:14px}
+.dev{font-size:11px;color:#fff}
+
+/* CONTROLS */
+.controls{
+ position:absolute;bottom:0;width:100%;
+ padding:8px 10px;
+ background:linear-gradient(transparent,rgba(0,0,0,.9));
+ transition:.3s
+}
+.controls.hide{opacity:0;pointer-events:none}
+
+.progress{
+ height:6px;background:#444;border-radius:10px;
+ position:relative;cursor:pointer
+}
+.progress-fill{height:100%;width:0;background:#2196f3;border-radius:10px}
+.thumb{
+ position:absolute;top:50%;left:0;
+ transform:translate(-50%,-50%);
+ width:16px;height:16px;background:#fff;border-radius:50%
+}
+
+.time{color:#fff;font-size:11px;text-align:right;margin:4px 0}
+
+.row{
+ display:flex;align-items:center;gap:6px;
+ justify-content:space-between;color:#fff
+}
+
+.btn{
+ width:36px;height:36px;
+ border:1.5px solid #fff;
+ border-radius:50%;
+ display:flex;align-items:center;
+ justify-content:center;font-size:14px
+}
+.btn.disabled{opacity:.35}
+
+select,input[type=range]{
+ background:#000;color:#fff;
+ border:1px solid #555;border-radius:4px;
+ font-size:11px;height:26px
+}
+.range{width:70px}
+
+/* TELEGRAM BOTTOM LINK */
+.tg-bottom{
+ position:absolute;bottom:65px;width:100%;
+ text-align:center;z-index:8
+}
+.tg-bottom a{
+ color:#00bfff;text-decoration:none;font-size:13px;
+ background:rgba(0,0,0,.6);
+ padding:6px 12px;border-radius:20px
+}
+
+/* TELEGRAM POPUP */
+.tg-popup{
+ position:fixed;inset:0;background:rgba(0,0,0,.6);
+ display:flex;align-items:center;justify-content:center;
+ z-index:50
+}
+.tg-box{
+ background:#111;color:#fff;
+ padding:20px;border-radius:12px;
+ text-align:center;width:260px
+}
+.tg-box a{
+ display:block;margin-top:12px;
+ color:#00bfff;text-decoration:none;font-weight:600
+}
+.tg-close{
+ margin-top:10px;font-size:12px;
+ color:#aaa;cursor:pointer
+}
+</style>
+</head>
+
+<body>
+
+<div class="player" id="player">
+
+<video id="video" autoplay playsinline></video>
+
+<div class="top-brand">
+ <div class="jsr">🚩 Jai Shree Ram 🚩</div>
+ <div class="dev">Developed by Devansh Sharma</div>
+</div>
+
+<div class="tg-bottom">
+ <a href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank">
+  Click here to join the Telegram channel
+ </a>
+</div>
+
+<div class="controls" id="controls">
+ <div class="progress" id="progress">
+  <div class="progress-fill" id="bar"></div>
+  <div class="thumb" id="thumb"></div>
+ </div>
+
+ <div class="time" id="time">00:00 / 00:00</div>
+
+ <div class="row">
+  <div class="btn" id="back">⟲10</div>
+  <div class="btn" id="play">▶</div>
+  <div class="btn" id="fwd">10⟳</div>
+
+  <input type="range" min="0" max="1" step="0.05" value="1"
+   id="volume" class="range">
+
+  <select id="speed">
+   <option>0.5</option><option>0.75</option>
+   <option selected>1</option>
+   <option>1.25</option><option>1.5</option>
+   <option>2</option>
+  </select>
+
+  <select id="quality">
+   <option value="-1">AUTO</option>
+  </select>
+
+  <div class="btn" id="fs">⛶</div>
+ </div>
+</div>
+</div>
+
+<!-- TELEGRAM POPUP -->
+<div class="tg-popup" id="tgPopup">
+ <div class="tg-box">
+  Click here to join the Telegram channel
+  <a href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank">Join Telegram</a>
+  <div class="tg-close" onclick="tgPopup.style.display='none'">Close</div>
+ </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+const v=video,player=document.getElementById("player"),
+controls=document.getElementById("controls");
+let hideTimer,hls,isLive=false,drag=false,seek=0;
+
+const url=new URLSearchParams(location.search).get("Url");
+
+/* FORMAT */
+const fmt=t=>{
+ let m=Math.floor(t/60),s=Math.floor(t%60);
+ return m+":"+s.toString().padStart(2,"0");
+};
+
+/* AUTO FULLSCREEN */
+function autoFullscreen(){
+ if(!document.fullscreenElement){
+  player.requestFullscreen().catch(()=>{});
+ }
+}
+
+/* LOAD VIDEO */
+if(Hls.isSupported() && url){
+ hls=new Hls({lowLatencyMode:true});
+ hls.loadSource(decodeURIComponent(url));
+ hls.attachMedia(v);
+
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+  v.muted=false;
+  v.play().then(autoFullscreen);
+ });
+
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+  quality.innerHTML='<option value="-1">AUTO</option>';
+  hls.levels.forEach((l,i)=>{
+   let o=document.createElement("option");
+   o.value=i;o.text=l.height+"p";
+   quality.appendChild(o);
+  });
+ });
+}else if(url){
+ v.src=decodeURIComponent(url);
+ v.onloadedmetadata=()=>{
+  v.muted=false;
+  v.play().then(autoFullscreen);
+ };
+}
+
+/* AUTO HIDE CONTROLS */
+function showControls(){
+ controls.classList.remove("hide");
+ clearTimeout(hideTimer);
+ hideTimer=setTimeout(()=>controls.classList.add("hide"),2000);
+}
+player.onclick=showControls;
+
+/* PLAY */
+play.onclick=()=>v.paused?v.play():v.pause();
+v.onplay=()=>play.textContent="⏸";
+v.onpause=()=>play.textContent="▶";
+
+/* TIME UPDATE */
+v.ontimeupdate=()=>{
+ if(!v.duration||drag)return;
+ let p=v.currentTime/v.duration*100;
+ bar.style.width=p+"%";
+ thumb.style.left=p+"%";
+ time.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
+};
+
+/* SEEK */
+progress.onmousedown=e=>{
+ drag=true;v.pause();
+};
+window.onmouseup=()=>{
+ if(!drag)return;
+ drag=false;
+ v.currentTime=seek/100*v.duration;
+ v.play();
+};
+window.onmousemove=e=>{
+ if(!drag)return;
+ let r=progress.getBoundingClientRect();
+ seek=Math.min(Math.max((e.clientX-r.left)/r.width,0),1)*100;
+ bar.style.width=seek+"%";
+ thumb.style.left=seek+"%";
+};
+
+/* VOLUME */
+volume.oninput=e=>v.volume=e.target.value;
+
+/* SPEED */
+speed.onchange=e=>v.playbackRate=parseFloat(e.target.value);
+
+/* QUALITY */
+quality.onchange=e=>hls&&(hls.currentLevel=parseInt(e.target.value));
+
+/* FULLSCREEN BUTTON */
+fs.onclick=()=>{
+ !document.fullscreenElement?
+ player.requestFullscreen():
+ document.exitFullscreen();
+};
+
+/* AUTO CLOSE POPUP */
+setTimeout(()=>tgPopup.style.display="none",5000);
+</script>
+
+</body>
+</html>
