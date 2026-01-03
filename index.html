@@ -2,256 +2,284 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Devansh Player</title>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DevCoderz Ultra smooth URL Player</title>
 
 <style>
-*{
-  margin:0;padding:0;box-sizing:border-box;
-  -webkit-user-select:none;user-select:none;
-  -webkit-tap-highlight-color:transparent;
-  font-family:Arial,sans-serif;
-}
-body{
-  background:#000;height:100vh;
-  display:flex;justify-content:center;align-items:center;
-}
-.player{
-  position:relative;
-  width:100%;max-width:900px;
-  background:#000;overflow:hidden;
-}
-video{
-  width:100%;height:100%;
-  background:#000;
-  object-fit:contain;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+html,body{width:100%;height:100%;background:#000;overflow:hidden}
+
+.player{position:fixed;inset:0;background:#000}
+video{width:100%;height:100%;object-fit:contain;background:#000}
 
 /* TOP BRAND */
 .top-brand{
-  position:absolute;top:8px;left:50%;
-  transform:translateX(-50%);
-  z-index:10;text-align:center;pointer-events:none;
+ position:absolute;top:6px;left:50%;
+ transform:translateX(-50%);
+ z-index:10;pointer-events:none;text-align:center
 }
-.jsr{
-  color:#ff9800;font-weight:bold;
-  text-shadow:0 0 10px #ff9800,0 0 20px #ff5722;
-}
-.dev{
-  font-size:13px;color:#fff;
-  text-shadow:0 0 8px #2196f3;
-}
+.jsr{color:#ff9800;font-weight:700;font-size:14px}
+.dev{font-size:11px;color:#fff}
 
-/* BIG PLAY */
-.big-play{
-  position:absolute;inset:0;
-  display:flex;justify-content:center;align-items:center;
-  z-index:9;cursor:pointer;
+/* UNMUTE OVERLAY */
+.unmute{
+ position:absolute;inset:0;
+ display:flex;align-items:center;justify-content:center;
+ background:rgba(0,0,0,.45);
+ color:#fff;font-size:16px;
+ z-index:20;cursor:pointer
 }
-.big-play.hide{display:none}
-.big-play div{
-  width:90px;height:90px;border-radius:50%;
-  background:#e53935;color:#fff;
-  display:flex;justify-content:center;align-items:center;
-  font-size:40px;
-  box-shadow:0 0 35px #e53935;
-}
+.unmute.hide{display:none}
 
 /* CONTROLS */
 .controls{
-  position:absolute;bottom:0;width:100%;
-  padding:12px;
-  background:linear-gradient(transparent,rgba(0,0,0,.9));
-  transition:.25s;
+ position:absolute;bottom:0;width:100%;
+ padding:8px 10px;
+ background:linear-gradient(transparent,rgba(0,0,0,.9));
+ transition:.25s
 }
 .controls.hide{opacity:0;pointer-events:none}
 
-/* PROGRESS */
 .progress{
-  position:relative;height:6px;
-  background:#555;border-radius:10px;
+ height:6px;background:#444;border-radius:10px;
+ position:relative;cursor:pointer
 }
-.fill{
-  height:100%;width:0%;
-  background:#2196f3;border-radius:10px;
-}
+.progress-fill{height:100%;width:0;background:#2196f3;border-radius:10px}
 .thumb{
-  position:absolute;top:50%;
-  transform:translate(-50%,-50%);
-  width:16px;height:16px;border-radius:50%;
-  background:#fff;box-shadow:0 0 10px #2196f3;
+ position:absolute;top:50%;left:0;
+ transform:translate(-50%,-50%);
+ width:16px;height:16px;
+ background:#fff;border-radius:50%
 }
 
-/* TIMER */
-.timer{
-  position:absolute;right:0;top:-22px;
-  font-size:12px;color:#fff;
-}
+.time{color:#fff;font-size:11px;text-align:right;margin:4px 0}
 
-/* ROW */
 .row{
-  display:flex;justify-content:space-between;
-  align-items:center;margin-top:10px;
-  color:#fff;gap:6px;
+ display:flex;align-items:center;gap:6px;
+ justify-content:space-between;color:#fff
 }
-.circle,.fsbtn,.onoff{
-  width:50px;height:50px;
-  border:3px solid #fff;border-radius:50%;
-  display:flex;justify-content:center;align-items:center;
-  cursor:pointer;font-weight:bold;
-}
-.circle:active,.fsbtn:active,.onoff:active{transform:scale(.9)}
 
-select{
-  background:#000;color:#fff;
-  border:1px solid #777;border-radius:4px;
+.btn{
+ width:36px;height:36px;
+ border:1.5px solid #fff;
+ border-radius:50%;
+ display:flex;align-items:center;
+ justify-content:center;font-size:14px
 }
+.btn.disabled{opacity:.35}
+
+select,input[type=range]{
+ background:#000;color:#fff;
+ border:1px solid #555;
+ border-radius:4px;
+ font-size:11px;height:26px
+}
+.range{width:70px}
+select{padding:2px}
 </style>
 </head>
 
 <body>
 
 <div class="player" id="player">
-  <video id="video" playsinline webkit-playsinline></video>
+
+  <video id="video" autoplay muted playsinline></video>
+
+  <div class="unmute" id="unmute">🔊 Tap to Unmute</div>
 
   <div class="top-brand">
     <div class="jsr">🚩 Jai Shree Ram 🚩</div>
     <div class="dev">Developed by Devansh Sharma</div>
   </div>
 
-  <div class="big-play" id="bigPlay">
-    <div>▶</div>
-  </div>
-
   <div class="controls hide" id="controls">
     <div class="progress" id="progress">
-      <div class="fill" id="fill"></div>
+      <div class="progress-fill" id="bar"></div>
       <div class="thumb" id="thumb"></div>
-      <div class="timer" id="timer">00:00:00 / 00:00:00</div>
     </div>
 
+    <div class="time" id="time">00:00 / 00:00</div>
+
     <div class="row">
-      <div class="circle" id="back10">⟲10</div>
+      <div class="btn" id="back">⟲10</div>
+      <div class="btn" id="play">▶</div>
+      <div class="btn" id="fwd">10⟳</div>
+
+      <input type="range" min="0" max="1" step="0.05" value="1"
+       id="volume" class="range">
 
       <select id="speed">
-        <option>0.5</option><option selected>1</option>
+        <option>0.5</option><option>0.75</option>
+        <option selected>1</option>
         <option>1.25</option><option>1.5</option>
-        <option>2</option><option>2.25</option>
-        <option>2.5</option><option>2.75</option>
-        <option>3</option>
+        <option>1.75</option><option>2</option>
+        <option>2.25</option><option>2.5</option>
+        <option>2.75</option><option>3</option>
       </select>
 
-      <div class="onoff" id="playPause">▶</div>
-
-      <select>
-        <option selected>Auto</option>
-        <option>144p</option><option>240p</option>
-        <option>360p</option><option>480p</option>
-        <option>720p</option><option>1080p</option>
+      <select id="quality">
+        <option value="-1">AUTO</option>
       </select>
 
-      <div class="fsbtn" id="fsBtn">⛶</div>
-
-      <div class="circle" id="fwd10">10⟳</div>
+      <div class="btn" id="fs">⛶</div>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
-document.addEventListener("contextmenu",e=>e.preventDefault());
+const v = document.getElementById("video"),
+player = document.getElementById("player"),
+controls = document.getElementById("controls"),
+unmute = document.getElementById("unmute"),
+bar = document.getElementById("bar"),
+thumb = document.getElementById("thumb"),
+progress = document.getElementById("progress"),
+timeEl = document.getElementById("time"),
+play = document.getElementById("play"),
+back = document.getElementById("back"),
+fwd = document.getElementById("fwd"),
+volume = document.getElementById("volume"),
+speed = document.getElementById("speed"),
+quality = document.getElementById("quality"),
+fs = document.getElementById("fs");
 
-const video=document.getElementById("video");
-const url=new URLSearchParams(location.search).get("Url");
+const url = new URLSearchParams(location.search).get("Url");
+let hls,isLive=false,dragging=false,seekPercent=0;
 
-if(Hls.isSupported()){
-  const hls=new Hls();
-  hls.loadSource(decodeURIComponent(url));
-  hls.attachMedia(video);
-}else{
-  video.src=decodeURIComponent(url);
-}
-
-/* AUTOPLAY SAFE */
-video.muted=true;
-video.play().catch(()=>{});
-
-/* UNMUTE ON USER PLAY */
-video.addEventListener("play",()=>{
-  video.muted=false;
-});
-
-const bigPlay=document.getElementById("bigPlay");
-const playPause=document.getElementById("playPause");
-const controls=document.getElementById("controls");
-const progress=document.getElementById("progress");
-const fill=document.getElementById("fill");
-const thumb=document.getElementById("thumb");
-const timer=document.getElementById("timer");
-const speed=document.getElementById("speed");
-const player=document.getElementById("player");
-
-bigPlay.onclick=()=>video.play();
-video.onplay=()=>{bigPlay.classList.add("hide");playPause.textContent="⏸";}
-video.onpause=()=>{bigPlay.classList.remove("hide");playPause.textContent="▶";}
-playPause.onclick=e=>{e.stopPropagation();video.paused?video.play():video.pause();}
-
+/* FORMAT */
 function fmt(t){
-  let h=Math.floor(t/3600),
-      m=Math.floor((t%3600)/60),
-      s=Math.floor(t%60);
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+ let h=Math.floor(t/3600),
+ m=Math.floor((t%3600)/60),
+ s=Math.floor(t%60);
+ return h?`${h}:${m.toString().padStart(2,0)}:${s.toString().padStart(2,0)}`
+         :`${m}:${s.toString().padStart(2,0)}`;
 }
 
-video.ontimeupdate=()=>{
-  if(!video.duration) return;
-  let p=(video.currentTime/video.duration)*100;
-  fill.style.width=p+"%";
-  thumb.style.left=p+"%";
-  timer.textContent=`${fmt(video.currentTime)} / ${fmt(video.duration)}`;
-};
+/* LOAD VIDEO */
+if(Hls.isSupported() && url){
+ hls=new Hls({lowLatencyMode:true});
+ hls.loadSource(decodeURIComponent(url));
+ hls.attachMedia(v);
 
-let drag=false;
-thumb.onmousedown=thumb.ontouchstart=e=>{e.preventDefault();drag=true;}
-document.onmousemove=document.ontouchmove=e=>{
-  if(!drag) return;
-  let r=progress.getBoundingClientRect();
-  let x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-  x=Math.max(0,Math.min(r.width,x));
-  let pct=x/r.width;
-  fill.style.width=pct*100+"%";
-  thumb.style.left=pct*100+"%";
-};
-document.onmouseup=document.ontouchend=()=>{
-  if(drag){
-    video.currentTime=(parseFloat(fill.style.width)/100)*video.duration;
-    drag=false;
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
+
+ hls.on(Hls.Events.LEVEL_LOADED,(_,d)=>{
+  isLive=d.details.live;
+  if(isLive){
+   timeEl.textContent="🔴 LIVE";
+   back.classList.add("disabled");
+   fwd.classList.add("disabled");
+   speed.disabled=true;
   }
+ });
+
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+  quality.innerHTML='<option value="-1">AUTO</option>';
+  hls.levels.forEach((l,i)=>{
+   let o=document.createElement("option");
+   o.value=i;o.text=l.height+"p";
+   quality.appendChild(o);
+  });
+ });
+}else if(url){
+ v.src=decodeURIComponent(url);
+ v.onloadedmetadata=()=>v.play().catch(()=>{});
+}
+
+/* REAL AUDIO UNLOCK */
+unmute.onclick=()=>{
+ v.muted=false;
+ v.volume=volume.value;
+ v.play();
+ unmute.classList.add("hide");
 };
 
-speed.onchange=()=>video.playbackRate=speed.value;
+/* PLAY */
+play.onclick=()=>{
+ if(v.muted){
+  unmute.classList.remove("hide");
+  return;
+ }
+ v.paused?v.play():v.pause();
+};
+v.onplay=()=>play.textContent="⏸";
+v.onpause=()=>play.textContent="▶";
 
-player.onclick=()=>controls.classList.toggle("hide");
-
-player.ondblclick=e=>{
-  let x=e.clientX-player.getBoundingClientRect().left;
-  x>player.clientWidth/2?video.currentTime+=10:video.currentTime-=10;
+/* VOLUME */
+volume.oninput=e=>{
+ v.volume=e.target.value;
+ v.muted=(v.volume==0);
 };
 
-document.getElementById("back10").onclick=e=>{
-  e.stopPropagation();video.currentTime-=10;
-};
-document.getElementById("fwd10").onclick=e=>{
-  e.stopPropagation();video.currentTime+=10;
+/* TIME UPDATE */
+v.ontimeupdate=()=>{
+ if(isLive||!v.duration||dragging) return;
+ let p=(v.currentTime/v.duration)*100;
+ bar.style.width=p+"%";
+ thumb.style.left=p+"%";
+ timeEl.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
 };
 
-document.getElementById("fsBtn").onclick=e=>{
-  e.stopPropagation();
-  player.style.position="fixed";
-  player.style.inset="0";
-  player.style.zIndex="9999";
+/* SMOOTH DRAG SEEK */
+function percentFromX(x){
+ const r=progress.getBoundingClientRect();
+ return Math.min(Math.max((x-r.left)/r.width,0),1)*100;
+}
+function startDrag(x){
+ if(isLive||!v.duration) return;
+ dragging=true;
+ v.pause();
+ seekPercent=percentFromX(x);
+ bar.style.width=seekPercent+"%";
+ thumb.style.left=seekPercent+"%";
+}
+function moveDrag(x){
+ if(!dragging) return;
+ seekPercent=percentFromX(x);
+ bar.style.width=seekPercent+"%";
+ thumb.style.left=seekPercent+"%";
+}
+function endDrag(){
+ if(!dragging) return;
+ dragging=false;
+ v.currentTime=(seekPercent/100)*v.duration;
+ v.play();
+}
+
+/* mouse */
+progress.addEventListener("mousedown",e=>startDrag(e.clientX));
+window.addEventListener("mousemove",e=>moveDrag(e.clientX));
+window.addEventListener("mouseup",endDrag);
+
+/* touch */
+progress.addEventListener("touchstart",e=>startDrag(e.touches[0].clientX));
+window.addEventListener("touchmove",e=>moveDrag(e.touches[0].clientX));
+window.addEventListener("touchend",endDrag);
+
+/* +/- 10s */
+back.onclick=()=>!isLive&&(v.currentTime-=10);
+fwd.onclick=()=>!isLive&&(v.currentTime+=10);
+
+/* SPEED */
+speed.onchange=e=>v.playbackRate=parseFloat(e.target.value);
+
+/* QUALITY */
+quality.onchange=e=>{
+ if(hls) hls.currentLevel=parseInt(e.target.value);
+};
+
+/* FULLSCREEN */
+fs.onclick=()=>{
+ !document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
+};
+
+/* SHOW CONTROLS */
+let show=false;
+player.onclick=()=>{
+ show=!show;
+ controls.classList.toggle("hide",!show);
 };
 </script>
 
