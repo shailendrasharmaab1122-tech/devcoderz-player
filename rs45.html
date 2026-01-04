@@ -49,13 +49,20 @@ video{width:100%;height:100%;object-fit:contain;background:#000}
 .time{color:#fff;font-size:11px;text-align:right;margin:4px 0}
 
 .row{
- display:flex;align-items:center;gap:8px;
+ display:flex;align-items:center;gap:6px;
  justify-content:space-between;color:#fff
 }
 .btn{
  width:36px;height:36px;
  border:1.5px solid #fff;border-radius:50%;
- display:flex;align-items:center;justify-content:center
+ display:flex;align-items:center;justify-content:center;
+ font-size:14px
+}
+
+select{
+ background:#000;color:#fff;
+ border:1px solid #555;border-radius:4px;
+ font-size:11px;height:26px
 }
 
 /* POPUPS */
@@ -65,20 +72,24 @@ video{width:100%;height:100%;object-fit:contain;background:#000}
  display:flex;align-items:center;justify-content:center;
  z-index:50
 }
+
+/* PREMIUM TELEGRAM (BLUE–PURPLE) */
 .box{
- background:#111;border:1px solid #ffb300;
- box-shadow:0 0 20px rgba(255,179,0,.3);
+ background:linear-gradient(135deg,#1e3c72,#2a5298);
+ box-shadow:0 0 25px rgba(42,82,152,.45);
  padding:22px;border-radius:16px;
- text-align:center;color:#fff;width:260px
+ text-align:center;color:#fff;width:270px
 }
+.box h3{margin-bottom:10px}
 .box a,.box button{
  display:block;margin-top:12px;
  padding:10px;border-radius:22px;
  border:none;font-weight:600;cursor:pointer
 }
-.join{background:#ffb300;color:#000}
-.continue{background:#222;color:#fff;border:1px solid #555}
+.join{background:#fff;color:#1e3c72;text-decoration:none}
+.continue{background:rgba(0,0,0,.25);color:#fff;border:1px solid rgba(255,255,255,.4)}
 
+/* TAP TO PLAY */
 .tap-play{
  display:none;font-size:18px;color:#fff
 }
@@ -111,6 +122,24 @@ video{width:100%;height:100%;object-fit:contain;background:#000}
   <div class="btn" id="back">⟲10</div>
   <div class="btn" id="play">▶</div>
   <div class="btn" id="fwd">10⟳</div>
+
+  <!-- SPEED -->
+  <select id="speed">
+   <option>0.5</option>
+   <option>0.75</option>
+   <option selected>1</option>
+   <option>1.25</option>
+   <option>1.5</option>
+   <option>2</option>
+   <option>2.5</option>
+   <option>3</option>
+  </select>
+
+  <!-- QUALITY -->
+  <select id="quality">
+   <option value="-1">AUTO</option>
+  </select>
+
   <div class="btn" id="fs">⛶</div>
  </div>
 </div>
@@ -119,8 +148,11 @@ video{width:100%;height:100%;object-fit:contain;background:#000}
 <!-- TELEGRAM POPUP -->
 <div class="overlay" id="tgPopup">
  <div class="box">
-  <h3 style="color:#ffb300">Join Premium Telegram</h3>
-  <a class="join" href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank">Join Telegram</a>
+  <h3>Join Premium Telegram</h3>
+  <p>Fast updates & exclusive content</p>
+  <a class="join" href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank">
+   Join Telegram
+  </a>
   <button class="continue" id="continueBtn">Continue to Video</button>
  </div>
 </div>
@@ -139,15 +171,24 @@ progress=document.getElementById("progress"),
 bar=document.getElementById("bar"),
 thumb=document.getElementById("thumb");
 
-let hideTimer,drag=false,seek=0;
-
+let hideTimer,drag=false,seek=0,hls;
 const url=new URLSearchParams(location.search).get("Url");
 
-/* LOAD */
+/* LOAD VIDEO */
 if(Hls.isSupported() && url){
- const hls=new Hls();
+ hls=new Hls();
  hls.loadSource(decodeURIComponent(url));
  hls.attachMedia(v);
+
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+  quality.innerHTML='<option value="-1">AUTO</option>';
+  hls.levels.forEach((l,i)=>{
+   const o=document.createElement("option");
+   o.value=i;
+   o.text=l.height+"p";
+   quality.appendChild(o);
+  });
+ });
 }else if(url){
  v.src=decodeURIComponent(url);
 }
@@ -166,7 +207,7 @@ tapPlay.onclick=()=>{
  showControls();
 };
 
-/* CONTROLS SHOW/HIDE */
+/* CONTROLS */
 function showControls(){
  controls.classList.remove("hide");
  clearTimeout(hideTimer);
@@ -174,7 +215,7 @@ function showControls(){
 }
 player.addEventListener("click",showControls);
 
-/* PLAY PAUSE */
+/* PLAY */
 play.onclick=()=>v.paused?v.play():v.pause();
 v.onplay=()=>play.textContent="⏸";
 v.onpause=()=>play.textContent="▶";
@@ -183,18 +224,25 @@ v.onpause=()=>play.textContent="▶";
 back.onclick=()=>v.currentTime=Math.max(0,v.currentTime-10);
 fwd.onclick=()=>v.currentTime=Math.min(v.duration,v.currentTime+10);
 
-/* TIME UPDATE */
+/* SPEED */
+speed.onchange=e=>v.playbackRate=parseFloat(e.target.value);
+
+/* QUALITY */
+quality.onchange=e=>{
+ if(hls) hls.currentLevel=parseInt(e.target.value);
+};
+
+/* TIME + SEEK */
 v.ontimeupdate=()=>{
  if(!v.duration||drag)return;
- let p=v.currentTime/v.duration*100;
+ const p=v.currentTime/v.duration*100;
  bar.style.width=p+"%";
  thumb.style.left=p+"%";
  time.textContent=
- Math.floor(v.currentTime/60)+":"+
- String(Math.floor(v.currentTime%60)).padStart(2,"0");
+  Math.floor(v.currentTime/60)+":"+
+  String(Math.floor(v.currentTime%60)).padStart(2,"0");
 };
 
-/* SEEK DRAG */
 progress.onmousedown=e=>{
  drag=true;
  let r=progress.getBoundingClientRect();
