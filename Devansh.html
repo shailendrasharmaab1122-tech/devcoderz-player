@@ -35,7 +35,7 @@ video{width:100%;height:100%;object-fit:contain;}
 /* CONTROLS */
 .controls{
  position:absolute;bottom:0;width:100%;
- padding:10px 10px 14px;
+ padding:10px 10px 10px;
  background:linear-gradient(transparent,rgba(0,0,0,.95));
  opacity:1;transition:opacity 0.3s;z-index:10;
  display:flex;flex-direction:column;
@@ -55,8 +55,8 @@ video{width:100%;height:100%;object-fit:contain;}
 .time{color:#fff;font-size:11px;text-align:right;margin-bottom:6px}
 
 .row{
- display:flex;align-items:center;gap:6px;
- justify-content:space-between;color:#fff
+ display:flex;align-items:center;gap:6px;justify-content:space-between;color:#fff;
+ flex-wrap:wrap
 }
 .btn{
  width:36px;height:36px;border:1.5px solid #fff;border-radius:50%;
@@ -206,7 +206,7 @@ window.onmouseup=()=>{ if(!dragging)return; dragging=false; v.currentTime=seekPe
 /* TIME */
 v.ontimeupdate=()=>{ if(dragging||!v.duration)return; let p=v.currentTime/v.duration*100; bar.style.width=thumb.style.left=p+"%"; timeEl.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`; };
 
-/* FULLSCREEN */
+/* FULLSCREEN + ROTATE */
 fs.onclick=()=>{
  if(!document.fullscreenElement){
   player.requestFullscreen();
