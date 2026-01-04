@@ -10,43 +10,34 @@
 html,body{width:100%;height:100%;background:#000;overflow:hidden}
 
 .player{position:fixed;inset:0;background:#000}
-video{width:100%;height:100%;object-fit:contain;background:#000}
-
-/* BRAND */
-.top-brand{
- position:absolute;top:6px;left:50%;
- transform:translateX(-50%);
- z-index:5;pointer-events:none;text-align:center
-}
-.jsr{color:#ff9800;font-weight:700;font-size:14px}
-.dev{font-size:11px;color:#fff}
+video{width:100%;height:100%;object-fit:contain}
 
 /* CONTROLS */
 .controls{
  position:absolute;bottom:0;width:100%;
- padding:8px 10px;
- background:linear-gradient(transparent,rgba(0,0,0,.9));
- transition:.35s
+ padding:10px;
+ background:linear-gradient(transparent,rgba(0,0,0,.95));
+ transition:.3s
 }
-.controls.hide{
- transform:translateY(100%);
- opacity:0;
- pointer-events:none
-}
+.controls.hide{transform:translateY(100%);opacity:0}
 
 /* PROGRESS */
 .progress{
- height:6px;background:#444;border-radius:10px;
- position:relative;cursor:pointer
+ height:7px;background:#555;border-radius:10px;
+ position:relative;margin-bottom:6px
 }
-.progress-fill{height:100%;width:0;background:#2196f3;border-radius:10px}
+.progress-fill{
+ height:100%;width:0;background:#2196f3;border-radius:10px
+}
 .thumb{
- position:absolute;top:50%;left:0;
+ position:absolute;top:50%;
+ width:18px;height:18px;background:#fff;
+ border-radius:50%;
  transform:translate(-50%,-50%);
- width:16px;height:16px;background:#fff;border-radius:50%
+ left:0
 }
 
-.time{color:#fff;font-size:11px;text-align:right;margin:4px 0}
+.time{color:#fff;font-size:11px;text-align:right}
 
 .row{
  display:flex;align-items:center;gap:6px;
@@ -55,8 +46,7 @@ video{width:100%;height:100%;object-fit:contain;background:#000}
 .btn{
  width:36px;height:36px;
  border:1.5px solid #fff;border-radius:50%;
- display:flex;align-items:center;justify-content:center;
- font-size:14px
+ display:flex;align-items:center;justify-content:center
 }
 
 select{
@@ -68,34 +58,40 @@ select{
 /* POPUPS */
 .overlay{
  position:fixed;inset:0;
- background:rgba(0,0,0,.65);
+ background:rgba(0,0,0,.7);
  display:flex;align-items:center;justify-content:center;
  z-index:50
 }
 
-/* PREMIUM TELEGRAM (BLUE–PURPLE) */
+/* BIG PREMIUM TELEGRAM */
 .box{
+ width:340px;
+ padding:30px;
+ border-radius:22px;
+ text-align:center;
  background:linear-gradient(135deg,#1e3c72,#2a5298);
- box-shadow:0 0 25px rgba(42,82,152,.45);
- padding:22px;border-radius:16px;
- text-align:center;color:#fff;width:270px
+ box-shadow:0 0 40px rgba(42,82,152,.6);
+ color:#fff
 }
-.box h3{margin-bottom:10px}
+.box h2{margin-bottom:10px}
+.box p{opacity:.9}
 .box a,.box button{
- display:block;margin-top:12px;
- padding:10px;border-radius:22px;
- border:none;font-weight:600;cursor:pointer
+ margin-top:16px;
+ padding:12px;
+ border-radius:26px;
+ border:none;font-weight:700;
+ display:block;width:100%
 }
 .join{background:#fff;color:#1e3c72;text-decoration:none}
-.continue{background:rgba(0,0,0,.25);color:#fff;border:1px solid rgba(255,255,255,.4)}
+.continue{background:rgba(0,0,0,.25);color:#fff;border:1px solid #fff}
 
 /* TAP TO PLAY */
-.tap-play{
- display:none;font-size:18px;color:#fff
-}
+.tap-play{display:none}
 .tap-play span{
- background:rgba(0,0,0,.7);
- padding:14px 24px;border-radius:30px
+ background:rgba(0,0,0,.75);
+ padding:16px 28px;
+ border-radius:30px;
+ color:#fff;font-size:18px
 }
 </style>
 </head>
@@ -104,11 +100,6 @@ select{
 
 <div class="player" id="player">
 <video id="video" playsinline></video>
-
-<div class="top-brand">
- <div class="jsr">🚩 Jai Shree Ram 🚩</div>
- <div class="dev">Developed by Devansh Sharma</div>
-</div>
 
 <div class="controls hide" id="controls">
  <div class="progress" id="progress">
@@ -123,86 +114,66 @@ select{
   <div class="btn" id="play">▶</div>
   <div class="btn" id="fwd">10⟳</div>
 
-  <!-- SPEED -->
   <select id="speed">
-   <option>0.5</option>
-   <option>0.75</option>
-   <option selected>1</option>
-   <option>1.25</option>
-   <option>1.5</option>
-   <option>2</option>
-   <option>2.5</option>
-   <option>3</option>
+   <option>0.5</option><option>0.75</option>
+   <option selected>1</option><option>1.25</option>
+   <option>1.5</option><option>2</option>
+   <option>2.25</option><option>2.5</option>
+   <option>2.75</option><option>3</option>
   </select>
 
-  <!-- QUALITY -->
-  <select id="quality">
-   <option value="-1">AUTO</option>
-  </select>
+  <select id="quality"><option value="-1">AUTO</option></select>
 
   <div class="btn" id="fs">⛶</div>
  </div>
 </div>
 </div>
 
-<!-- TELEGRAM POPUP -->
+<!-- TELEGRAM -->
 <div class="overlay" id="tgPopup">
  <div class="box">
-  <h3>Join Premium Telegram</h3>
-  <p>Fast updates & exclusive content</p>
-  <a class="join" href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank">
-   Join Telegram
-  </a>
+  <h2>Premium Telegram</h2>
+  <p>Exclusive content & fast updates</p>
+  <a class="join" href="https://t.me/+JXdxtVzQf-NhM2Jl" target="_blank">Join Now</a>
   <button class="continue" id="continueBtn">Continue to Video</button>
  </div>
 </div>
 
-<!-- TAP TO PLAY -->
 <div class="overlay tap-play" id="tapPlay">
- <span>▶ Tap on screen to play video</span>
+ <span>▶ Tap to play video</span>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <script>
-const v=video,player=document.getElementById("player"),
-controls=document.getElementById("controls"),
-progress=document.getElementById("progress"),
-bar=document.getElementById("bar"),
-thumb=document.getElementById("thumb");
+const v=video,controls=document.getElementById("controls");
+let hls,drag=false;
 
-let hideTimer,drag=false,seek=0,hls;
 const url=new URLSearchParams(location.search).get("Url");
 
-/* LOAD VIDEO */
 if(Hls.isSupported() && url){
  hls=new Hls();
  hls.loadSource(decodeURIComponent(url));
  hls.attachMedia(v);
-
  hls.on(Hls.Events.MANIFEST_PARSED,()=>{
   quality.innerHTML='<option value="-1">AUTO</option>';
   hls.levels.forEach((l,i)=>{
-   const o=document.createElement("option");
-   o.value=i;
-   o.text=l.height+"p";
-   quality.appendChild(o);
+   if(l.height<=1080){
+    let o=document.createElement("option");
+    o.value=i;o.text=l.height+"p";
+    quality.appendChild(o);
+   }
   });
  });
-}else if(url){
- v.src=decodeURIComponent(url);
-}
+}else if(url){v.src=decodeURIComponent(url);}
 
 /* POPUP FLOW */
 continueBtn.onclick=()=>{
  tgPopup.style.display="none";
  tapPlay.style.display="flex";
 };
-
 tapPlay.onclick=()=>{
  tapPlay.style.display="none";
- v.muted=false;
- v.play();
+ v.muted=false;v.play();
  player.requestFullscreen().catch(()=>{});
  showControls();
 };
@@ -210,55 +181,68 @@ tapPlay.onclick=()=>{
 /* CONTROLS */
 function showControls(){
  controls.classList.remove("hide");
- clearTimeout(hideTimer);
- hideTimer=setTimeout(()=>controls.classList.add("hide"),2000);
+ clearTimeout(window.ht);
+ window.ht=setTimeout(()=>controls.classList.add("hide"),2000);
 }
-player.addEventListener("click",showControls);
+player.onclick=showControls;
 
 /* PLAY */
 play.onclick=()=>v.paused?v.play():v.pause();
 v.onplay=()=>play.textContent="⏸";
 v.onpause=()=>play.textContent="▶";
 
-/* BACK / FORWARD */
+/* BACK/FWD */
 back.onclick=()=>v.currentTime=Math.max(0,v.currentTime-10);
 fwd.onclick=()=>v.currentTime=Math.min(v.duration,v.currentTime+10);
 
-/* SPEED */
+/* SPEED / QUALITY */
 speed.onchange=e=>v.playbackRate=parseFloat(e.target.value);
+quality.onchange=e=>hls&&(hls.currentLevel=parseInt(e.target.value));
 
-/* QUALITY */
-quality.onchange=e=>{
- if(hls) hls.currentLevel=parseInt(e.target.value);
-};
-
-/* TIME + SEEK */
-v.ontimeupdate=()=>{
- if(!v.duration||drag)return;
- const p=v.currentTime/v.duration*100;
- bar.style.width=p+"%";
- thumb.style.left=p+"%";
- time.textContent=
-  Math.floor(v.currentTime/60)+":"+
-  String(Math.floor(v.currentTime%60)).padStart(2,"0");
-};
-
-progress.onmousedown=e=>{
- drag=true;
+/* PROGRESS + REAL DRAG */
+function seekAt(x){
  let r=progress.getBoundingClientRect();
- seek=(e.clientX-r.left)/r.width;
-};
-window.onmousemove=e=>{
+ return Math.min(Math.max((x-r.left)/r.width,0),1);
+}
+progress.addEventListener("mousedown",e=>{
+ drag=true;v.pause();
+ let p=seekAt(e.clientX);
+ bar.style.width=thumb.style.left=p*100+"%";
+});
+window.addEventListener("mousemove",e=>{
  if(!drag)return;
- let r=progress.getBoundingClientRect();
- seek=Math.min(Math.max((e.clientX-r.left)/r.width,0),1);
- bar.style.width=seek*100+"%";
- thumb.style.left=seek*100+"%";
-};
-window.onmouseup=()=>{
+ let p=seekAt(e.clientX);
+ bar.style.width=thumb.style.left=p*100+"%";
+});
+window.addEventListener("mouseup",e=>{
  if(!drag)return;
  drag=false;
- v.currentTime=seek*v.duration;
+ let p=seekAt(e.clientX);
+ v.currentTime=p*v.duration;
+ v.play();
+});
+
+/* TOUCH */
+progress.addEventListener("touchstart",e=>{
+ drag=true;v.pause();
+});
+window.addEventListener("touchmove",e=>{
+ if(!drag)return;
+ let p=seekAt(e.touches[0].clientX);
+ bar.style.width=thumb.style.left=p*100+"%";
+});
+window.addEventListener("touchend",()=>{
+ if(!drag)return;
+ drag=false;
+ v.currentTime=(parseFloat(bar.style.width)/100)*v.duration;
+ v.play();
+});
+
+/* TIME */
+v.ontimeupdate=()=>{
+ if(drag||!v.duration)return;
+ let p=v.currentTime/v.duration*100;
+ bar.style.width=thumb.style.left=p+"%";
 };
 
 /* FULLSCREEN */
