@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DevCoderz Ultra Smooth Player</title>
+<title>DevCoderz Ultra Player</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
@@ -23,16 +22,8 @@ video{width:100%;height:100%;object-fit:contain}
  text-align:center;
  pointer-events:none
 }
-.top-brand .jsr{
- color:#ff9800;
- font-weight:700;
- font-size:14px
-}
-.top-brand .dev{
- font-size:11px;
- color:#fff;
- opacity:.85
-}
+.top-brand .jsr{color:#ff9800;font-weight:700;font-size:14px}
+.top-brand .dev{font-size:11px;color:#fff;opacity:.85}
 
 /* CENTER PLAY */
 .center-play{
@@ -87,14 +78,8 @@ video{width:100%;height:100%;object-fit:contain}
 
 /* PLAY ICON */
 #play{font-size:0}
-#play::before{
- content:"▶";
- font-size:16px;margin-left:2px
-}
-#play.pause::before{
- content:"❚❚";
- margin-left:0
-}
+#play::before{content:"▶";font-size:16px;margin-left:2px}
+#play.pause::before{content:"❚❚";margin-left:0}
 
 select{
  background:#000;color:#fff;
@@ -102,15 +87,13 @@ select{
  font-size:11px;height:26px
 }
 
-/* POPUPS */
+/* TELEGRAM POPUP */
 .overlay{
  position:fixed;inset:0;
  background:rgba(0,0,0,.7);
  display:flex;align-items:center;justify-content:center;
  z-index:50
 }
-
-/* TELEGRAM PREMIUM */
 .box{
  width:360px;
  padding:32px;
@@ -131,7 +114,10 @@ select{
 }
 .join{background:#fff;color:#1e3c72;text-decoration:none}
 .continue{background:rgba(0,0,0,.25);color:#fff;border:1px solid #fff}
+</style>
+</head>
 
+<body>
 
 <!-- TELEGRAM POPUP -->
 <div class="overlay" id="tgPopup">
@@ -145,13 +131,7 @@ select{
  </div>
 </div>
 
-<!-- TAP TO PLAY -->
-<div class="overlay tap-play" id="tapPlay">
- <span>▶ Tap to play video</span>
-</div>
-
 <div class="player" id="player">
-
 <video id="video" playsinline></video>
 
 <!-- BRAND -->
@@ -186,49 +166,45 @@ select{
   </select>
 
   <select id="quality"><option value="-1">AUTO</option></select>
-
   <div class="btn" id="fs">⛶</div>
  </div>
 </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-const v = video,
-player = document.getElementById("player"),
-controls = document.getElementById("controls"),
-centerPlay = document.getElementById("centerPlay"),
-bar = document.getElementById("bar"),
-thumb = document.getElementById("thumb"),
-progress = document.getElementById("progress"),
-timeEl = document.getElementById("time"),
-playBtn = document.getElementById("play"),
-back = document.getElementById("back"),
-fwd = document.getElementById("fwd"),
-speed = document.getElementById("speed"),
-quality = document.getElementById("quality"),
-fs = document.getElementById("fs"),
-tgPopup = document.getElementById("tgPopup"),
-continueBtn = document.getElementById("continueBtn"),
-tapPlay = document.getElementById("tapPlay");
+const v=video,player=document.getElementById("player"),
+controls=document.getElementById("controls"),
+centerPlay=document.getElementById("centerPlay"),
+bar=document.getElementById("bar"),
+thumb=document.getElementById("thumb"),
+progress=document.getElementById("progress"),
+timeEl=document.getElementById("time"),
+playBtn=document.getElementById("play"),
+back=document.getElementById("back"),
+fwd=document.getElementById("fwd"),
+speed=document.getElementById("speed"),
+quality=document.getElementById("quality"),
+fs=document.getElementById("fs"),
+tgPopup=document.getElementById("tgPopup"),
+continueBtn=document.getElementById("continueBtn");
 
-let hls, dragging=false, seekPercent=0;
-const url = new URLSearchParams(location.search).get("Url");
+let hls,dragging=false,seekPercent=0;
+const url=new URLSearchParams(location.search).get("Url");
 
-/* TIME FORMAT HH:MM:SS */
+/* TIME FORMAT */
 function fmt(t){
- if(isNaN(t)) return "00:00:00";
+ if(isNaN(t))return"00:00:00";
  let h=Math.floor(t/3600),
-     m=Math.floor((t%3600)/60),
-     s=Math.floor(t%60);
+ m=Math.floor((t%3600)/60),
+ s=Math.floor(t%60);
  return String(h).padStart(2,"0")+":"+
         String(m).padStart(2,"0")+":"+
         String(s).padStart(2,"0");
 }
 
-/* LOAD VIDEO */
-if(Hls.isSupported() && url){
+/* LOAD */
+if(Hls.isSupported()&&url){
  hls=new Hls();
  hls.loadSource(decodeURIComponent(url));
  hls.attachMedia(v);
@@ -242,27 +218,16 @@ if(Hls.isSupported() && url){
    }
   });
  });
-}else if(url){
- v.src=decodeURIComponent(url);
-}
+}else if(url){v.src=decodeURIComponent(url);}
 
-/* POPUP FLOW */
+/* TELEGRAM FLOW */
 continueBtn.onclick=()=>{
  tgPopup.style.display="none";
- tapPlay.style.display="flex";
-};
-tapPlay.onclick=()=>{
- tapPlay.style.display="none";
  centerPlay.classList.remove("hide");
 };
 
-/* CENTER PLAY */
-centerPlay.onclick=()=>{
- centerPlay.classList.add("hide");
- v.play();
-};
-
-/* PLAY PAUSE */
+/* PLAY */
+centerPlay.onclick=()=>v.play();
 playBtn.onclick=()=>v.paused?v.play():v.pause();
 v.onplay=()=>{
  playBtn.classList.add("pause");
@@ -273,7 +238,7 @@ v.onpause=()=>{
  centerPlay.classList.remove("hide");
 };
 
-/* CONTROLS AUTO HIDE */
+/* CONTROLS */
 function showControls(){
  controls.classList.remove("hide");
  clearTimeout(window.ht);
@@ -289,50 +254,31 @@ fwd.onclick=()=>v.currentTime=Math.min(v.duration,v.currentTime+10);
 speed.onchange=e=>v.playbackRate=parseFloat(e.target.value);
 quality.onchange=e=>hls&&(hls.currentLevel=parseInt(e.target.value));
 
-/* PROGRESS + REAL THUMB DRAG */
-function percentFromX(x){
+/* PROGRESS DRAG */
+function pct(x){
  const r=progress.getBoundingClientRect();
  return Math.min(Math.max((x-r.left)/r.width,0),1);
 }
-
-progress.addEventListener("mousedown",e=>{
+progress.onmousedown=e=>{
  dragging=true;v.pause();
- seekPercent=percentFromX(e.clientX);
+ seekPercent=pct(e.clientX);
  bar.style.width=thumb.style.left=seekPercent*100+"%";
-});
-window.addEventListener("mousemove",e=>{
- if(!dragging) return;
- seekPercent=percentFromX(e.clientX);
+};
+window.onmousemove=e=>{
+ if(!dragging)return;
+ seekPercent=pct(e.clientX);
  bar.style.width=thumb.style.left=seekPercent*100+"%";
-});
-window.addEventListener("mouseup",()=>{
- if(!dragging) return;
+};
+window.onmouseup=()=>{
+ if(!dragging)return;
  dragging=false;
  v.currentTime=seekPercent*v.duration;
  v.play();
-});
+};
 
-/* TOUCH */
-progress.addEventListener("touchstart",e=>{
- dragging=true;v.pause();
- seekPercent=percentFromX(e.touches[0].clientX);
- bar.style.width=thumb.style.left=seekPercent*100+"%";
-},{passive:true});
-window.addEventListener("touchmove",e=>{
- if(!dragging) return;
- seekPercent=percentFromX(e.touches[0].clientX);
- bar.style.width=thumb.style.left=seekPercent*100+"%";
-},{passive:true});
-window.addEventListener("touchend",()=>{
- if(!dragging) return;
- dragging=false;
- v.currentTime=seekPercent*v.duration;
- v.play();
-});
-
-/* TIME UPDATE */
+/* TIME */
 v.ontimeupdate=()=>{
- if(dragging||!v.duration) return;
+ if(dragging||!v.duration)return;
  let p=v.currentTime/v.duration*100;
  bar.style.width=thumb.style.left=p+"%";
  timeEl.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
