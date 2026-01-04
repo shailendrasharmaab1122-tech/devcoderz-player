@@ -44,11 +44,13 @@ video{width:100%;height:100%;object-fit:contain;}
 /* CONTROLS */
 .controls{
  position:absolute;bottom:0;width:100%;
- padding:10px;
+ padding:10px 10px 14px;
  background:linear-gradient(transparent,rgba(0,0,0,.95));
- transition:.3s
+ opacity:1;
+ transition:opacity 0.3s;
+ z-index:10;
 }
-.controls.hide{transform:translateY(100%);opacity:0}
+.controls.hide{opacity:0;pointer-events:none;}
 
 .progress{
  height:7px;background:#555;border-radius:10px;
@@ -226,14 +228,14 @@ continueBtn.onclick=()=>{ tgPopup.style.display="none"; centerPlay.classList.rem
 /* PLAY */
 centerPlay.onclick=()=>v.play();
 playBtn.onclick=()=>v.paused?v.play():v.pause();
-v.onplay=()=>{ playBtn.classList.add("pause"); centerPlay.classList.add("hide"); };
-v.onpause=()=>{ playBtn.classList.remove("pause"); centerPlay.classList.remove("hide"); };
+v.onplay=()=>{ playBtn.classList.add("pause"); centerPlay.classList.add("hide"); showControls(); };
+v.onpause=()=>{ playBtn.classList.remove("pause"); centerPlay.classList.remove("hide"); showControls(); };
 
 /* CONTROLS */
 function showControls(){
  controls.classList.remove("hide");
- clearTimeout(window.ht);
- window.ht=setTimeout(()=>controls.classList.add("hide"),2000);
+clearTimeout(window.ht);
+window.ht=setTimeout(()=>controls.classList.add("hide"),2000);
 }
 player.onclick=showControls;
 
