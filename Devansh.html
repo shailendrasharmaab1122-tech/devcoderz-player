@@ -9,8 +9,8 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 html,body{width:100%;height:100%;background:#000;overflow:hidden}
 
-.player{position:fixed;inset:0;background:#000}
-video{width:100%;height:100%;object-fit:contain}
+.player{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;transition:transform 0.3s;}
+video{width:100%;height:100%;object-fit:contain;}
 
 /* TOP BRAND */
 .top-brand{
@@ -256,6 +256,23 @@ v.ontimeupdate=()=>{ if(dragging||!v.duration)return; let p=v.currentTime/v.dura
 
 /* FULLSCREEN */
 fs.onclick=()=>{ !document.fullscreenElement?player.requestFullscreen():document.exitFullscreen(); };
+
+/* ORIENTATION DETECT */
+function adjustOrientation(){
+  if(window.innerWidth > window.innerHeight){
+    // Landscape
+    player.style.transform="rotate(0deg)";
+    player.style.width="100vw";
+    player.style.height="100vh";
+  } else {
+    // Portrait
+    player.style.transform="rotate(0deg)";
+    player.style.width="100vw";
+    player.style.height="100vh";
+  }
+}
+window.addEventListener('resize',adjustOrientation);
+adjustOrientation();
 </script>
 
 </body>
