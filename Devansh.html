@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DevCoderz Ultra Player</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 html,body{width:100%;height:100%;background:#000;overflow:hidden}
@@ -14,29 +13,21 @@ video{width:100%;height:100%;object-fit:contain;}
 
 /* TOP BRAND */
 .top-brand{
- position:absolute;
- top:6px;
- left:50%;
- transform:translateX(-50%);
- z-index:20;
- text-align:center;
- pointer-events:none
+ position:absolute;top:6px;left:50%;transform:translateX(-50%);
+ z-index:20;text-align:center;pointer-events:none
 }
 .top-brand .jsr{color:#ff9800;font-weight:700;font-size:14px}
 .top-brand .dev{font-size:11px;color:#fff;opacity:.85}
 
 /* CENTER PLAY */
 .center-play{
- position:absolute;inset:0;
- display:flex;align-items:center;justify-content:center;
+ position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
  z-index:5;cursor:pointer
 }
 .center-play.hide{display:none}
 .center-play span{
- width:84px;height:84px;
- background:rgba(255,255,255,.25);
- backdrop-filter:blur(4px);
- border-radius:50%;
+ width:84px;height:84px;background:rgba(255,255,255,.25);
+ backdrop-filter:blur(4px);border-radius:50%;
  display:flex;align-items:center;justify-content:center;
  font-size:36px;color:#fff
 }
@@ -46,9 +37,8 @@ video{width:100%;height:100%;object-fit:contain;}
  position:absolute;bottom:0;width:100%;
  padding:10px 10px 14px;
  background:linear-gradient(transparent,rgba(0,0,0,.95));
- opacity:1;
- transition:opacity 0.3s;
- z-index:10;
+ opacity:1;transition:opacity 0.3s;z-index:10;
+ display:flex;flex-direction:column;
 }
 .controls.hide{opacity:0;pointer-events:none;}
 
@@ -58,34 +48,26 @@ video{width:100%;height:100%;object-fit:contain;}
 }
 .progress-fill{height:100%;width:0;background:#2196f3;border-radius:10px}
 .thumb{
- position:absolute;top:50%;
- width:18px;height:18px;background:#fff;
- border-radius:50%;
- transform:translate(-50%,-50%);
- left:0
+ position:absolute;top:50%;width:18px;height:18px;background:#fff;
+ border-radius:50%;transform:translate(-50%,-50%);left:0
 }
 
-.time{color:#fff;font-size:11px;text-align:right}
+.time{color:#fff;font-size:11px;text-align:right;margin-bottom:6px}
 
 .row{
  display:flex;align-items:center;gap:6px;
  justify-content:space-between;color:#fff
 }
 .btn{
- width:36px;height:36px;
- border:1.5px solid #fff;border-radius:50%;
+ width:36px;height:36px;border:1.5px solid #fff;border-radius:50%;
  display:flex;align-items:center;justify-content:center;
  cursor:pointer
 }
-
-/* PLAY ICON */
 #play{font-size:0}
 #play::before{content:"▶";font-size:16px;margin-left:2px}
 #play.pause::before{content:"❚❚";margin-left:0}
-
 select{
- background:#000;color:#fff;
- border:1px solid #555;border-radius:4px;
+ background:#000;color:#fff;border:1px solid #555;border-radius:4px;
  font-size:11px;height:26px
 }
 
@@ -97,30 +79,20 @@ select{
  z-index:50
 }
 .box{
- width:360px;
- padding:32px;
- border-radius:22px;
- text-align:center;
+ width:360px;padding:32px;border-radius:22px;text-align:center;
  background:linear-gradient(135deg,#1e3c72,#2a5298);
  box-shadow:0 0 40px rgba(42,82,152,.6);
  color:#fff
 }
 .box h2{margin-bottom:10px}
 .box p{opacity:.9}
-.box a,.box button{
- margin-top:16px;
- padding:14px;
- border-radius:28px;
- border:none;font-weight:700;
- display:block;width:100%
-}
+.box a,.box button{margin-top:16px;padding:14px;border-radius:28px;border:none;font-weight:700;display:block;width:100%}
 .join{background:#fff;color:#1e3c72;text-decoration:none}
 .continue{background:rgba(0,0,0,.25);color:#fff;border:1px solid #fff}
 </style>
 </head>
 
 <body>
-
 <!-- TELEGRAM POPUP -->
 <div class="overlay" id="tgPopup">
  <div class="box">
@@ -136,7 +108,6 @@ select{
 <div class="player" id="player">
 <video id="video" playsinline></video>
 
-<!-- BRAND -->
 <div class="top-brand">
  <div class="jsr">🚩 Jai Shree Ram 🚩</div>
  <div class="dev">Developed by Devansh Sharma</div>
@@ -151,22 +122,16 @@ select{
   <div class="progress-fill" id="bar"></div>
   <div class="thumb" id="thumb"></div>
  </div>
-
  <div class="time" id="time">00:00:00 / 00:00:00</div>
-
  <div class="row">
   <div class="btn" id="back">⟲10</div>
   <div class="btn" id="play"></div>
   <div class="btn" id="fwd">10⟳</div>
-
   <select id="speed">
-   <option>0.5</option><option>0.75</option>
-   <option selected>1</option><option>1.25</option>
-   <option>1.5</option><option>2</option>
-   <option>2.25</option><option>2.5</option>
-   <option>2.75</option><option>3</option>
+   <option>0.5</option><option>0.75</option><option selected>1</option>
+   <option>1.25</option><option>1.5</option><option>2</option>
+   <option>2.25</option><option>2.5</option><option>2.75</option><option>3</option>
   </select>
-
   <select id="quality"><option value="-1">AUTO</option></select>
   <div class="btn" id="fs">⛶</div>
  </div>
@@ -194,31 +159,20 @@ continueBtn=document.getElementById("continueBtn");
 let hls,dragging=false,seekPercent=0;
 const url=new URLSearchParams(location.search).get("Url");
 
-/* TIME FORMAT */
 function fmt(t){
  if(isNaN(t))return"00:00:00";
- let h=Math.floor(t/3600),
- m=Math.floor((t%3600)/60),
- s=Math.floor(t%60);
- return String(h).padStart(2,"0")+":"+
-        String(m).padStart(2,"0")+":"+
-        String(s).padStart(2,"0");
+ let h=Math.floor(t/3600), m=Math.floor((t%3600)/60), s=Math.floor(t%60);
+ return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
 }
 
-/* LOAD */
-if(Hls.isSupported()&&url){
+/* LOAD VIDEO */
+if(Hls.isSupported() && url){
  hls=new Hls();
  hls.loadSource(decodeURIComponent(url));
  hls.attachMedia(v);
- hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+ hls.on(Hls.Events.MANIFEST_PARSED, ()=>{
   quality.innerHTML='<option value="-1">AUTO</option>';
-  hls.levels.forEach((l,i)=>{
-   if(l.height<=1080){
-    let o=document.createElement("option");
-    o.value=i;o.text=l.height+"p";
-    quality.appendChild(o);
-   }
-  });
+  hls.levels.forEach((l,i)=>{if(l.height<=1080){let o=document.createElement("option");o.value=i;o.text=l.height+"p"; quality.appendChild(o);} });
  });
 }else if(url){v.src=decodeURIComponent(url);}
 
@@ -231,12 +185,8 @@ playBtn.onclick=()=>v.paused?v.play():v.pause();
 v.onplay=()=>{ playBtn.classList.add("pause"); centerPlay.classList.add("hide"); showControls(); };
 v.onpause=()=>{ playBtn.classList.remove("pause"); centerPlay.classList.remove("hide"); showControls(); };
 
-/* CONTROLS */
-function showControls(){
- controls.classList.remove("hide");
-clearTimeout(window.ht);
-window.ht=setTimeout(()=>controls.classList.add("hide"),2000);
-}
+/* CONTROLS SHOW/HIDE */
+function showControls(){ controls.classList.remove("hide"); clearTimeout(window.ht); window.ht=setTimeout(()=>controls.classList.add("hide"),2000);}
 player.onclick=showControls;
 
 /* BACK / FWD */
@@ -251,31 +201,33 @@ quality.onchange=e=>hls&&(hls.currentLevel=parseInt(e.target.value));
 function pct(x){ const r=progress.getBoundingClientRect(); return Math.min(Math.max((x-r.left)/r.width,0),1);}
 progress.onmousedown=e=>{ dragging=true; v.pause(); seekPercent=pct(e.clientX); bar.style.width=thumb.style.left=seekPercent*100+"%";};
 window.onmousemove=e=>{ if(!dragging)return; seekPercent=pct(e.clientX); bar.style.width=thumb.style.left=seekPercent*100+"%";};
-window.onmouseup=()=>{ if(!dragging)return; dragging=false; v.currentTime=seekPercent*v.duration; v.play(); };
+window.onmouseup=()=>{ if(!dragging)return; dragging=false; v.currentTime=seekPercent*v.duration; v.play();};
 
 /* TIME */
 v.ontimeupdate=()=>{ if(dragging||!v.duration)return; let p=v.currentTime/v.duration*100; bar.style.width=thumb.style.left=p+"%"; timeEl.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`; };
 
 /* FULLSCREEN */
-fs.onclick=()=>{ !document.fullscreenElement?player.requestFullscreen():document.exitFullscreen(); };
+fs.onclick=()=>{
+ if(!document.fullscreenElement){
+  player.requestFullscreen();
+  if(window.screen.orientation && window.screen.orientation.lock) window.screen.orientation.lock('landscape').catch(()=>{});
+ }else{
+  document.exitFullscreen();
+  if(window.screen.orientation && window.screen.orientation.unlock) window.screen.orientation.unlock();
+ }
+ adjustOrientation();
+};
 
 /* ORIENTATION DETECT */
 function adjustOrientation(){
   if(window.innerWidth > window.innerHeight){
-    // Landscape
-    player.style.transform="rotate(0deg)";
-    player.style.width="100vw";
-    player.style.height="100vh";
-  } else {
-    // Portrait
-    player.style.transform="rotate(0deg)";
-    player.style.width="100vw";
-    player.style.height="100vh";
+    player.style.transform="rotate(0deg)"; player.style.width="100vw"; player.style.height="100vh";
+  }else{
+    player.style.transform="rotate(0deg)"; player.style.width="100vw"; player.style.height="100vh";
   }
 }
 window.addEventListener('resize',adjustOrientation);
 adjustOrientation();
 </script>
-
 </body>
 </html>
